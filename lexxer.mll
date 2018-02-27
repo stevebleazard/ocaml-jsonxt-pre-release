@@ -1,4 +1,6 @@
 {
+  (* CR sbleazard: It's not clear this has a major impact with the rule set used here
+
   module Lexing = struct
     (* Override the Lexing.engine to avoid creating a new position record
        each time a rule is matched. Reduces total parse time by around 30%.
@@ -19,9 +21,9 @@
       *)
       result
   end
+  *)
   open Lexing
 
-  (* CR sbleazard: change Float/Int to float/int *)
   type token = [
   | `Null
   | `Bool of bool
@@ -48,12 +50,6 @@
 
   exception SyntaxError of string
 
-  let new_line lexbuf =
-    let pos = lexbuf.lex_curr_p in
-    lexbuf.lex_curr_p <-
-      { pos with pos_bol = lexbuf.lex_curr_pos;
-                 pos_lnum = pos.pos_lnum + 1
-      }
 }
 
 let digit_1_to_9 = ['1'-'9']
@@ -117,7 +113,7 @@ rule read =
   | whitespace
     { read lexbuf }
   | newline
-    { new_line lexbuf; read lexbuf; }
+    { Lexing.new_line lexbuf; read lexbuf; }
   | _
     { raise (SyntaxError ("Unexpected char: " ^ (Lexing.lexeme lexbuf))) }
 
@@ -141,6 +137,9 @@ rule read =
       | `Neg_infinity ->  Printf.printf "Neg_infinity\n"; loop ()
       | `Nan ->  Printf.printf "Nan\n"; loop ()
       | `Eof -> Printf.printf "EOF\n"
+      (*
+      | _ ->  loop ()
+      *)
     in
       loop ()
 
