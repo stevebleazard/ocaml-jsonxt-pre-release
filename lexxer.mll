@@ -151,4 +151,10 @@ rule read =
     close_in inf
 
   let () = lexit "test.json"
+  (*
+  open Core
+  open Core_bench.Std
+
+  let () = Command.run (Bench.make_command [Bench.Test.create ~name:"lexxer" (fun () -> Lexxer.lexit "test.json")])
+  *)
 }

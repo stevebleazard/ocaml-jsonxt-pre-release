@@ -1,0 +1,11 @@
+(jbuild_version 1)
+
+(ocamllex (lexxer))
+
+(executable
+ ((name lexxer)
+  (libraries (core core_bench))))
+
+;(alias
+; ((name DEFAULT)
+;  (deps (lexxer.exe))))
