@@ -21,12 +21,13 @@
   end
   open Lexing
 
+  (* CR sbleazard: change Float/Int to float/int *)
   type token = [
   | `Null
   | `Bool of bool
   | `String of string
   | `Float of float
-  | `Int of int (* CR sbleazard: how to handle 32bit builds? *)
+  | `Int of int
   | `Name of string
   | `As
   | `Ae
@@ -34,8 +35,16 @@
   | `Oe
   | `Comma
   | `Colon
-  | `Eof ]
+  | `Eof
+  | `Infinity
+  | `Neg_infinity
+  | `Nan
+  ]
 
+
+  let string2int s =
+    try (`Int (int_of_string s)) with
+    | Failure _ -> `Float (float_of_string s)
 
   exception SyntaxError of string
 
@@ -66,9 +75,39 @@ let ident = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']*
 let double_quote = ['"']
 let whitespace = [ ' ' '\t' '\r' ]+
 let newline = '\n'
+let nan = ( "nan" | "-nan" | "NaN" )
+let inifinity = ( "inf" | "Infinity" )
 
 rule read =
   parse
+  | "true"
+    { `Bool true }
+  | "false"
+    { `Bool false }
+  | "null"
+    { `Null }
+  | "{"
+    { `Os }
+  | "}"
+    { `Oe }
+  | "["
+    { `As }
+  | "]"
+    { `Ae }
+  | ","
+    { `Comma }
+  | ":"
+    { `Colon }
+  | "-" inifinity
+    { `Neg_infinity }
+  | inifinity
+    { `Infinity }
+  | nan
+    { `Nan }
+  | integer
+    { string2int (Lexing.lexeme lexbuf) }
+  | fp
+    { `Float (float_of_string (Lexing.lexeme lexbuf)) }
   | double_quote double_quote
     { `String "" }
   | double_quote characters double_quote
@@ -87,7 +126,20 @@ rule read =
   let lex_and_print lexbuf =
     let rec loop () =
       match read lexbuf with
+      | `Float f ->  Printf.printf "Float [%g]\n" f; loop ()
+      | `Int i ->  Printf.printf "Int [%d]\n" i; loop ()
       | `String s -> Printf.printf "String [%s]\n" s; loop ()
+      | `Bool b ->  Printf.printf "Bool [%s]\n" (if b then "true" else "false"); loop ()
+      | `Null ->  Printf.printf "Null\n"; loop ()
+      | `As ->  Printf.printf "A_start\n"; loop ()
+      | `Ae ->  Printf.printf "A_end\n"; loop ()
+      | `Os ->  Printf.printf "O_start\n"; loop ()
+      | `Oe ->  Printf.printf "O_end\n"; loop ()
+      | `Colon ->  Printf.printf "Colon\n"; loop ()
+      | `Comma ->  Printf.printf "Comma\n"; loop ()
+      | `Infinity ->  Printf.printf "Infinity\n"; loop ()
+      | `Neg_infinity ->  Printf.printf "Neg_infinity\n"; loop ()
+      | `Nan ->  Printf.printf "Nan\n"; loop ()
       | `Eof -> Printf.printf "EOF\n"
     in
       loop ()
