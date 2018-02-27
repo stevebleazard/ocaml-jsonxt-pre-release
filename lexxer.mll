@@ -42,7 +42,7 @@
   ]
 
 
-  let string2int s =
+  let string2num s =
     try (`Int (int_of_string s)) with
     | Failure _ -> `Float (float_of_string s)
 
@@ -105,7 +105,7 @@ rule read =
   | nan
     { `Nan }
   | integer
-    { string2int (Lexing.lexeme lexbuf) }
+    { string2num (Lexing.lexeme lexbuf) }
   | fp
     { `Float (float_of_string (Lexing.lexeme lexbuf)) }
   | double_quote double_quote
