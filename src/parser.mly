@@ -6,9 +6,9 @@
   | `Nan ->         `Float (0.0 /. 0.0)
 %}
 
-%start <Json.value option> prog
+%start <Json.json option> lax
 %%
-prog:
+lax:
   | EOF
     { None }
   | v = value
@@ -42,6 +42,8 @@ rev_object_fields:
   | (* empty *) { [] }
   | obj = rev_object_fields; COMMA; k = STRING; COLON; v = value
     { (k, v) :: obj }
+  | k = STRING; COLON; v = value
+    { [(k, v)] }
 
 list_values: l = rev_list_values { List.rev l }
 

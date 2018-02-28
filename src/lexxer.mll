@@ -23,7 +23,9 @@
   end
   *)
   open Lexing
+  open Tokens
 
+  (*
   type token =
   | NULL
   | BOOL of bool
@@ -41,7 +43,7 @@
   | INFINITY
   | NEGINFINITY
   | NAN
-
+  *)
 
   let string2num s =
     try (INT (int_of_string s)) with
@@ -124,7 +126,6 @@ rule read =
       | FLOAT f ->  Printf.printf "Float [%g]\n" f; loop ()
       | INT i ->  Printf.printf "Int [%d]\n" i; loop ()
       | STRING s -> Printf.printf "String [%s]\n" s; loop ()
-      | NAME s -> Printf.printf "Name [%s]\n" s; loop ()
       | BOOL b ->  Printf.printf "Bool [%s]\n" (if b then "true" else "false"); loop ()
       | NULL ->  Printf.printf "Null\n"; loop ()
       | AS ->  Printf.printf "A_start\n"; loop ()
@@ -143,6 +144,39 @@ rule read =
     in
       loop ()
 
+  open Printf
+
+  let print_json_value json = 
+    let rec fmt value =
+      match value with
+      | `Assoc o -> printf "{"; print_json_assoc o; printf "}"
+      | `List l -> printf "["; print_json_list l; printf "]"
+      | `Null -> printf "Null "
+      | `Bool b -> printf "%s " (if b then "true" else "false")
+      | `Int i -> printf "%d " i
+      | `Intlit s -> printf "%s " s
+      | `Float f -> printf "%g" f
+      | `Floatlit s -> printf "%s " s
+      | `String s -> printf "%s " s
+      | `Stringlit s -> printf "%s " s
+      | `Tuple t -> printf "tuple "
+      | `Variant t -> printf "variant "
+    and print_json_assoc o = List.iter print_pair o
+    and print_pair (k, v) = printf "%s : " k; fmt v; printf ","
+    and print_json_list l = List.iter (fun v -> fmt v; printf ",") l
+    in
+    fmt json
+
+type json =
+    [
+    | `Assoc of (string * json) list
+    | `List of json list
+    | `Tuple of json list
+    | `Variant of (string * json option)
+    ]
+
+    
+    
   let lexit filename =
     let inf = open_in filename in
     let lexbuf = Lexing.from_channel inf in
@@ -150,8 +184,17 @@ rule read =
     lex_and_print lexbuf;
     close_in inf
 
-  let () = lexit "test.json"
+  let parsit filename =
+    let inf = open_in filename in
+    let lexbuf = Lexing.from_channel inf in
+    lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+    match Parser.lax read lexbuf with
+    | None -> printf "Parse failed\n"
+    | Some json ->  print_json_value json; printf "\n"
+
+  let () = parsit "test.json"
   (*
+  let () = lexit "test.json"
   open Core
   open Core_bench.Std
 
