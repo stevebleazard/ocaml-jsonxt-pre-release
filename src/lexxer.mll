@@ -24,29 +24,28 @@
   *)
   open Lexing
 
-  type token = [
-  | `Null
-  | `Bool of bool
-  | `String of string
-  | `Float of float
-  | `Int of int
-  | `Name of string
-  | `As
-  | `Ae
-  | `Os
-  | `Oe
-  | `Comma
-  | `Colon
-  | `Eof
-  | `Infinity
-  | `Neg_infinity
-  | `Nan
-  ]
+  type token =
+  | NULL
+  | BOOL of bool
+  | STRING of string
+  | FLOAT of float
+  | INT of int
+  | NAME of string
+  | AS
+  | AE
+  | OS
+  | OE
+  | COMMA
+  | COLON
+  | EOF
+  | INFINITY
+  | NEGINFINITY
+  | NAN
 
 
   let string2num s =
-    try (`Int (int_of_string s)) with
-    | Failure _ -> `Float (float_of_string s)
+    try (INT (int_of_string s)) with
+    | Failure _ -> FLOAT (float_of_string s)
 
   exception SyntaxError of string
 
@@ -77,39 +76,39 @@ let inifinity = ( "inf" | "Infinity" )
 rule read =
   parse
   | "true"
-    { `Bool true }
+    { BOOL true }
   | "false"
-    { `Bool false }
+    { BOOL false }
   | "null"
-    { `Null }
+    { NULL }
   | "{"
-    { `Os }
+    { OS }
   | "}"
-    { `Oe }
+    { OE }
   | "["
-    { `As }
+    { AS }
   | "]"
-    { `Ae }
+    { AE }
   | ","
-    { `Comma }
+    { COMMA }
   | ":"
-    { `Colon }
+    { COLON }
   | "-" inifinity
-    { `Neg_infinity }
+    { NEGINFINITY }
   | inifinity
-    { `Infinity }
+    { INFINITY }
   | nan
-    { `Nan }
+    { NAN }
   | integer
     { string2num (Lexing.lexeme lexbuf) }
   | fp
-    { `Float (float_of_string (Lexing.lexeme lexbuf)) }
+    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
   | double_quote double_quote
-    { `String "" }
+    { STRING "" }
   | double_quote characters double_quote
-    { `String (Lexing.lexeme lexbuf) }
+    { STRING (Lexing.lexeme lexbuf) }
   | eof
-    { `Eof }
+    { EOF }
   | whitespace
     { read lexbuf }
   | newline
@@ -122,21 +121,22 @@ rule read =
   let lex_and_print lexbuf =
     let rec loop () =
       match read lexbuf with
-      | `Float f ->  Printf.printf "Float [%g]\n" f; loop ()
-      | `Int i ->  Printf.printf "Int [%d]\n" i; loop ()
-      | `String s -> Printf.printf "String [%s]\n" s; loop ()
-      | `Bool b ->  Printf.printf "Bool [%s]\n" (if b then "true" else "false"); loop ()
-      | `Null ->  Printf.printf "Null\n"; loop ()
-      | `As ->  Printf.printf "A_start\n"; loop ()
-      | `Ae ->  Printf.printf "A_end\n"; loop ()
-      | `Os ->  Printf.printf "O_start\n"; loop ()
-      | `Oe ->  Printf.printf "O_end\n"; loop ()
-      | `Colon ->  Printf.printf "Colon\n"; loop ()
-      | `Comma ->  Printf.printf "Comma\n"; loop ()
-      | `Infinity ->  Printf.printf "Infinity\n"; loop ()
-      | `Neg_infinity ->  Printf.printf "Neg_infinity\n"; loop ()
-      | `Nan ->  Printf.printf "Nan\n"; loop ()
-      | `Eof -> Printf.printf "EOF\n"
+      | FLOAT f ->  Printf.printf "Float [%g]\n" f; loop ()
+      | INT i ->  Printf.printf "Int [%d]\n" i; loop ()
+      | STRING s -> Printf.printf "String [%s]\n" s; loop ()
+      | NAME s -> Printf.printf "Name [%s]\n" s; loop ()
+      | BOOL b ->  Printf.printf "Bool [%s]\n" (if b then "true" else "false"); loop ()
+      | NULL ->  Printf.printf "Null\n"; loop ()
+      | AS ->  Printf.printf "A_start\n"; loop ()
+      | AE ->  Printf.printf "A_end\n"; loop ()
+      | OS ->  Printf.printf "O_start\n"; loop ()
+      | OE ->  Printf.printf "O_end\n"; loop ()
+      | COLON ->  Printf.printf "Colon\n"; loop ()
+      | COMMA ->  Printf.printf "Comma\n"; loop ()
+      | INFINITY ->  Printf.printf "Infinity\n"; loop ()
+      | NEGINFINITY ->  Printf.printf "Neg_infinity\n"; loop ()
+      | NAN ->  Printf.printf "Nan\n"; loop ()
+      | EOF -> Printf.printf "EOF\n"
       (*
       | _ ->  loop ()
       *)
