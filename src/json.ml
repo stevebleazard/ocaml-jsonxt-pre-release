@@ -18,6 +18,12 @@ type t = json
 module Extended = struct
   type nonrec json = json
   type t = json
+
+  let number = function
+  | `Float f ->     `Float f
+  | `Infinity ->    `Float (1.0 /. 0.0)
+  | `Neginfinity -> `Float (-1.0 /. 0.0)
+  | `Nan ->         `Float (0.0 /. 0.0)
 end
 
 module Basic = struct

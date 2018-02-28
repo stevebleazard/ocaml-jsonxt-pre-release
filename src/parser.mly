@@ -1,9 +1,16 @@
+%parameter<Compliance : sig
+    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> Json.json
+  end>
+
 %{
+  (*
   let number = function
   | `Float f ->     `Float f
   | `Infinity ->    `Float (1.0 /. 0.0)
   | `Neginfinity -> `Float (-1.0 /. 0.0)
   | `Nan ->         `Float (0.0 /. 0.0)
+  *)
+  open Compliance
 %}
 
 %start <Json.json option> lax

@@ -147,6 +147,8 @@ rule read =
     in
     fmt json
 
+  module Extended_parser = Parser.Make(Json.Extended)
+
   let lexit filename =
     let inf = open_in filename in
     let lexbuf = Lexing.from_channel inf in
@@ -158,7 +160,7 @@ rule read =
     let inf = open_in filename in
     let lexbuf = Lexing.from_channel inf in
     lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-    match Parser.lax read lexbuf with
+    match Extended_parser.lax read lexbuf with
     | None -> printf "Parse failed\n"
     | Some json ->  print_json_value json; printf "\n"
 

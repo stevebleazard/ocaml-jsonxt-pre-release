@@ -18,6 +18,8 @@ type t = json
 module Extended : sig
   type nonrec json = json
   type t = json
+
+  val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
 end
 
 module Basic : sig
