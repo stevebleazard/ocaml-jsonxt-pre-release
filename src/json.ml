@@ -20,10 +20,18 @@ module Extended = struct
   type t = json
 
   let number = function
-  | `Float f ->     `Float f
-  | `Infinity ->    `Float (1.0 /. 0.0)
-  | `Neginfinity -> `Float (-1.0 /. 0.0)
-  | `Nan ->         `Float (0.0 /. 0.0)
+  | `Float f ->     Some (`Float f)
+  | `Infinity ->    Some (`Float (1.0 /. 0.0))
+  | `Neginfinity -> Some (`Float (-1.0 /. 0.0))
+  | `Nan ->         Some (`Float (0.0 /. 0.0))
+
+  let integer i = `Int i
+
+  let null = `Null
+  let string s = `String s
+  let bool b = `Bool b
+  let assoc a = `Assoc a
+  let list l = `List l
 end
 
 module Basic = struct
@@ -38,6 +46,19 @@ module Basic = struct
       | `List of json list
       ]
   type t = json
+
+  let number = function
+  | `Float f ->     Some (`Float f)
+  | `Infinity ->    None
+  | `Neginfinity -> None
+  | `Nan ->         None
+
+  let integer i = `Int i
+  let null = `Null
+  let string s = `String s
+  let bool b = `Bool b
+  let assoc a = `Assoc a
+  let list l = `List l
 end
 
 module Strict = struct
@@ -51,6 +72,19 @@ module Strict = struct
       | `List of json list
       ]
   type t = json
+
+  let number = function
+  | `Float f ->     Some (`Float f)
+  | `Infinity ->    None
+  | `Neginfinity -> None
+  | `Nan ->         None
+
+  let integer i = `Float (float_of_int i)
+  let null = `Null
+  let string s = `String s
+  let bool b = `Bool b
+  let assoc a = `Assoc a
+  let list l = `List l
 end
 
 module Stream = struct

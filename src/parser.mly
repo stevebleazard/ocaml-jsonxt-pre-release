@@ -1,19 +1,42 @@
 %parameter<Compliance : sig
-    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> Json.json
+    type json
+        (*
+        [
+        | `Null
+        | `Bool of bool
+        | `Int of int
+        | `Intlit of string
+        | `Float of float
+        | `Floatlit of string
+        | `String of string
+        | `Stringlit of string
+        | `Assoc of (string * json) list
+        | `List of json list
+        | `Tuple of json list
+        | `Variant of (string * json option)
+        ]
+        *)
+
+    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
+    val integer : int -> json
+    val null : json
+    val string : string -> json
+    val bool : bool -> json
+    val assoc : (string * json) list -> json
+    val list : json list -> json
   end>
 
 %{
-  (*
-  let number = function
-  | `Float f ->     `Float f
-  | `Infinity ->    `Float (1.0 /. 0.0)
-  | `Neginfinity -> `Float (-1.0 /. 0.0)
-  | `Nan ->         `Float (0.0 /. 0.0)
-  *)
-  open Compliance
+  exception Invalid_float
+
+  let validate_number num =
+    match Compliance.number num with
+    | None -> raise Invalid_float
+    | Some json -> json
+  
 %}
 
-%start <Json.json option> lax
+%start <Compliance.json option> lax
 %%
 lax:
   | EOF
@@ -23,25 +46,25 @@ lax:
 
 value:
   | OS; obj = object_fields; OE
-    { `Assoc obj }
+    { Compliance.assoc obj }
   | AS; l = list_values; AE
-    { `List l }
+    { Compliance.list l }
   | s = STRING
-    { `String s }
+    { Compliance.string s }
   | i = INT
-    { `Int i }
+    { Compliance.integer i }
   | b = BOOL
-    { `Bool b }
+    { Compliance.bool b }
   | f = FLOAT
-    { number (`Float f) }
+    { validate_number (`Float f) }
   | INFINITY
-    { number `Infinity }
+    { validate_number `Infinity }
   | NEGINFINITY
-    { number `Neginfinity }
+    { validate_number `Neginfinity }
   | NAN
-    { number `Nan }
+    { validate_number `Nan }
   | NULL
-    { `Null }
+    { Compliance.null }
 
 object_fields: obj = rev_object_fields { List.rev obj }
 

@@ -19,7 +19,13 @@ module Extended : sig
   type nonrec json = json
   type t = json
 
-  val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
+  val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
+  val integer : int -> json
+  val null : json
+  val string : string -> json
+  val bool : bool -> json
+  val assoc : (string * json) list -> json
+  val list : json list -> json
 end
 
 module Basic : sig
@@ -34,6 +40,14 @@ module Basic : sig
       | `List of json list
       ]
   type t = json
+
+  val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
+  val integer : int -> json
+  val null : json
+  val string : string -> json
+  val bool : bool -> json
+  val assoc : (string * json) list -> json
+  val list : json list -> json
 end
 
 module Strict : sig
@@ -47,6 +61,14 @@ module Strict : sig
       | `List of json list
       ]
   type t = json
+
+  val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
+  val integer : int -> json
+  val null : json
+  val string : string -> json
+  val bool : bool -> json
+  val assoc : (string * json) list -> json
+  val list : json list -> json
 end
 
 module Stream : sig
