@@ -54,7 +54,4 @@ rev_list_values:
   | v = value
     { [v] }
 
-(*
-%token <string> NAME
-*) 
 %%
