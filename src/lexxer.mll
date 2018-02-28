@@ -25,26 +25,6 @@
   open Lexing
   open Tokens
 
-  (*
-  type token =
-  | NULL
-  | BOOL of bool
-  | STRING of string
-  | FLOAT of float
-  | INT of int
-  | NAME of string
-  | AS
-  | AE
-  | OS
-  | OE
-  | COMMA
-  | COLON
-  | EOF
-  | INFINITY
-  | NEGINFINITY
-  | NAN
-  *)
-
   let string2num s =
     try (INT (int_of_string s)) with
     | Failure _ -> FLOAT (float_of_string s)
@@ -167,16 +147,6 @@ rule read =
     in
     fmt json
 
-type json =
-    [
-    | `Assoc of (string * json) list
-    | `List of json list
-    | `Tuple of json list
-    | `Variant of (string * json option)
-    ]
-
-    
-    
   let lexit filename =
     let inf = open_in filename in
     let lexbuf = Lexing.from_channel inf in
