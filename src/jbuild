@@ -2,6 +2,15 @@
 
 (ocamllex (lexxer))
 
+(menhir
+ ((flags (--only-tokens))
+   (modules (tokens))))
+
+(menhir
+ ((merge_into parser)
+  (flags (--external-tokens Tokens))
+   (modules (tokens parser))))
+
 (executable
  ((name lexxer)
   (libraries (core core_bench))))
