@@ -22,7 +22,7 @@ module Extended = struct
   type t = json
 
   let lex_number token = token
-  let lex_integer token = token (* CR sbleazard: fix bounds *)
+  let lex_integer token = token (* CR sbleazard: fix bounds - add a Yojson version that matches? *)
 
   let integer i = Some (`Int i)
   let null = `Null
@@ -87,6 +87,15 @@ module Strict = struct
       | `List of json list
       ]
   type t = json
+
+  let lex_number = function
+  | INFINITY -> COMPLIANCE_ERROR "inf not supported"
+  | NEGINFINITY -> COMPLIANCE_ERROR "-inf not supported"
+  | NAN -> COMPLIANCE_ERROR "nan not supported"
+  | FLOAT _ as token -> token
+  | _ as token -> token
+
+  let lex_integer token = token (* CR sbleazard: fix bounds *)
 
   let integer i = Some (`Float (float_of_int i))
   let null = `Null
