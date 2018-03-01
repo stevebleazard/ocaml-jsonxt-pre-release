@@ -18,7 +18,7 @@
         *)
 
     val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
-    val integer : int -> json
+    val integer : int -> json option
     val null : json
     val string : string -> json
     val bool : bool -> json
@@ -28,10 +28,16 @@
 
 %{
   exception Invalid_float
+  exception Invalid_integer
 
   let validate_number num =
     match Compliance.number num with
     | None -> raise Invalid_float
+    | Some json -> json
+  
+  let validate_integer num =
+    match Compliance.integer num with
+    | None -> raise Invalid_integer
     | Some json -> json
   
 %}
@@ -52,7 +58,7 @@ value:
   | s = STRING
     { Compliance.string s }
   | i = INT
-    { Compliance.integer i }
+    { validate_integer i }
   | b = BOOL
     { Compliance.bool b }
   | f = FLOAT

@@ -25,8 +25,7 @@ module Extended = struct
   | `Neginfinity -> Some (`Float (-1.0 /. 0.0))
   | `Nan ->         Some (`Float (0.0 /. 0.0))
 
-  let integer i = `Int i
-
+  let integer i = Some (`Int i)
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
@@ -53,7 +52,7 @@ module Basic = struct
   | `Neginfinity -> None
   | `Nan ->         None
 
-  let integer i = `Int i
+  let integer i = Some (`Int i)
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
@@ -79,7 +78,7 @@ module Strict = struct
   | `Neginfinity -> None
   | `Nan ->         None
 
-  let integer i = `Float (float_of_int i)
+  let integer i = Some (`Float (float_of_int i))
   let null = `Null
   let string s = `String s
   let bool b = `Bool b

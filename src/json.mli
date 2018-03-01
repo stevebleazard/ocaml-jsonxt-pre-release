@@ -20,7 +20,7 @@ module Extended : sig
   type t = json
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
-  val integer : int -> json
+  val integer : int -> json option
   val null : json
   val string : string -> json
   val bool : bool -> json
@@ -42,7 +42,7 @@ module Basic : sig
   type t = json
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
-  val integer : int -> json
+  val integer : int -> json option
   val null : json
   val string : string -> json
   val bool : bool -> json
@@ -63,7 +63,7 @@ module Strict : sig
   type t = json
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
-  val integer : int -> json
+  val integer : int -> json option
   val null : json
   val string : string -> json
   val bool : bool -> json
