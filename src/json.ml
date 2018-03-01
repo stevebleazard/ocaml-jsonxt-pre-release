@@ -19,6 +19,9 @@ module Extended = struct
   type nonrec json = json
   type t = json
 
+  let lex_number token = token
+  let lex_integer token = token (* CR sbleazard: fix bounds *)
+
   let integer i = Some (`Int i)
   let null = `Null
   let string s = `String s

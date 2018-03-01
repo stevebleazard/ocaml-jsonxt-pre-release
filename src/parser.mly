@@ -55,7 +55,8 @@ lax:
       let cnum = start.pos_cnum - start.pos_bol + 1 in
       Error (Printf.sprintf "JSON syntax error at line %d char %d" start.pos_lnum cnum)
     }
-
+  | err = COMPLIANCE_ERROR
+    { Error err }
 
 value:
   | OS; obj = object_fields; OE
@@ -78,6 +79,7 @@ value:
     { validate_number `Nan }
   | NULL
     { Compliance.null }
+
 
 object_fields: obj = rev_object_fields { List.rev obj }
 

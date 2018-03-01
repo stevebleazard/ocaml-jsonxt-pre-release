@@ -13,5 +13,6 @@
 %token INFINITY
 %token NEGINFINITY
 %token NAN
+%token <string> COMPLIANCE_ERROR
 
 %%

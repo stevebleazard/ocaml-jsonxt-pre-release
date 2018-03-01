@@ -102,6 +102,16 @@ rule read =
 
 {
 
+  module type Lex = Compliant_lex.Lex 
+  module Make_lexxer ( Compliant_lex : Compliant_lex.S  ) : Lex = struct
+    let read lexbuf =
+      match read lexbuf with
+      | INFINITY | NEGINFINITY | NAN | FLOAT _ as token -> Compliant_lex.lex_number token
+      | INT _ as token -> Compliant_lex.lex_integer token
+      | _ as token -> token
+  end
+
+  (* Testing *)
   let lex_and_print lexbuf =
     let rec loop () =
       match read lexbuf with
@@ -120,6 +130,7 @@ rule read =
       | NEGINFINITY ->  Printf.printf "Neg_infinity\n"; loop ()
       | NAN ->  Printf.printf "Nan\n"; loop ()
       | EOF -> Printf.printf "EOF\n"
+      | COMPLIANCE_ERROR err -> Printf.printf "COMPLIANCE_ERROR: %s\n" err; loop ()
       (*
       | _ ->  loop ()
       *)

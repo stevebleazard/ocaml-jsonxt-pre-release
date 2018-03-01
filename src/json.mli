@@ -19,6 +19,9 @@ module Extended : sig
   type nonrec json = json
   type t = json
 
+  val lex_number : Tokens.token -> Tokens.token
+  val lex_integer : Tokens.token -> Tokens.token
+
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
   val integer : int -> json option
   val null : json
