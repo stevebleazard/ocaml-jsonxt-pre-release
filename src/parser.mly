@@ -39,16 +39,23 @@
     match Compliance.integer num with
     | None -> raise Invalid_integer
     | Some json -> json
-  
+
 %}
 
-%start <Compliance.json option> lax
+%start <(Compliance.json option, string) result> lax
 %%
 lax:
   | EOF
-    { None }
+    { Ok None }
   | v = value
-    { Some v }
+    { Ok (Some v) }
+  | error
+    {
+      let start = $startpos in
+      let cnum = start.pos_cnum - start.pos_bol + 1 in
+      Error (Printf.sprintf "JSON syntax error at line %d char %d" start.pos_lnum cnum)
+    }
+
 
 value:
   | OS; obj = object_fields; OE

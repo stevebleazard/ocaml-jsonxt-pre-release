@@ -79,6 +79,8 @@ rule read =
     { NEGINFINITY }
   | inifinity
     { INFINITY }
+  | "+" inifinity
+    { INFINITY }
   | nan
     { NAN }
   | integer
@@ -161,8 +163,11 @@ rule read =
     let lexbuf = Lexing.from_channel inf in
     lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
     match Basic_parser.lax read lexbuf with
-    | None -> printf "Parse failed\n"
-    | Some json ->  print_json_value json; printf "\n"
+    | Error s -> printf "%s\n" s
+    | Ok json ->
+      match json with
+      | None -> printf "(*None*)\n";
+      | Some json ->  print_json_value json; printf "\n"
 
   let () = parsit "test.json"
   (*
