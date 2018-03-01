@@ -2,7 +2,7 @@
     type json
 
     val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
-    val integer : int -> json option
+    val integer : int -> json
     val null : json
     val string : string -> json
     val bool : bool -> json
@@ -11,21 +11,6 @@
   end>
 
 %{
-  exception Invalid_float
-  exception Invalid_integer
-
-  (*
-  let validate_number num =
-    match Compliance.number num with
-    | None -> raise Invalid_float
-    | Some json -> json
-  *)
-  
-  let validate_integer num =
-    match Compliance.integer num with
-    | None -> raise Invalid_integer
-    | Some json -> json
-
 %}
 
 %start <(Compliance.json option, string) result> lax
@@ -53,7 +38,7 @@ value:
   | s = STRING
     { Compliance.string s }
   | i = INT
-    { validate_integer i }
+    { Compliance.integer i }
   | s = LARGEINT
     (* LARGEINT is actually handled by the lexxer *)
     { Compliance.number (`Float (float_of_string s)) }

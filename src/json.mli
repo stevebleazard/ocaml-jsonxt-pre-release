@@ -24,7 +24,7 @@ module Extended : sig
   val lex_largeint : Tokens.token -> Tokens.token
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
-  val integer : int -> json option
+  val integer : int -> json
   val null : json
   val string : string -> json
   val bool : bool -> json
@@ -41,7 +41,7 @@ module Yojson : sig
   val lex_largeint : Tokens.token -> Tokens.token
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
-  val integer : int -> json option
+  val integer : int -> json
   val null : json
   val string : string -> json
   val bool : bool -> json
@@ -67,7 +67,7 @@ module Basic : sig
   val lex_largeint : Tokens.token -> Tokens.token
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
-  val integer : int -> json option
+  val integer : int -> json
   val null : json
   val string : string -> json
   val bool : bool -> json
@@ -92,7 +92,7 @@ module Strict : sig
   val lex_largeint : Tokens.token -> Tokens.token
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
-  val integer : int -> json option
+  val integer : int -> json
   val null : json
   val string : string -> json
   val bool : bool -> json

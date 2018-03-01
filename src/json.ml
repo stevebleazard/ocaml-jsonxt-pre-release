@@ -25,15 +25,17 @@ module Extended = struct
   let lex_integer token = token (* CR sbleazard: fix bounds? *)
 
   let lex_largeint = function
-  | LARGEINT s ->  
+  | LARGEINT s ->  begin
     let f = float_of_string s in
     match classify_float f with
     | FP_normal | FP_subnormal | FP_zero -> FLOAT f
     | FP_infinite -> INFINITY
     | FP_nan -> NAN
+    end
+  | _ as token ->  token
 
 
-  let integer i = Some (`Int i)
+  let integer i = `Int i
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
@@ -56,7 +58,7 @@ module Yojson = struct
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
-  let integer i = Some (`Int i)
+  let integer i = `Int i
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
@@ -94,7 +96,7 @@ module Basic = struct
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
-  let integer i = Some (`Int i)
+  let integer i = `Int i
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
@@ -131,7 +133,7 @@ module Strict = struct
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
-  let integer i = Some (`Float (float_of_int i))
+  let integer i = `Float (float_of_int i)
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
