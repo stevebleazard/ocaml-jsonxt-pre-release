@@ -21,7 +21,7 @@ module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
       | _ as token -> token
     in
     match token with
-    | COMPLIANCE_ERROR err as token ->
+    | COMPLIANCE_ERROR err | LEX_ERROR err as token ->
       error := Some err;
       token
     | _ as token -> token

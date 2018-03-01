@@ -29,6 +29,8 @@ lax:
     }
   | err = COMPLIANCE_ERROR
     { Error err }
+  | err = LEX_ERROR
+    { Error err }
 
 value:
   | OS; obj = object_fields; OE

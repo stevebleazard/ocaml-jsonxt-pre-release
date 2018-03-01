@@ -15,5 +15,6 @@
 %token NEGINFINITY
 %token NAN
 %token <string> COMPLIANCE_ERROR
+%token <string> LEX_ERROR
 
 %%

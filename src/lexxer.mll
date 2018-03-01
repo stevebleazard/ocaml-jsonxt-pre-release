@@ -1,7 +1,4 @@
 {
-  (* CR sbleazard: It's not clear this has a major impact with the rule set used here
-  *)
-
   module Lexing = struct
     (* Override the Lexing.engine to avoid creating a new position record
        each time a rule is matched. Reduces total parse time by around 30%.
@@ -29,8 +26,6 @@
   let string2num s =
     try (INT (int_of_string s)) with
     | Failure _ -> LARGEINT s
-
-  exception SyntaxError of string
 
 }
 
@@ -99,4 +94,4 @@ rule read =
   | newline
     { Lexing.new_line lexbuf; read lexbuf; }
   | _
-    { raise (SyntaxError ("Unexpected char: " ^ (Lexing.lexeme lexbuf))) }
+    { LEX_ERROR ("Unexpected char: " ^ (Lexing.lexeme lexbuf)) }

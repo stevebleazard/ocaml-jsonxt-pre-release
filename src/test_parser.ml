@@ -18,6 +18,7 @@ let lex_and_print lexbuf =
     | NAN ->  Printf.printf "Nan\n"; loop ()
     | EOF -> Printf.printf "EOF\n"
     | COMPLIANCE_ERROR err -> Printf.printf "COMPLIANCE_ERROR: %s\n" err; loop ()
+    | LEX_ERROR err -> Printf.printf "COMPLIANCE_ERROR: %s\n" err; loop ()
     (*
     | _ ->  loop ()
     *)
@@ -86,12 +87,12 @@ let testit filename =
 
 (*
 let () = parsit "../test.json"
-*)
 let () = lexit "../test.json"
+*)
 
 open Core
 open Core_bench.Std
 
-(*
 let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit "../test.json")])
+(*
 *)
