@@ -5,12 +5,12 @@ end
 
 module type Lex = sig
   val read : Lexing.lexbuf -> Tokens.token
-  val lex_error : string option
+  val lex_error : unit -> string option
 end
 
 module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
   let error = ref None
-  let lex_error = !error
+  let lex_error () = !error
 
   let read lexbuf =
     let token = match Lexxer.read lexbuf with
@@ -24,4 +24,3 @@ module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
       token
     | _ as token -> token
 end
-

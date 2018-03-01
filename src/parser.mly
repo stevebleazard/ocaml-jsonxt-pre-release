@@ -1,21 +1,5 @@
 %parameter<Compliance : sig
     type json
-        (*
-        [
-        | `Null
-        | `Bool of bool
-        | `Int of int
-        | `Intlit of string
-        | `Float of float
-        | `Floatlit of string
-        | `String of string
-        | `Stringlit of string
-        | `Assoc of (string * json) list
-        | `List of json list
-        | `Tuple of json list
-        | `Variant of (string * json option)
-        ]
-        *)
 
     val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
     val integer : int -> json option

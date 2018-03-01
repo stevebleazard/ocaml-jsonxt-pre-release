@@ -61,7 +61,11 @@ let parsit filename =
   let lexbuf = Lexing.from_channel inf in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   match Basic_parser.lax Basic_lexxer.read lexbuf with
-  | Error s -> printf "%s\n" s
+  | Error s -> begin
+    match Basic_lexxer.lex_error () with
+    | None -> printf "%s\n" s
+    | Some e -> printf "%s: %s\n" s e
+    end
   | Ok json ->
     match json with
     | None -> printf "(*None*)\n";
