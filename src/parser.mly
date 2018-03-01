@@ -55,6 +55,7 @@ value:
   | i = INT
     { validate_integer i }
   | s = LARGEINT
+    (* LARGEINT is actually handled by the lexxer *)
     { Compliance.number (`Float (float_of_string s)) }
   | b = BOOL
     { Compliance.bool b }
