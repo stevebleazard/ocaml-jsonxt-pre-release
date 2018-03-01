@@ -3,6 +3,7 @@ let lex_and_print lexbuf =
     match Lexxer.read lexbuf with
     | FLOAT f ->  Printf.printf "Float [%g]\n" f; loop ()
     | INT i ->  Printf.printf "Int [%d]\n" i; loop ()
+    | LARGEINT s ->  Printf.printf "Largeint [%s]\n" s; loop ()
     | STRING s -> Printf.printf "String [%s]\n" s; loop ()
     | BOOL b ->  Printf.printf "Bool [%s]\n" (if b then "true" else "false"); loop ()
     | NULL ->  Printf.printf "Null\n"; loop ()
@@ -71,11 +72,26 @@ let parsit filename =
     | None -> printf "(*None*)\n";
     | Some json ->  print_json_value json; printf "\n"
 
-let () = parsit "test.json"
+let testit filename =
+  let inf = open_in filename in
+  let lexbuf = Lexing.from_channel inf in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  match Basic_parser.lax Basic_lexxer.read lexbuf with
+  | Error s -> begin
+    match Basic_lexxer.lex_error () with
+    | None -> printf "%s\n" s
+    | Some e -> printf "%s: %s\n" s e
+    end
+  | Ok _ -> ()
+
 (*
-let () = lexit "test.json"
+let () = parsit "../test.json"
+*)
+let () = lexit "../test.json"
+
 open Core
 open Core_bench.Std
 
-let () = Command.run (Bench.make_command [Bench.Test.create ~name:"lexxer" (fun () -> Lexxer.lexit "test.json")])
+(*
+let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit "../test.json")])
 *)

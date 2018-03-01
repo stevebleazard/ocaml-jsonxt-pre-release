@@ -1,5 +1,6 @@
 {
   (* CR sbleazard: It's not clear this has a major impact with the rule set used here
+  *)
 
   module Lexing = struct
     (* Override the Lexing.engine to avoid creating a new position record
@@ -21,13 +22,13 @@
       *)
       result
   end
-  *)
+  (**)
   open Lexing
   open Tokens
 
   let string2num s =
     try (INT (int_of_string s)) with
-    | Failure _ -> FLOAT (float_of_string s)
+    | Failure _ -> LARGEINT s
 
   exception SyntaxError of string
 

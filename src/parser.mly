@@ -1,7 +1,7 @@
 %parameter<Compliance : sig
     type json
 
-    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json option
+    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
     val integer : int -> json option
     val null : json
     val string : string -> json
@@ -14,10 +14,12 @@
   exception Invalid_float
   exception Invalid_integer
 
+  (*
   let validate_number num =
     match Compliance.number num with
     | None -> raise Invalid_float
     | Some json -> json
+  *)
   
   let validate_integer num =
     match Compliance.integer num with
@@ -52,16 +54,18 @@ value:
     { Compliance.string s }
   | i = INT
     { validate_integer i }
+  | s = LARGEINT
+    { Compliance.number (`Float (float_of_string s)) }
   | b = BOOL
     { Compliance.bool b }
   | f = FLOAT
-    { validate_number (`Float f) }
+    { Compliance.number (`Float f) }
   | INFINITY
-    { validate_number `Infinity }
+    { Compliance.number `Infinity }
   | NEGINFINITY
-    { validate_number `Neginfinity }
+    { Compliance.number `Neginfinity }
   | NAN
-    { validate_number `Nan }
+    { Compliance.number `Nan }
   | NULL
     { Compliance.null }
 

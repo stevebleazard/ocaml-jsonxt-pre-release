@@ -1,6 +1,7 @@
 module type S = sig
   val lex_number : Tokens.token -> Tokens.token
   val lex_integer : Tokens.token -> Tokens.token
+  val lex_largeint : Tokens.token -> Tokens.token
 end
 
 module type Lex = sig
@@ -16,6 +17,7 @@ module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
     let token = match Lexxer.read lexbuf with
       | INFINITY | NEGINFINITY | NAN | FLOAT _ as token -> Compliant_lex.lex_number token
       | INT _ as token -> Compliant_lex.lex_integer token
+      | LARGEINT _ as token -> Compliant_lex.lex_largeint token
       | _ as token -> token
     in
     match token with

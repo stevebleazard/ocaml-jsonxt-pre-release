@@ -21,8 +21,17 @@ module Extended = struct
   type nonrec json = json
   type t = json
 
-  let lex_number token = token
-  let lex_integer token = token (* CR sbleazard: fix bounds - add a Yojson version that matches? *)
+  let lex_number token = token (* CR sbleazard: check finite *)
+  let lex_integer token = token (* CR sbleazard: fix bounds? *)
+
+  let lex_largeint = function
+  | LARGEINT s ->  
+    let f = float_of_string s in
+    match classify_float f with
+    | FP_normal | FP_subnormal | FP_zero -> FLOAT f
+    | FP_infinite -> INFINITY
+    | FP_nan -> NAN
+
 
   let integer i = Some (`Int i)
   let null = `Null
@@ -32,10 +41,33 @@ module Extended = struct
   let list l = `List l
 
   let number = function
-  | `Float f ->     Some (`Float f)
-  | `Infinity ->    Some (`Float (1.0 /. 0.0))
-  | `Neginfinity -> Some (`Float (-1.0 /. 0.0))
-  | `Nan ->         Some (`Float (0.0 /. 0.0))
+  | `Float f ->     `Float f
+  | `Infinity ->    `Float (1.0 /. 0.0)
+  | `Neginfinity -> `Float (-1.0 /. 0.0)
+  | `Nan ->         `Float (0.0 /. 0.0)
+
+end
+
+module Yojson = struct
+  type nonrec json = json
+  type t = json
+
+  let lex_number token = token
+  let lex_integer token = token (* CR sbleazard: fix bounds *)
+  let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
+
+  let integer i = Some (`Int i)
+  let null = `Null
+  let string s = `String s
+  let bool b = `Bool b
+  let assoc a = `Assoc a
+  let list l = `List l
+
+  let number = function
+  | `Float f ->     `Float f
+  | `Infinity ->    `Float (1.0 /. 0.0)
+  | `Neginfinity -> `Float (-1.0 /. 0.0)
+  | `Nan ->         `Float (0.0 /. 0.0)
 
 end
 
@@ -60,6 +92,7 @@ module Basic = struct
   | _ as token -> token
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
+  let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
   let integer i = Some (`Int i)
   let null = `Null
@@ -69,10 +102,10 @@ module Basic = struct
   let list l = `List l
 
   let number = function
-  | `Float f ->     Some (`Float f)
-  | `Infinity ->    None
-  | `Neginfinity -> None
-  | `Nan ->         None
+  | `Float f ->     `Float f
+  | `Infinity ->    `Null
+  | `Neginfinity -> `Null
+  | `Nan ->         `Null
 
 end
 
@@ -96,6 +129,7 @@ module Strict = struct
   | _ as token -> token
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
+  let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
   let integer i = Some (`Float (float_of_int i))
   let null = `Null
@@ -105,10 +139,10 @@ module Strict = struct
   let list l = `List l
 
   let number = function
-  | `Float f ->     Some (`Float f)
-  | `Infinity ->    None
-  | `Neginfinity -> None
-  | `Nan ->         None
+  | `Float f ->     `Float f
+  | `Infinity ->    `Null
+  | `Neginfinity -> `Null
+  | `Nan ->         `Null
 end
 
 module Stream = struct

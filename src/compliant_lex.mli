@@ -1,6 +1,7 @@
 module type S = sig
   val lex_number : Tokens.token -> Tokens.token
   val lex_integer : Tokens.token -> Tokens.token
+  val lex_largeint : Tokens.token -> Tokens.token
 end
 
 module type Lex = sig

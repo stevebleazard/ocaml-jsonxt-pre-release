@@ -3,6 +3,7 @@
 %token <string> STRING
 %token <float> FLOAT
 %token <int> INT
+%token <string> LARGEINT
 %token AS
 %token AE
 %token OS
