@@ -102,15 +102,7 @@ rule read =
 
 {
 
-  module type Lex = Compliant_lex.Lex 
-  module Make_lexxer ( Compliant_lex : Compliant_lex.S  ) : Lex = struct
-    let read lexbuf =
-      match read lexbuf with
-      | INFINITY | NEGINFINITY | NAN | FLOAT _ as token -> Compliant_lex.lex_number token
-      | INT _ as token -> Compliant_lex.lex_integer token
-      | _ as token -> token
-  end
-
+  (*
   (* Testing *)
   let lex_and_print lexbuf =
     let rec loop () =
@@ -161,6 +153,7 @@ rule read =
     fmt json
 
   module Basic_parser = Parser.Make(Json.Basic)
+  module Basic_lexxer = Compliant_lex.Make_lexxer(Json.Basic)
 
   let lexit filename =
     let inf = open_in filename in
@@ -173,7 +166,7 @@ rule read =
     let inf = open_in filename in
     let lexbuf = Lexing.from_channel inf in
     lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-    match Basic_parser.lax read lexbuf with
+    match Basic_parser.lax Basic_lexxer.read lexbuf with
     | Error s -> printf "%s\n" s
     | Ok json ->
       match json with
@@ -187,5 +180,6 @@ rule read =
   open Core_bench.Std
 
   let () = Command.run (Bench.make_command [Bench.Test.create ~name:"lexxer" (fun () -> Lexxer.lexit "test.json")])
+  *)
   *)
 }

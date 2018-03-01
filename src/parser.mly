@@ -53,7 +53,8 @@ lax:
     {
       let start = $startpos in
       let cnum = start.pos_cnum - start.pos_bol + 1 in
-      Error (Printf.sprintf "JSON syntax error at line %d char %d" start.pos_lnum cnum)
+      let err = Printf.sprintf "JSON syntax error at line %d char %d" start.pos_lnum cnum in
+        Error err
     }
   | err = COMPLIANCE_ERROR
     { Error err }
@@ -100,3 +101,4 @@ rev_list_values:
     { [v] }
 
 %%
+

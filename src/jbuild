@@ -12,9 +12,9 @@
    (modules (tokens parser))))
 
 (executable
- ((name lexxer)
+ ((name test_parser)
   (libraries (core core_bench))))
 
 ;(alias
 ; ((name DEFAULT)
-;  (deps (lexxer.exe))))
+;  (deps (test_parser.exe))))
