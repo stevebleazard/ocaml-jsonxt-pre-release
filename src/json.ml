@@ -19,18 +19,19 @@ module Extended = struct
   type nonrec json = json
   type t = json
 
-  let number = function
-  | `Float f ->     Some (`Float f)
-  | `Infinity ->    Some (`Float (1.0 /. 0.0))
-  | `Neginfinity -> Some (`Float (-1.0 /. 0.0))
-  | `Nan ->         Some (`Float (0.0 /. 0.0))
-
   let integer i = Some (`Int i)
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
+
+  let number = function
+  | `Float f ->     Some (`Float f)
+  | `Infinity ->    Some (`Float (1.0 /. 0.0))
+  | `Neginfinity -> Some (`Float (-1.0 /. 0.0))
+  | `Nan ->         Some (`Float (0.0 /. 0.0))
+
 end
 
 module Basic = struct
@@ -46,18 +47,19 @@ module Basic = struct
       ]
   type t = json
 
-  let number = function
-  | `Float f ->     Some (`Float f)
-  | `Infinity ->    None
-  | `Neginfinity -> None
-  | `Nan ->         None
-
   let integer i = Some (`Int i)
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
+
+  let number = function
+  | `Float f ->     Some (`Float f)
+  | `Infinity ->    None
+  | `Neginfinity -> None
+  | `Nan ->         None
+
 end
 
 module Strict = struct
@@ -72,18 +74,18 @@ module Strict = struct
       ]
   type t = json
 
-  let number = function
-  | `Float f ->     Some (`Float f)
-  | `Infinity ->    None
-  | `Neginfinity -> None
-  | `Nan ->         None
-
   let integer i = Some (`Float (float_of_int i))
   let null = `Null
   let string s = `String s
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
+
+  let number = function
+  | `Float f ->     Some (`Float f)
+  | `Infinity ->    None
+  | `Neginfinity -> None
+  | `Nan ->         None
 end
 
 module Stream = struct
