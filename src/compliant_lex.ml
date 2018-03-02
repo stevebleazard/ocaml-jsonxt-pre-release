@@ -7,17 +7,11 @@ end
 module type Lex = sig
   val read : Lexing.lexbuf -> Tokens.token
   val lex_error : unit -> string option
-  val set_lexbuf : Lexing.lexbuf -> unit
-  val get_lexbuf : unit -> Lexing.lexbuf option
 end
 
 module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
   let error = ref None
-  let saved_lexbuf = ref None
-
   let lex_error () = !error
-  let set_lexbuf lexbuf = saved_lexbuf := Some lexbuf
-  let get_lexbuf () = !saved_lexbuf
 
   let read lexbuf =
     let token = match Lexxer.read lexbuf with

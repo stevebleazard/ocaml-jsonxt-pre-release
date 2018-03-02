@@ -10,13 +10,6 @@
     val list : json list -> json
   end>
 
-(* This is necessary to allow the lexbuf to be accessed for error reporting
-   as continuous position updates are disabled *)
-
-%parameter<Error_handler : sig
-    val get_lexbuf : unit -> Lexing.lexbuf option
-  end>
-
 %{
 %}
 
@@ -28,18 +21,7 @@ lax:
   | v = value
     { Ok (Some v) }
   | error
-    {
-      let start = $startpos in
-      let end_ = $endpos in
-      let cnum =
-        match Error_handler.get_lexbuf () with
-        | None -> 0
-        | Some lexbuf -> lexbuf.lex_last_pos - start.pos_bol
-      in
-      let err = Printf.sprintf "JSON syntax error at line %d char %d (%d, %d - %d, %d)" start.pos_lnum cnum start.pos_lnum start.pos_cnum end_.pos_lnum end_.pos_cnum
-      in
-        Error err
-    }
+    { Error "JSON syntax error" }
   | err = COMPLIANCE_ERROR
     { Error err }
   | err = LEX_ERROR

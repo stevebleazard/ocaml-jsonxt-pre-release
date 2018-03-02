@@ -28,8 +28,6 @@
   
   let update_pos lexbuf =
     let pos = lexbuf.lex_start_p in
-    Printf.printf "pos:  bol=%d, lnum = %d, cnum = %d\n%!" pos.pos_bol pos.pos_lnum pos.pos_cnum;
-    Printf.printf "cur:  cnum = %d\n%!" lexbuf.lex_curr_pos;
     lexbuf.lex_start_p <-
       { pos with pos_bol = lexbuf.lex_start_pos;
                  pos_lnum = pos.pos_lnum + 1
