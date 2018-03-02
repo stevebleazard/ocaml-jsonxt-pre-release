@@ -48,8 +48,8 @@ let print_json_value json =
   in
   fmt json
 
-module Basic_parser = Parser.Make(Json.Basic)
 module Basic_lexxer = Compliant_lex.Make_lexxer(Json.Basic)
+module Basic_parser = Parser.Make(Json.Basic)(Basic_lexxer)
 
 let lexit filename =
   let inf = open_in filename in
@@ -62,6 +62,7 @@ let parsit filename =
   let inf = open_in filename in
   let lexbuf = Lexing.from_channel inf in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  Basic_lexxer.set_lexbuf lexbuf;
   match Basic_parser.lax Basic_lexxer.read lexbuf with
   | Error s -> begin
     match Basic_lexxer.lex_error () with
@@ -85,14 +86,14 @@ let testit filename =
     end
   | Ok _ -> ()
 
-(*
 let () = parsit "../test.json"
+(*
 let () = lexit "../test.json"
 *)
 
 open Core
 open Core_bench.Std
 
-let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit "../test.json")])
 (*
+let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit "../test.json")])
 *)
