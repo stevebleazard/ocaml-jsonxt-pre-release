@@ -58,19 +58,13 @@ let lexit filename =
   lex_and_print lexbuf;
   close_in inf
 
-let error_pos_msg (lexbuf : Lexing.lexbuf) =
-  let start = lexbuf.lex_start_p in
-  let cnum = lexbuf.lex_last_pos - start.pos_bol in
-    Printf.sprintf "line %d char %d" start.pos_lnum cnum
-
-
 let parsit filename =
   let inf = open_in filename in
   let lexbuf = Lexing.from_channel inf in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   match Basic_parser.lax Basic_lexxer.read lexbuf with
   | Error s -> begin
-    let loc = error_pos_msg lexbuf in
+    let loc = Lexxer.error_pos_msg lexbuf in
     match Basic_lexxer.lex_error () with
     | None -> printf "%s at %s\n" s loc
     | Some e -> printf "%s: %s at %s\n" s e loc
