@@ -19,14 +19,21 @@
       *)
       result
   end
-  (**)
   open Lexing
   open Tokens
 
   let string2num s =
     try (INT (int_of_string s)) with
     | Failure _ -> LARGEINT s
-
+  
+  let update_pos lexbuf =
+    let pos = lexbuf.lex_start_p in
+    Printf.printf "pos:  bol=%d, lnum = %d, cnum = %d\n%!" pos.pos_bol pos.pos_lnum pos.pos_cnum;
+    Printf.printf "cur:  cnum = %d\n%!" lexbuf.lex_curr_pos;
+    lexbuf.lex_start_p <-
+      { pos with pos_bol = lexbuf.lex_start_pos;
+                 pos_lnum = pos.pos_lnum + 1
+      }
 }
 
 let digit_1_to_9 = ['1'-'9']
@@ -92,6 +99,6 @@ rule read =
   | whitespace
     { read lexbuf }
   | newline
-    { Lexing.new_line lexbuf; read lexbuf; }
+    { update_pos lexbuf; read lexbuf; }
   | _
     { LEX_ERROR ("Unexpected char: " ^ (Lexing.lexeme lexbuf)) }
