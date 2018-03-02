@@ -48,8 +48,8 @@ let print_json_value json =
   in
   fmt json
 
-module Basic_lexxer = Compliant_lex.Make_lexxer(Json.Basic)
-module Basic_parser = Parser.Make(Json.Basic)
+module Basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
+module Basic_parser = Parser.Make(Json_parse_types.Basic)
 
 let lexit filename =
   let inf = open_in filename in
