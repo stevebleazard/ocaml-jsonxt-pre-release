@@ -16,7 +16,7 @@ end
 
 module type Json_encoder_decoder = sig
   module IO : IO
-  module Compliance : Compliance
+  module Compliance : Compliance.S
 
   type nonrec json = json
 
@@ -52,6 +52,6 @@ module type Json_encoder_decoder = sig
 end
 
 
-module Make (Compliance : Compliance) (IO : IO) : Json_encoder_decoder with
+module Make (Compliance : Compliance.S) (IO : IO) : Json_encoder_decoder with
      module IO := IO
  and module Compliance := Compliance

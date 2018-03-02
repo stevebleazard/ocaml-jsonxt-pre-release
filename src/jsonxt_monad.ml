@@ -1,3 +1,4 @@
+(*
 module Error = struct
   type pos = { line : int; char : int }
   type t = { start : pos; end_ : pos; error : Jsonm_error.t }
@@ -19,6 +20,7 @@ module Error = struct
       (pos_to_string err.end_)
 
 end
+*)
 
 module type IO = sig
   type 'a t
@@ -29,7 +31,7 @@ end
 
 module type Json_encoder_decoder = sig
   module IO : IO
-  module Compliance : Compliance
+  module Compliance : Compliance.S
 
   type json = Compliance.json
 
@@ -45,7 +47,7 @@ module type Json_encoder_decoder = sig
   val encode_string_hum : json -> (string, string) result IO.t
 end
 
-module Make (Compliance : Compliance) (IO : IO) : Json_encoder_decoder with
+module Make (Compliance : Compliance.S) (IO : IO) : Json_encoder_decoder with
     module IO := IO and module Compliance := Compliance = struct
 
   module Lexxer = Compliant_lex.Make_lexxer(Compliance)

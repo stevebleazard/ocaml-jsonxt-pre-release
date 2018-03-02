@@ -91,9 +91,13 @@ let () = parsit "../test.json"
 let () = lexit "../test.json"
 *)
 
+module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic)
+
+(*
 open Core
 open Core_bench.Std
 
-(*
+
 let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit "../test.json")])
 *)
+

@@ -15,7 +15,7 @@ type json =
     | `Tuple of json list
     | `Variant of (string * json option)
     ]
-    constraint json = Json_parse_type.json
+    constraint json = Json_parse_types.json
 
 type t = json
 
@@ -40,7 +40,7 @@ module Basic = struct
       | `Assoc of (string * json) list
       | `List of json list
       ]
-      constraint json = Json_parse_type.Basic.json
+      constraint json = Json_parse_types.Basic.json
   type t = json
 end
 
@@ -54,7 +54,7 @@ module Strict = struct
       | `Assoc of (string * json) list
       | `List of json list
       ]
-      constraint json = Json_parse_type.Strict.json
+      constraint json = Json_parse_types.Strict.json
   type t = json
 end
 
@@ -81,6 +81,6 @@ module Stream = struct
       | `Neg_infinity
       | `Nan
       ]
-      constraint json = Json_parse_type.Stream.json
+      constraint json = Json_parse_types.Stream.json
   type t = json
 end
