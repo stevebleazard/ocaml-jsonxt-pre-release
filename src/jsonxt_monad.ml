@@ -48,11 +48,29 @@ end
 module Make (Compliance : Compliance) (IO : IO) : Json_encoder_decoder with
     module IO := IO and module Compliance := Compliance = struct
 
+  module Lexxer = Compliant_lex.Make_lexxer(Compliance)
+  module Parser = Parser.Make(Compliance)
+
   open IO
 
   type json = Compliance.json
   type reader = Bytes.t -> int -> int IO.t
   type writer = Bytes.t -> int -> unit IO.t
+
+  let parse_json filename =
+    let inf = open_in filename in
+    let lexbuf = Lexing.from_channel inf in
+    lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+    match Parser.lax Parser.read lexbuf with
+    | Ok json as res -> res
+    | Error s -> begin
+      let loc = Lexxer.error_pos_msg lexbuf in
+      let err = match Lexxer.lex_error () with
+        | None -> Printf.sprintf "%s at %s\n" s loc
+        | Some e -> Printf.sprintf "%s: %s at %s\n" s e loc
+      in
+        Error err
+      end
 
   (*
   let raise_of_error = function
