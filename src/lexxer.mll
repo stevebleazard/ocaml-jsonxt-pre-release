@@ -25,7 +25,8 @@
   let error_pos_msg (lexbuf : Lexing.lexbuf) =
     let start = lexbuf.lex_start_p in
     let cnum = lexbuf.lex_last_pos - start.pos_bol in
-      Printf.sprintf "line %d char %d" start.pos_lnum cnum
+    let enum = lexbuf.lex_curr_pos - start.pos_bol in
+      Printf.sprintf "line %d chars %d-%d" start.pos_lnum cnum enum
 
   let string2num s =
     try (INT (int_of_string s)) with
