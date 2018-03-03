@@ -111,11 +111,16 @@ let parsit2 filename =
       let loc = Lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
-let () = parsit2 "../test.json"
-(*
-let () = parsit "../test.json"
-let () = lexit "../test.json"
-*)
+let () = 
+  if Array.length Sys.argv < 2 then
+    printf "expected filename\n"
+  else
+    let filename = Sys.argv.(1) in
+    parsit2 filename
+    (*
+    parsit "../test.json"
+    lexit "../test.json"
+    *)
 
 (* module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic) *)
 
