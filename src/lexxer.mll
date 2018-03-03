@@ -105,4 +105,4 @@ rule read =
   | newline
     { update_pos lexbuf; read lexbuf; }
   | _
-    { LEX_ERROR ("Unexpected char: " ^ (Lexing.lexeme lexbuf)) }
+    { LEX_ERROR (Lexing.lexeme lexbuf) }

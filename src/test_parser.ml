@@ -109,9 +109,7 @@ let parsit2 filename =
     | Ok (Some json) -> print_json_value json; printf "\n"
     | Error s ->
       let loc = Lexxer.error_pos_msg lexbuf in
-      match New_basic_lexxer.lex_error () with
-      | None -> printf "%s at %s\n" s loc
-      | Some e -> printf "%s: %s at %s\n" s e loc
+      printf "%s at %s\n" s loc
 
 let () = parsit2 "../test.json"
 (*
