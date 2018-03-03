@@ -44,7 +44,29 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
   open Error_or
 
   (* CR sbleazard: fix *)
-  let token_error _tok = `Syntax_error "unexpected *replace*"
+  let token_error tok =
+    let open Tokens in
+    let err = match tok with
+      | STRING s -> "STRING(" ^ s ^ ")"
+      | OS -> "OS"
+      | OE -> "OE"
+      | NULL -> "NULL"
+      | NEGINFINITY -> "NEGINFINITY"
+      | NAN -> "NAN"
+      | LEX_ERROR s -> "LEX_ERROR(" ^ s ^ ")"
+      | LARGEINT s -> "LARGEINT(" ^ s ^ ")"
+      | INT i -> "INT(" ^ (string_of_int i) ^ ")"
+      | INFINITY -> "INFINITY"
+      | FLOAT f -> "FLOAT" ^ (string_of_float f) ^ ")"
+      | EOF -> "EOF"
+      | COMPLIANCE_ERROR s -> "COMPLIANCE(" ^ s ^ ")"
+      | COMMA -> "COMMA"
+      | COLON -> "COLON"
+      | BOOL b -> "BOOL(" ^ (if b then "true" else "false") ^ ")"
+      | AS -> "AS"
+      | AE -> "AE"
+    in
+      `Syntax_error ("Unexpected " ^ err)
 
   let json_value ~reader = 
     let open Tokens in
@@ -81,9 +103,9 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     and array_values acc = begin
       value ()
       >>=? fun v ->
-        peek () >>= fun tok -> 
+        read () >>= fun tok -> 
         match tok with
-        | AE -> discard () >>= fun () -> return (Compliance.list (List.rev (v::acc)))
+        | AE -> return (Compliance.list (List.rev (v::acc)))
         | COMMA -> array_values (v::acc)
         | tok -> fail (token_error tok)
     end
@@ -96,9 +118,9 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     and object_values acc = begin
       key_colon_value ()
       >>=? fun v ->
-        peek () >>= fun tok -> 
+        read () >>= fun tok -> 
         match tok with
-        | OE -> discard () >>= fun () -> return (Compliance.assoc (List.rev (v::acc)))
+        | OE -> return (Compliance.assoc (List.rev (v::acc)))
         | COMMA -> object_values (v::acc)
         | tok -> fail (token_error tok)
     end
