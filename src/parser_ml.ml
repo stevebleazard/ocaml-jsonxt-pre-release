@@ -64,7 +64,11 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
         (* LARGEINT is actually handled by the lexxer *)
       | LARGEINT s ->
         return (Compliance.number (`Float (float_of_string s)))
+      | EOF
+      | COMMA | COLON | AE | OE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
+        fail (token_error tok)
       | AS -> array_value_start ()
+      | OS -> object_value_start ()
     end
     and array_value_start () = begin
       peek () >>= fun tok ->
@@ -77,11 +81,35 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
       >>=? fun v ->
         peek () >>= fun tok -> 
         match tok with
-        | AE ->
-          discard ()
-          >>= fun () -> return (Compliance.list (List.rev (v::acc)))
+        | AE -> discard () >>= fun () -> return (Compliance.list (List.rev (v::acc)))
         | COMMA -> array_values (v::acc)
         | tok -> fail (token_error tok)
+    end
+    and object_value_start () = begin
+      peek () >>= fun tok ->
+      match tok with
+      | OE -> discard () >>= fun () -> return (Compliance.assoc [])
+      | _ -> object_values []
+    end
+    and object_values acc = begin
+      key_colon_value ()
+      >>=? fun v ->
+        peek () >>= fun tok -> 
+        match tok with
+        | OE -> discard () >>= fun () -> return (Compliance.assoc (List.rev (v::acc)))
+        | COMMA -> object_values (v::acc)
+        | tok -> fail (token_error tok)
+    end
+    and key_colon_value () = begin
+      read ()
+      >>= function
+        | STRING k -> begin
+          read ()
+          >>= function
+            | COLON -> begin value () >>=? fun v -> return (k, v) end
+            | tok ->  fail (token_error tok)
+          end
+        | tok ->  fail (token_error tok)
     end
     in
     value ()
