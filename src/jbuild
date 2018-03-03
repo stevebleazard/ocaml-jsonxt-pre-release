@@ -11,9 +11,13 @@
   (flags (--external-tokens Tokens))
    (modules (tokens parser))))
 
-(executable
- ((name test_parser)
+(executables
+ ((names (test_parser parser_ml))
   (libraries (core core_bench))))
+
+;(executable
+; ((name test_parser)
+;  (libraries (core core_bench))))
 
 ;(alias
 ; ((name DEFAULT)
