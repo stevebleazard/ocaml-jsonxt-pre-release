@@ -86,12 +86,40 @@ let testit filename =
     end
   | Ok _ -> ()
 
-let () = parsit "../test.json"
+
+module IO = struct
+  type 'a t = 'a
+  
+  let return v = v
+  let (>>=) a f = f a
+end
+
+module New_basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
+module New_basic_parser = Parser_ml.Make(Json_parse_types.Basic) (IO)
+
+let parsit2 filename =
+  let inf = open_in filename in
+  let lexbuf = Lexing.from_channel inf in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let open IO in
+  let reader () = return (New_basic_lexxer.read lexbuf) in
+  New_basic_parser.lax ~reader
+  >>= function
+    | Ok None -> Printf.printf "(*None*)\n"
+    | Ok (Some json) -> print_json_value json; printf "\n"
+    | Error s ->
+      let loc = Lexxer.error_pos_msg lexbuf in
+      match New_basic_lexxer.lex_error () with
+      | None -> printf "%s at %s\n" s loc
+      | Some e -> printf "%s: %s at %s\n" s e loc
+
+let () = parsit2 "../test.json"
 (*
+let () = parsit "../test.json"
 let () = lexit "../test.json"
 *)
 
-module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic)
+(* module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic) *)
 
 (*
 open Core

@@ -9,9 +9,10 @@ module type Parser = sig
     -> (Compliance.json option, string) result IO.t
 end
 
-module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
-  module IO = IO
-  module Compliance = Compliance
+module Make (Compliance : Compliance.S) (IO : IO) : Parser
+  with module IO := IO
+   and module Compliance := Compliance
+= struct
 
   open IO
 
@@ -123,7 +124,3 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
       | Error (`Syntax_error err) -> fail err
 
 end
-
-module Simple_parser = Make (Json_parse_types.Extended) (struct type 'a t = 'a let return v = v let (>>=) a f = f a end)
-
-let () = Printf.printf "Hello!\n"
