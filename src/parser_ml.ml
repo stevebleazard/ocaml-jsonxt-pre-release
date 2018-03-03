@@ -6,7 +6,7 @@ module type Parser = sig
 
   val lax
     :  reader : (unit -> Tokens.token IO.t)
-    -> (Compliance.json option, string) result
+    -> (Compliance.json option, string) result IO.t
 end
 
 module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
@@ -42,7 +42,8 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
 
   open Error_or
 
-  let token_error _tok = "unexpected *replace*"
+  (* CR sbleazard: fix *)
+  let token_error _tok = `Syntax_error "unexpected *replace*"
 
   let json_value ~reader = 
     let open Tokens in
@@ -64,7 +65,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
         (* LARGEINT is actually handled by the lexxer *)
       | LARGEINT s ->
         return (Compliance.number (`Float (float_of_string s)))
-      | EOF
+      | EOF -> fail `Eof
       | COMMA | COLON | AE | OE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
         fail (token_error tok)
       | AS -> array_value_start ()
@@ -114,34 +115,12 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser = struct
     in
     value ()
 
-  let lax ~reader = Ok None
-
-(*
-  | OS; obj = object_fields; OE
-    { Compliance.assoc obj }
-  | AS; l = list_values; AE
-    { Compliance.list l }
-
-  | s = LARGEINT
-    (* LARGEINT is actually handled by the lexxer *)
-    { Compliance.number (`Float (float_of_string s)) }
-  | NULL
-    { Compliance.null }
-  | INFINITY
-    { Compliance.number `Infinity }
-  | NEGINFINITY
-    { Compliance.number `Neginfinity }
-  | NAN
-    { Compliance.number `Nan }
-  | f = FLOAT
-    { Compliance.number (`Float f) }
-  | b = BOOL
-    { Compliance.bool b }
-  | s = STRING
-    { Compliance.string s }
-  | i = INT
-    { Compliance.integer i }
-*)
+  let lax ~reader = 
+    json_value reader
+    >>= function
+      | Ok res -> return (Some res)
+      | Error `Eof -> return None
+      | Error (`Syntax_error err) -> fail err
 
 end
 
