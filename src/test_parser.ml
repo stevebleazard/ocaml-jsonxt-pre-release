@@ -96,6 +96,7 @@ end
 
 module New_basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
 module New_basic_parser = Parser_ml.Make(Json_parse_types.Basic) (IO)
+module New_basic_parser2 = Parser_ml.Make2(Json_parse_types.Basic)
 
 let parsit2 filename =
   let inf = open_in filename in
@@ -111,6 +112,21 @@ let parsit2 filename =
       let loc = Lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
+let testit2 filename =
+  let inf = open_in filename in
+  let lexbuf = Lexing.from_channel inf in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let open IO in
+  let reader () = return (New_basic_lexxer.read lexbuf) in
+  New_basic_parser2.lax ~reader
+  >>= function
+    | Ok None -> ()
+    | Ok (Some json) -> ()
+    | Error s ->
+      let loc = Lexxer.error_pos_msg lexbuf in
+      printf "%s at %s\n" s loc
+
+(*
 let () = 
   if Array.length Sys.argv < 2 then
     printf "expected filename\n"
@@ -121,14 +137,14 @@ let () =
     parsit "../test.json"
     lexit "../test.json"
     *)
-
+*)
 (* module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic) *)
 
-(*
 open Core
 open Core_bench.Std
 
 
-let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit "../test.json")])
+let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit2 "../test.json.2" )])
+(*
 *)
 
