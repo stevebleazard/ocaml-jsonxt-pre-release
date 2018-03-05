@@ -121,7 +121,7 @@ let testit2 filename contents =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (New_basic_lexxer.read lexbuf) in
-  New_basic_parser2_nola.lax ~reader
+  New_basic_parser.lax ~reader
   >>= function
     | Ok None -> ()
     | Ok (Some json) -> ()
@@ -130,15 +130,14 @@ let testit2 filename contents =
         printf "%s at %s\n" s loc
 
 let testit_spacetime filename contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
-  let reader () = return (New_basic_lexxer.read lexbuf) in
   let rec loop i =
-    printf ".%!";
     if i <= 0 then Ok None
     else begin
-      New_basic_parser2_nola.lax ~reader
+      let lexbuf = Lexing.from_string contents in
+      lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+      let reader () = return (New_basic_lexxer.read lexbuf) in
+      New_basic_parser.lax ~reader
       >>= function
         | Ok None -> loop (i - 1)
         | Ok (Some json) -> loop (i - 1)
@@ -148,27 +147,26 @@ let testit_spacetime filename contents =
           loop (i - 1)
     end
   in
-    loop 10000
+    loop 100
 
-(*
 let () = 
   if Array.length Sys.argv < 2 then
     printf "expected filename\n"
   else
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
-      parsit2 filename contents
+      ignore (testit_spacetime filename contents)
     (*
-      ignore (testit_spacetime filename)
+      parsit2 filename contents
       parsit "../test.json"
       lexit "../test.json"
     *)
+(*
 *)
 
 (* module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic) *)
 
 (*
-*)
 open Core
 open Core_bench.Std
 
@@ -182,3 +180,4 @@ let () = Command.run (Bench.make_command [
   Bench.Test.create ~name:"parser" test
 ])
 
+*)
