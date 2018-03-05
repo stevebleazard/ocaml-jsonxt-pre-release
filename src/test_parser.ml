@@ -104,7 +104,7 @@ let parsit2 filename =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (New_basic_lexxer.read lexbuf) in
-  New_basic_parser.lax ~reader
+  New_basic_parser2.lax ~reader
   >>= function
     | Ok None -> Printf.printf "(*None*)\n"
     | Ok (Some json) -> print_json_value json; printf "\n"
