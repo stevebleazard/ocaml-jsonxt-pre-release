@@ -95,8 +95,8 @@ module IO = struct
 end
 
 module New_basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
-module New_basic_parser = Parser_ml.Make(Json_parse_types.Basic) (IO)
-module New_basic_parser2 = Parser_ml.Make2(Json_parse_types.Basic)
+module New_basic_parser = Parser_monad.Make(Json_parse_types.Basic) (IO)
+module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 
 let parsit2 filename =
   let inf = open_in filename in
@@ -144,7 +144,7 @@ open Core
 open Core_bench.Std
 
 
-let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit2 "../test.json.2" )])
+let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit2 "../test.json.10000" )])
 (*
 *)
 
