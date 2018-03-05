@@ -1,3 +1,11 @@
+let load_file f =
+  let ic = open_in f in
+  let n = in_channel_length ic in
+  let s = Bytes.create n in
+  really_input ic s 0 n;
+  close_in ic;
+  (s)
+
 let lex_and_print lexbuf =
   let rec loop () =
     match Lexxer.read lexbuf with
@@ -51,16 +59,13 @@ let print_json_value json =
 module Basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
 module Basic_parser = Parser.Make(Json_parse_types.Basic)
 
-let lexit filename =
-  let inf = open_in filename in
-  let lexbuf = Lexing.from_channel inf in
+let lexit filename contents =
+  let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  lex_and_print lexbuf;
-  close_in inf
+  lex_and_print lexbuf
 
-let parsit filename =
-  let inf = open_in filename in
-  let lexbuf = Lexing.from_channel inf in
+let parsit filename contents =
+  let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   match Basic_parser.lax Basic_lexxer.read lexbuf with
   | Error s -> begin
@@ -74,9 +79,8 @@ let parsit filename =
     | None -> printf "(*None*)\n";
     | Some json ->  print_json_value json; printf "\n"
 
-let testit filename =
-  let inf = open_in filename in
-  let lexbuf = Lexing.from_channel inf in
+let testit filename contents =
+  let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   match Basic_parser.lax Basic_lexxer.read lexbuf with
   | Error s -> begin
@@ -99,9 +103,8 @@ module New_basic_parser = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
 
-let parsit2 filename =
-  let inf = open_in filename in
-  let lexbuf = Lexing.from_channel inf in
+let parsit2 filename contents =
+  let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (New_basic_lexxer.read lexbuf) in
@@ -113,9 +116,8 @@ let parsit2 filename =
       let loc = Lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
-let testit2 filename =
-  let inf = open_in filename in
-  let lexbuf = Lexing.from_channel inf in
+let testit2 filename contents =
+  let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (New_basic_lexxer.read lexbuf) in
@@ -125,7 +127,28 @@ let testit2 filename =
     | Ok (Some json) -> ()
     | Error s ->
       let loc = Lexxer.error_pos_msg lexbuf in
-      printf "%s at %s\n" s loc
+        printf "%s at %s\n" s loc
+
+let testit_spacetime filename contents =
+  let lexbuf = Lexing.from_string contents in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let open IO in
+  let reader () = return (New_basic_lexxer.read lexbuf) in
+  let rec loop i =
+    printf ".%!";
+    if i <= 0 then Ok None
+    else begin
+      New_basic_parser2_nola.lax ~reader
+      >>= function
+        | Ok None -> loop (i - 1)
+        | Ok (Some json) -> loop (i - 1)
+        | Error s ->
+          let loc = Lexxer.error_pos_msg lexbuf in
+          printf "%s at %s\n" s loc;
+          loop (i - 1)
+    end
+  in
+    loop 10000
 
 (*
 let () = 
@@ -133,19 +156,29 @@ let () =
     printf "expected filename\n"
   else
     let filename = Sys.argv.(1) in
-    parsit2 filename
+    let contents = load_file filename in
+      parsit2 filename contents
     (*
-    parsit "../test.json"
-    lexit "../test.json"
+      ignore (testit_spacetime filename)
+      parsit "../test.json"
+      lexit "../test.json"
     *)
 *)
+
 (* module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic) *)
 
+(*
+*)
 open Core
 open Core_bench.Std
 
+let benchit filename = 
+  let contents = load_file filename in
+  (fun () -> testit2 filename contents)
+  
 
-let () = Command.run (Bench.make_command [Bench.Test.create ~name:"parser" (fun () -> testit2 "../test.json.10000" )])
-(*
-*)
+let () = Command.run (Bench.make_command [
+  let test = benchit "../test.json.10000" in
+  Bench.Test.create ~name:"parser" test
+])
 
