@@ -97,6 +97,7 @@ end
 module New_basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
 module New_basic_parser = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
+module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
 
 let parsit2 filename =
   let inf = open_in filename in
@@ -118,7 +119,7 @@ let testit2 filename =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (New_basic_lexxer.read lexbuf) in
-  New_basic_parser2.lax ~reader
+  New_basic_parser2_nola.lax ~reader
   >>= function
     | Ok None -> ()
     | Ok (Some json) -> ()
