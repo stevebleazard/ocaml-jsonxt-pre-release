@@ -22,6 +22,10 @@
   open Lexing
   open Tokens
 
+  exception Lex_error of string
+
+  let lex_error err = raise (Lex_error err)
+
   let error_pos_msg (lexbuf : Lexing.lexbuf) =
     let start = lexbuf.lex_start_p in
     let cnum = lexbuf.lex_last_pos - start.pos_bol in
@@ -46,9 +50,35 @@
     | 'A'..'F' -> int_of_char c - int_of_char 'A' + 10
     | _ -> assert false
 
-  exception Lex_error of string
+  let unescape_string s =
+    let l = String.length s in
+    let s' = Bytes.create l in
+    let i = ref 0 in
+    let j = ref 0 in
+    let state = ref `Char in
+    while !i < l do
+      match !state with
+      | `Char -> begin
+           match s.[!i] with
+           | '\\' -> state := `Escape
+           | c -> Bytes.unsafe_set s' !j c; j := !j + 1
+         end;
+         i := !i + 1
+      | `Escape -> begin
+        match s.[!i] with
+         | '"'  -> Bytes.unsafe_set s' !j '"'
+         | '\\' -> Bytes.unsafe_set s' !j '\\'
+         | 'b'  -> Bytes.unsafe_set s' !j '\b'
+         | 'f'  -> Bytes.unsafe_set s' !j '\012'
+         | 'n'  -> Bytes.unsafe_set s' !j '\n'
+         | 'r'  -> Bytes.unsafe_set s' !j '\r'
+         | 't'  -> Bytes.unsafe_set s' !j '\t'
+         | _    -> lex_error ("invalid escape in string: '" ^ s ^ "'")
+        end;
+        state := `Char
+    done;
+    Bytes.unsafe_to_string s'
 
-  let lex_error err = raise (Lex_error err)
 }
 
 let digit_1_to_9 = ['1'-'9']
@@ -107,8 +137,12 @@ rule read =
     { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
   | double_quote double_quote
     { STRING "" }
+  | double_quote characters double_quote
+    { STRING (Lexing.lexeme lexbuf) }
+(*
   | double_quote 
     { read_string (Buffer.create 100) lexbuf }
+*)
   | eof
     { EOF }
   | whitespace
@@ -120,16 +154,27 @@ rule read =
 
 and read_string buf =
   parse
-  | double_quote { STRING (Buffer.contents buf) }
-  | '\\' '"'     { Buffer.add_char buf '"'; read_string buf lexbuf }
-  | '\\' '\\'    { Buffer.add_char buf '\\'; read_string buf lexbuf }
-  | '\\' 'b'     { Buffer.add_char buf '\b'; read_string buf lexbuf }
-  | '\\' 'f'     { Buffer.add_char buf '\012'; read_string buf lexbuf }
-  | '\\' 'n'     { Buffer.add_char buf '\n'; read_string buf lexbuf }
-  | '\\' 'r'     { Buffer.add_char buf '\r'; read_string buf lexbuf }
-  | '\\' 't'     { Buffer.add_char buf '\t'; read_string buf lexbuf }
-  | newline      { update_pos lexbuf; Buffer.add_char buf '\n'; read_string buf lexbuf }
-  | '\\' 'u' (hex_digit as a) (hex_digit as b) (hex_digit as c) (hex_digit as d)
+  | '"'
+    { STRING (Buffer.contents buf) }
+  | '\\'
+    { read_escaped_char buf lexbuf; read_string buf lexbuf }
+  | [^ '"' '\\' '\n']+
+    {
+      Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | eof          { lex_error "end of file" }
+
+and read_escaped_char buf = 
+  parse
+  | '"'     { Buffer.add_char buf '"' }
+  | '\\'    { Buffer.add_char buf '\\' }
+  | 'b'     { Buffer.add_char buf '\b' }
+  | 'f'     { Buffer.add_char buf '\012' }
+  | 'n'     { Buffer.add_char buf '\n' }
+  | 'r'     { Buffer.add_char buf '\r' }
+  | 't'     { Buffer.add_char buf '\t' }
+  | 'u' (hex_digit as a) (hex_digit as b) (hex_digit as c) (hex_digit as d)
     { 
       let u =
         ((int_of_hexchar a) lsl 12) lor ((int_of_hexchar b) lsl 8) lor
@@ -139,16 +184,9 @@ and read_string buf =
         second_of_surrogate_pair buf u lexbuf
       else
         Utf8.utf8_of_code buf u;
-
-      read_string buf lexbuf
     }
-  | [^ '"' '\\' '\n']+
-    {
-      Buffer.add_string buf (Lexing.lexeme lexbuf);
-      read_string buf lexbuf
-    }
-  | '\\' _       { lex_error ("unexepted escape sequence " ^ (Lexing.lexeme lexbuf)) }
-  | eof          { lex_error "end of file" }
+  | _       { lex_error ("unexepted escape sequence " ^ (Lexing.lexeme lexbuf)) }
+  | eof     { lex_error "end of file" }
 
 and second_of_surrogate_pair buf high =
   parse
