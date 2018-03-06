@@ -155,9 +155,9 @@ let () =
   else
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
-      ignore (testit_spacetime filename contents)
-    (*
       parsit2 filename contents
+    (*
+      ignore (testit_spacetime filename contents)
       parsit "../test.json"
       lexit "../test.json"
     *)

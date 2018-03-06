@@ -38,6 +38,17 @@
       { pos with pos_bol = lexbuf.lex_start_pos;
                  pos_lnum = pos.pos_lnum + 1
       }
+
+  let int_of_hexchar c =
+    match c with
+    | '0'..'9' -> int_of_char c - int_of_char '0'
+    | 'a'..'f' -> int_of_char c - int_of_char 'a' + 10
+    | 'A'..'F' -> int_of_char c - int_of_char 'A' + 10
+    | _ -> assert false
+
+  exception Lex_error of string
+
+  let lex_error err = raise (Lex_error err)
 }
 
 let digit_1_to_9 = ['1'-'9']
@@ -96,8 +107,8 @@ rule read =
     { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
   | double_quote double_quote
     { STRING "" }
-  | double_quote characters double_quote
-    { STRING (Lexing.lexeme lexbuf) }
+  | double_quote 
+    { read_string (Buffer.create 100) lexbuf }
   | eof
     { EOF }
   | whitespace
@@ -105,4 +116,58 @@ rule read =
   | newline
     { update_pos lexbuf; read lexbuf; }
   | _
-    { LEX_ERROR (Lexing.lexeme lexbuf) }
+    { lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
+
+and read_string buf =
+  parse
+  | double_quote { STRING (Buffer.contents buf) }
+  | '\\' '"'     { Buffer.add_char buf '"'; read_string buf lexbuf }
+  | '\\' '\\'    { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'     { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'     { Buffer.add_char buf '\012'; read_string buf lexbuf }
+  | '\\' 'n'     { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'     { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'     { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | newline      { update_pos lexbuf; Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'u' (hex_digit as a) (hex_digit as b) (hex_digit as c) (hex_digit as d)
+    { 
+      let u =
+        ((int_of_hexchar a) lsl 12) lor ((int_of_hexchar b) lsl 8) lor
+        ((int_of_hexchar c) lsl 4) lor ((int_of_hexchar d) lsl 0)
+      in
+      if u >= 0xD800 && u <= 0xDBFF then
+        second_of_surrogate_pair buf u lexbuf
+      else
+        Utf8.utf8_of_code buf u;
+
+      read_string buf lexbuf
+    }
+  | [^ '"' '\\' '\n']+
+    {
+      Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | '\\' _       { lex_error ("unexepted escape sequence " ^ (Lexing.lexeme lexbuf)) }
+  | eof          { lex_error "end of file" }
+
+and second_of_surrogate_pair buf high =
+  parse
+  | '\\' 'u' (hex_digit as a) (hex_digit as b) (hex_digit as c) (hex_digit as d)
+    {
+      let low =
+        ((int_of_hexchar a) lsl 12) lor ((int_of_hexchar b) lsl 8) lor
+        ((int_of_hexchar c) lsl 4) lor ((int_of_hexchar d) lsl 0)
+      in
+      if low >= 0xDC00 && low <= 0xDFFF then
+        Utf8.utf8_of_surrogate_pair buf high low 
+      else
+        lex_error ("invalid low surrogate for code point beyond U+FFFF " ^ (Lexing.lexeme lexbuf))
+    }
+  | '\\' _ 
+    {
+      lex_error ("expecting \\uXXXX escape sequence containing low surrogate for code point beyond U+FFFF, got '"
+        ^ (Lexing.lexeme lexbuf) ^ "'")
+    }
+  | eof
+    { lex_error "end of file" }
+

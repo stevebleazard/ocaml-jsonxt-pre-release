@@ -27,7 +27,7 @@ module Make (Compliance : Compliance.S) : Parser
       | NULL -> "unexpected null value"
       | NEGINFINITY -> "unexpected negative infinity"
       | NAN -> "unexpected Not-a-Number"
-      | LEX_ERROR s -> "unexpected char '" ^ s ^ "'"
+      | LEX_ERROR s -> s
       | LARGEINT s -> "unexpected large integer '" ^ s ^ "'"
       | INT i -> "unexpected integer '" ^ (string_of_int i) ^ "'"
       | INFINITY -> "unexpected infinity"
