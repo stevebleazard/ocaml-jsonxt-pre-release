@@ -12,7 +12,7 @@
    (modules (tokens parser))))
 
 (executables
- ((names (test_parser))
+ ((names (test_parser test_unescape))
   (libraries (core core_bench))))
 
 ;(executable
