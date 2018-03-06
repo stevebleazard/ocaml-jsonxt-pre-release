@@ -136,13 +136,12 @@
 let run () =
   (* Printf.printf "[%s]\n%!" (unescape_string "escaped[\\\"\\\\\\b\\f\\n\\r\\t]") *)
   (* Printf.printf "[%s]\n%!" (unescape_string "xxx\\txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") *)
-  Printf.printf "[%s]\n%!" (unescape_string "aaaa\\x\\u041f\\u043e\\u043b\\u0442\\u043e\\u0440\\u0430 \\u0417\\u0435\\u043c\\u043b\\u0435\\u043a\\u043e\\u043f\\u0430\\uD834\\uDD1E\\uD800\\uDF30\\uD800\\uDA30")
+  Printf.printf "[%s]\n%!" (unescape_string "\\u041f\\u043e\\u043b\\u0442\\u043e\\u0440\\u0430 \\u0417\\u0435\\u043c\\u043b\\u0435\\u043a\\u043e\\u043f\\u0430\\uD834\\uDD1E\\uD800\\uDF30")
 
 let () = run ()
 (*
 *)
 
-(*
 open Core
 open Core_bench.Std
 
@@ -151,10 +150,12 @@ open Core_bench.Std
     (* ignore(unescape_string "\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b\\b") *)
 let benchit () = 
   for i = 0 to 99999 do
-    ignore(unescape_string "xxxxxxxxxx")
+    (*ignore(unescape_string "xxxxxxxxxx") *)
+    ignore (unescape_string "\\u041f\\u043e\\u043b\\u0442\\u043e\\u0440\\u0430 \\u0417\\u0435\\u043c\\u043b\\u0435\\u043a\\u043e\\u043f\\u0430\\uD834\\uDD1E\\uD800\\uDF30")
   done
 
 let () = Command.run (Bench.make_command [
   Bench.Test.create ~name:"parser" benchit
 ])
+(*
 *)

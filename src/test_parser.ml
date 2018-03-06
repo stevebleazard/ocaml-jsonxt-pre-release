@@ -121,7 +121,7 @@ let testit2 filename contents =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (New_basic_lexxer.read lexbuf) in
-  New_basic_parser2_nola.lax ~reader
+  New_basic_parser2.lax ~reader
   >>= function
     | Ok None -> ()
     | Ok (Some json) -> ()
