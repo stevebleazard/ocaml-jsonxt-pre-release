@@ -98,6 +98,14 @@
     let code = 0x10000 + ((high lsl 10) lor low) in
       utf8_of_code buf idx code
 
+  let escaping_error msg s c off =
+    let offs = string_of_int off in
+    let cs =
+      match c with
+      | Some c -> " '" ^ (String.make 1 c) ^ "' "
+      | None -> ""
+    in
+      lex_error (msg ^ " at offset " ^ offs ^ cs ^ ": " ^ s)
 
   let unescape_string s =
     let l = String.length s in
@@ -124,7 +132,7 @@
          | 'r'  -> Bytes.unsafe_set s' !j '\r';   state := `Char; j := !j + 1
          | 't'  -> Bytes.unsafe_set s' !j '\t';   state := `Char; j := !j + 1
          | 'u'  -> state := `U1_h1
-         | _    -> lex_error ("invalid escape in string: '" ^ s ^ "'")
+         | _    -> escaping_error "invalid escape in string" s (Some s.[i]) i
         end;
       | `U1_h1 -> u1 := int_of_hexchar s.[i];  state := `U1_h2
       | `U1_h2 -> u1 := (!u1 lsl 4) lor (int_of_hexchar s.[i]);  state := `U1_h3
@@ -132,14 +140,24 @@
       | `U1_h4 ->
         u1 := (!u1 lsl 4) lor (int_of_hexchar s.[i]);
         if !u1 >= 0xD800 && !u1 <= 0xDBFF then
-          state := `U2_h1
+          state := `U2_bs
         else begin
           j := utf8_of_code s' !j !u1;
           state := `Char
         end
+      | `U2_bs ->
+        if s.[i] <> '\\' then
+          lex_error ("expected low surrogate escape '\\', got char " ^ (String.make 1 s.[i]))
+        else
+          state := `U2_u
+      | `U2_u ->
+        if s.[i] <> 'u' then
+          lex_error ("expected low surrogate escape 'u', got char " ^ (String.make 1 s.[i]))
+        else
+          state := `U2_h1
       | `U2_h1 -> u2 := int_of_hexchar s.[i];  state := `U2_h2
-      | `U2_h2 -> u2 := (!u1 lsl 4) lor (int_of_hexchar s.[i]);  state := `U2_h3
-      | `U2_h3 -> u2 := (!u1 lsl 4) lor (int_of_hexchar s.[i]);  state := `U2_h4
+      | `U2_h2 -> u2 := (!u2 lsl 4) lor (int_of_hexchar s.[i]);  state := `U2_h3
+      | `U2_h3 -> u2 := (!u2 lsl 4) lor (int_of_hexchar s.[i]);  state := `U2_h4
       | `U2_h4 ->
         state := `Char;
         u2 := (!u2 lsl 4) lor (int_of_hexchar s.[i]);
