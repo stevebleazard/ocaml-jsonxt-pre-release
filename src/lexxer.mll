@@ -231,7 +231,7 @@ rule read =
   | double_quote double_quote
     { STRING "" }
   | double_quote characters double_quote
-    { STRING (Lexing.lexeme lexbuf) }
+    { STRING (unescape_string (Lexing.lexeme lexbuf)) }
 (*
   | double_quote 
     { read_string (Buffer.create 100) lexbuf }
