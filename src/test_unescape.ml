@@ -107,12 +107,12 @@
         end
       | `U2_bs ->
         if s.[i] <> '\\' then
-          lex_error ("expected low surrogate escape '\\', got char " ^ (String.make 1 s.[i]))
+          escaping_error "expected low surrogate escape char (\\)" s (Some s.[i]) i
         else
           state := `U2_u
       | `U2_u ->
         if s.[i] <> 'u' then
-          lex_error ("expected low surrogate escape 'u', got char " ^ (String.make 1 s.[i]))
+          escaping_error "expected low surrogate escape sequence (u)" s (Some s.[i]) i
         else
           state := `U2_h1
       | `U2_h1 -> u2 := int_of_hexchar s.[i];  state := `U2_h2
@@ -124,19 +124,19 @@
         if !u2 >= 0xDC00 && !u2 <= 0xDFFF then
           j := utf8_of_surrogate_pair s' !j !u1 !u2 
         else
-          lex_error ("invalid low surrogate for code point beyond U+FFFF '" ^ s ^ "'")
+          escaping_error "invalid low surrogate for code point beyond U+FFFF'" s None i
     done;
     begin
       match !state with
       | `Char -> ()
-      | _ -> lex_error("end of string in escape sequence: '" ^ s ^ "'")
+      | _ -> escaping_error "end of string in escape sequence" s None l
     end;
     if !j <> l then Bytes.unsafe_to_string (Bytes.sub s' 0 !j) else s
 
 let run () =
   (* Printf.printf "[%s]\n%!" (unescape_string "escaped[\\\"\\\\\\b\\f\\n\\r\\t]") *)
   (* Printf.printf "[%s]\n%!" (unescape_string "xxx\\txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") *)
-  Printf.printf "[%s]\n%!" (unescape_string "\\u041f\\u043e\\u043b\\u0442\\u043e\\u0440\\u0430 \\u0417\\u0435\\u043c\\u043b\\u0435\\u043a\\u043e\\u043f\\u0430\\uD834\\uDD1E\\uD800\\uDF30\\uD800\\uDA30")
+  Printf.printf "[%s]\n%!" (unescape_string "aaaa\\x\\u041f\\u043e\\u043b\\u0442\\u043e\\u0440\\u0430 \\u0417\\u0435\\u043c\\u043b\\u0435\\u043a\\u043e\\u043f\\u0430\\uD834\\uDD1E\\uD800\\uDF30\\uD800\\uDA30")
 
 let () = run ()
 (*

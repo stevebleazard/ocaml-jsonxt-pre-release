@@ -147,12 +147,12 @@
         end
       | `U2_bs ->
         if s.[i] <> '\\' then
-          lex_error ("expected low surrogate escape '\\', got char " ^ (String.make 1 s.[i]))
+          escaping_error "expected low surrogate escape char (\\)" s (Some s.[i]) i
         else
           state := `U2_u
       | `U2_u ->
         if s.[i] <> 'u' then
-          lex_error ("expected low surrogate escape 'u', got char " ^ (String.make 1 s.[i]))
+          escaping_error "expected low surrogate escape sequence (u)" s (Some s.[i]) i
         else
           state := `U2_h1
       | `U2_h1 -> u2 := int_of_hexchar s.[i];  state := `U2_h2
@@ -164,12 +164,12 @@
         if !u2 >= 0xDC00 && !u2 <= 0xDFFF then
           j := utf8_of_surrogate_pair s' !j !u1 !u2 
         else
-          lex_error ("invalid low surrogate for code point beyond U+FFFF '" ^ s ^ "'")
+          escaping_error "invalid low surrogate for code point beyond U+FFFF'" s None i
     done;
     begin
       match !state with
       | `Char -> ()
-      | _ -> lex_error("end of string in escape sequence: '" ^ s ^ "'")
+      | _ -> escaping_error "end of string in escape sequence" s None l
     end;
     if !j <> l then Bytes.unsafe_to_string (Bytes.sub s' 0 !j) else s
 }
