@@ -62,11 +62,11 @@ module Make (Compliance : Compliance.S) : Parser
       | EOF -> raise (Parse_error `Eof)
       | COMMA | COLON | AE | OE | LEX_ERROR _ | COMPLIANCE_ERROR _ -> parse_error tok
       | AS -> array_value ()
-      | OS -> object_value_start ()
+      | OS -> object_value ()
     end
     and value () = token_value (reader ())
     and array_value () = begin
-      let loop acc = function
+      let rec loop acc = function
       | `Value_or_end -> begin
           match reader () with
           | AE -> Compliance.list []
@@ -84,7 +84,7 @@ module Make (Compliance : Compliance.S) : Parser
         loop [] `Value_or_end
     end
     and object_value () = begin
-      let loop acc key = function
+      let rec loop acc key = function
       | `Key_or_end -> begin
           match reader () with
           | OE -> Compliance.assoc []
@@ -95,11 +95,12 @@ module Make (Compliance : Compliance.S) : Parser
           match reader () with
           | COLON -> loop acc key `Value
           | tok -> parse_error tok
+        end
       | `Value -> 
         loop ((key, value ())::acc) "" `Comma_or_end
       | `Comma_or_end -> begin
           match reader () with
-          | OE -> Compliance.list (List.rev acc)
+          | OE -> Compliance.assoc (List.rev acc)
           | COMMA -> loop acc "" `Key_value
           | tok -> parse_error tok
         end
