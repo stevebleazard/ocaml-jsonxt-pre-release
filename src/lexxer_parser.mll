@@ -273,11 +273,11 @@ rule json_value =
   | fp
     { lex_number (`Float (float_of_string (Lexing.lexeme lexbuf))) }
   | double_quote double_quote
-    { `String "" }
+    { Compliance.string "" }
   | double_quote characters double_quote
-    { `String (unescape_string (Lexing.lexeme lexbuf)) }
+    { Compliance.string (unescape_string (Lexing.lexeme lexbuf)) }
   | eof
-    { `Eof }
+    { lex_error "unexpected end of file" }
   | whitespace
     { json_value lexbuf }
   | newline
@@ -288,12 +288,12 @@ rule json_value =
 and read_object pairs =
   parse
   | "}"
-    { `Assoc pairs  }
+    { Compliance.assoc pairs  }
 
 and read_array entries =
   parse
   | "]"
-    { `List entries  }
+    { Compliance.list entries  }
 
 (*
     { AE }
