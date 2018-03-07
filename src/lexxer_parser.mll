@@ -2,7 +2,7 @@
   module Lexing = struct
     (* Override the Lexing.engine to avoid creating a new position record
        each time a rule is matched. Reduces total parse time by around 30%.
-       Idea stollen from yojson *)
+       Idea stolen from yojson *)
 
     include Lexing
 
@@ -23,14 +23,16 @@
   open Tokens
 
   exception Lex_error of string
-
-  let lex_error err = raise (Lex_error err)
+  exception Parse_error of [`Eof | `Syntax_error of string]
 
   let error_pos_msg (lexbuf : Lexing.lexbuf) =
     let start = lexbuf.lex_start_p in
     let cnum = lexbuf.lex_last_pos - start.pos_bol in
     let enum = lexbuf.lex_curr_pos - start.pos_bol in
       Printf.sprintf "line %d chars %d-%d" start.pos_lnum cnum enum
+
+  let lex_error err = raise (Lex_error err)
+  let parse_error err = raise (Parse_error err)
 
   let string2num s =
     try (INT (int_of_string s)) with
@@ -172,6 +174,24 @@
       | _ -> escaping_error "end of string in escape sequence" s None l
     end;
     if !j <> l then Bytes.unsafe_to_string (Bytes.sub s' 0 !j) else s
+
+module type Parser = sig
+  module Compliance : Compliance.S
+
+  val lax
+    :  lexbuf : Lexing.lexbuf
+    -> (Compliance.json option, string) result
+
+  val ecma404
+    :  lexbuf : Lexing.lexbuf
+    -> (Compliance.json option, string) result
+
+end
+
+module Make (Compliance : Compliance.S) : Parser
+  with module Compliance := Compliance
+= struct
+
 }
 
 let digit_1_to_9 = ['1'-'9']
@@ -196,7 +216,7 @@ let newline = '\n'
 let nan = ( "nan" | "-nan" | "NaN" )
 let inifinity = ( "inf" | "Infinity" )
 
-rule read =
+rule json_value =
   parse
   | "true"
     { BOOL true }
@@ -217,17 +237,22 @@ rule read =
   | ":"
     { COLON }
   | "-" inifinity
-    { NEGINFINITY }
+    { Compliant.lex_number NEGINFINITY }
   | inifinity
-    { INFINITY }
+    { Compliant.lex_number INFINITY }
   | "+" inifinity
-    { INFINITY }
+    { Compliant.lex_number INFINITY }
   | nan
-    { NAN }
+    { Compliant.lex_number NAN }
   | integer
-    { string2num (Lexing.lexeme lexbuf) }
+    {
+      match string2num (Lexing.lexeme lexbuf) with
+      | INT _ as tok -> Compliant.lex_integer tok
+      | LARGEINT _ as tok -> Compliant.lex_largeint tok
+      | tok -> tok
+    }
   | fp
-    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+    { Compliant.lex_number (FLOAT (float_of_string (Lexing.lexeme lexbuf))) }
   | double_quote double_quote
     { STRING "" }
   | double_quote characters double_quote
@@ -235,9 +260,23 @@ rule read =
   | eof
     { EOF }
   | whitespace
-    { read lexbuf }
+    { json_value lexbuf }
   | newline
-    { update_pos lexbuf; read lexbuf; }
+    { update_pos lexbuf; json_value lexbuf; }
   | _
     { lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
 
+(*
+*)
+
+{
+  let lax lexbuf =
+     try Ok (Some (json_value lexbuf)) with
+     | Parse_error `Eof -> Ok None
+     | Lex_error err -> Error err
+     | Parse_error (`Syntax_error err) -> Error err
+
+  let ecma404 = lax
+
+end
+}

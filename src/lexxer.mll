@@ -2,7 +2,7 @@
   module Lexing = struct
     (* Override the Lexing.engine to avoid creating a new position record
        each time a rule is matched. Reduces total parse time by around 30%.
-       Idea stollen from yojson *)
+       Idea stolen from yojson *)
 
     include Lexing
 

@@ -14,6 +14,12 @@ module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
   let lex_error () = !error
 
   let read lexbuf =
+    match Lexxer.read lexbuf with
+    | INFINITY | NEGINFINITY | NAN | FLOAT _ as token -> Compliant_lex.lex_number token
+    | INT _ as token -> Compliant_lex.lex_integer token
+    | LARGEINT _ as token -> Compliant_lex.lex_largeint token
+    | _ as token -> token
+    (*
     let token = match Lexxer.read lexbuf with
       | INFINITY | NEGINFINITY | NAN | FLOAT _ as token -> Compliant_lex.lex_number token
       | INT _ as token -> Compliant_lex.lex_integer token
@@ -25,4 +31,5 @@ module Make_lexxer ( Compliant_lex : S  ) : Lex = struct
       error := Some err;
       token
     | _ as token -> token
+    *)
 end

@@ -103,6 +103,9 @@ module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
 
+(* module Lexxer_parser_basic = Lexxer_parser.Make(Json_parse_types.Basic) *)
+module New_new_basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
+
 let parsit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };

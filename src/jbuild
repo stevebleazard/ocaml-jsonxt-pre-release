@@ -1,6 +1,8 @@
 (jbuild_version 1)
 
 (ocamllex (lexxer))
+(ocamllex (lexxer_parser))
+(ocamllex (compliant_lexxer))
 
 (menhir
  ((flags (--only-tokens))
