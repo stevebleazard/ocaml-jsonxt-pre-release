@@ -41,12 +41,12 @@ module Extended = struct
   let lex_integer value = value (* CR sbleazard: fix bounds? *)
 
   let lex_largeint = function
-  | LARGEINT s ->  begin
+  | `Largeint s ->  begin
     let f = float_of_string s in
     match classify_float f with
-    | FP_normal | FP_subnormal | FP_zero -> FLOAT f
-    | FP_infinite -> INFINITY
-    | FP_nan -> NAN
+    | FP_normal | FP_subnormal | FP_zero -> `Float f
+    | FP_infinite -> `Infinity
+    | FP_nan -> `Nan
     end
   | _ as token ->  token
 
@@ -117,11 +117,11 @@ module Basic = struct
   type t = json
 
   let lex_number = function
-  | INFINITY -> `Compliance_error "inf not supported"
-  | NEGINFINITY -> `Compliance_error "-inf not supported"
-  | NAN -> `Compliance_error "nan not supported"
-  | FLOAT _ as token -> token
-  | _ as token -> token
+  | `Infinity -> `Compliance_error "inf not supported"
+  | `Neginfinity -> `Compliance_error "-inf not supported"
+  | `Nan -> `Compliance_error "nan not supported"
+  | `Float _ as value -> value
+  | value -> value
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = `Compliance_error "Integer out of bounds"
@@ -154,11 +154,11 @@ module Strict = struct
   type t = json
 
   let lex_number = function
-  | INFINITY -> `Compliance_error "inf not supported"
-  | NEGINFINITY -> `Compliance_error "-inf not supported"
-  | NAN -> `Compliance_error "nan not supported"
-  | FLOAT _ as token -> token
-  | _ as token -> token
+  | `Infinity -> `Compliance_error "inf not supported"
+  | `Neginfinity -> `Compliance_error "-inf not supported"
+  | `Nan -> `Compliance_error "nan not supported"
+  | `Float _ as value -> value
+  | value -> value
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = `Compliance_error "Integer out of bounds"
