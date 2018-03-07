@@ -120,7 +120,7 @@ let testit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let reader () = New_basic_lexxer.read lexbuf in
-  match New_basic_parser2.lax ~reader with
+  match New_basic_parser2_nola.lax ~reader with
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->
