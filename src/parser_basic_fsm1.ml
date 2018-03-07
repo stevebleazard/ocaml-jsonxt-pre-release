@@ -105,7 +105,7 @@ module Make (Compliance : Compliance.S) : Parser
             | tok -> parse_error tok
           end
         | `Value -> 
-          acc := ((!key, value ())::!acc); key := ""; state := `Comma_or_end
+          acc := ((!key, value ())::!acc);  state := `Comma_or_end
         | `Comma_or_end -> begin
             match reader () with
             | OE -> state := `End
