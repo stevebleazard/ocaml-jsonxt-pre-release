@@ -188,7 +188,7 @@ module type Parser = sig
 
 end
 
-module Make (Compliance : Compliance.S) : Parser
+module Make (Compliance : Compliance.S) : Parser 
   with module Compliance := Compliance
 = struct
 
@@ -237,22 +237,22 @@ rule json_value =
   | ":"
     { COLON }
   | "-" inifinity
-    { Compliant.lex_number NEGINFINITY }
+    { Compliance.lex_number NEGINFINITY }
   | inifinity
-    { Compliant.lex_number INFINITY }
+    { Compliance.lex_number INFINITY }
   | "+" inifinity
-    { Compliant.lex_number INFINITY }
+    { Compliance.lex_number INFINITY }
   | nan
-    { Compliant.lex_number NAN }
+    { Compliance.lex_number NAN }
   | integer
     {
       match string2num (Lexing.lexeme lexbuf) with
-      | INT _ as tok -> Compliant.lex_integer tok
-      | LARGEINT _ as tok -> Compliant.lex_largeint tok
+      | INT _ as tok -> Compliance.lex_integer tok
+      | LARGEINT _ as tok -> Compliance.lex_largeint tok
       | tok -> tok
     }
   | fp
-    { Compliant.lex_number (FLOAT (float_of_string (Lexing.lexeme lexbuf))) }
+    { Compliance.lex_number (FLOAT (float_of_string (Lexing.lexeme lexbuf))) }
   | double_quote double_quote
     { STRING "" }
   | double_quote characters double_quote
