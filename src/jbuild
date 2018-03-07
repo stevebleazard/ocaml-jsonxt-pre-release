@@ -13,7 +13,7 @@
 
 (executables
  ((names (test_parser test_unescape))
-  (libraries (core core_bench))))
+  (libraries (yojson core core_bench))))
 
 ;(executable
 ; ((name test_parser)

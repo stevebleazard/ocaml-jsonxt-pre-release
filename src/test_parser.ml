@@ -99,7 +99,7 @@ module IO = struct
 end
 
 module New_basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
-module New_basic_parser = Parser_monad.Make(Json_parse_types.Basic) (IO)
+module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
 
@@ -119,35 +119,13 @@ let parsit2 filename contents =
 let testit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  let open IO in
-  let reader () = return (New_basic_lexxer.read lexbuf) in
-  New_basic_parser2.lax ~reader
-  >>= function
-    | Ok None -> ()
-    | Ok (Some json) -> ()
-    | Error s ->
-      let loc = Lexxer.error_pos_msg lexbuf in
-        printf "%s at %s\n" s loc
-
-let testit_spacetime filename contents =
-  let open IO in
-  let rec loop i =
-    if i <= 0 then Ok None
-    else begin
-      let lexbuf = Lexing.from_string contents in
-      lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-      let reader () = return (New_basic_lexxer.read lexbuf) in
-      New_basic_parser.lax ~reader
-      >>= function
-        | Ok None -> loop (i - 1)
-        | Ok (Some json) -> loop (i - 1)
-        | Error s ->
-          let loc = Lexxer.error_pos_msg lexbuf in
-          printf "%s at %s\n" s loc;
-          loop (i - 1)
-    end
-  in
-    loop 100
+  let reader () = New_basic_lexxer.read lexbuf in
+  match New_basic_parser2.lax ~reader with
+  | Ok None -> ()
+  | Ok (Some json) -> ()
+  | Error s ->
+    let loc = Lexxer.error_pos_msg lexbuf in
+      printf "%s at %s\n" s loc
 
 (*
 let () = 
@@ -158,7 +136,6 @@ let () =
     let contents = load_file filename in
       parsit2 filename contents
     (*
-      ignore (testit_spacetime filename contents)
       parsit "../test.json"
       lexit "../test.json"
     *)
@@ -169,15 +146,27 @@ let () =
 open Core
 open Core_bench.Std
 
+module Yj = struct
+  open Yojson
+
+  let read contents = Raw.from_string contents
+
+  let benchit () = 
+    let contents = load_file "../test.json.10000" in
+    (fun () -> ignore (read contents))
+end
+  
 let benchit filename = 
   let contents = load_file filename in
-  (fun () -> testit2 filename contents)
-  
+  (fun () -> ignore(testit2 filename contents))
+
+let testxt = benchit "../test.json.10000"
+let testyj = Yj.benchit ()
 
 let () = Command.run (Bench.make_command [
-  let test = benchit "../test.json.10000" in
-  Bench.Test.create ~name:"parser" test
-])
+    Bench.Test.create ~name:"parser" testxt
+  ; Bench.Test.create ~name:"yojson" testyj 
+  ])
 
 (*
 *)
