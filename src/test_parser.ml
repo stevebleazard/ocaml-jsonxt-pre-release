@@ -156,15 +156,37 @@ module Yj = struct
     (fun () -> ignore (read contents))
 end
   
+let lex_and_discard reader =
+  let rec loop () =
+    match reader () with
+    | Tokens.EOF -> ()
+    | LEX_ERROR err -> Printf.printf "COMPLIANCE_ERROR: %s\n" err; loop ()
+    | _ -> loop ()
+  in
+  loop ()
+
+let testit_lex filename contents =
+  let lexbuf = Lexing.from_string contents in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let reader () = New_basic_lexxer.read lexbuf in
+    lex_and_discard reader
+
+
 let benchit filename = 
   let contents = load_file filename in
   (fun () -> ignore(testit2 filename contents))
 
+let benchit_lex filename = 
+  let contents = load_file filename in
+  (fun () -> ignore(testit_lex filename contents))
+
 let testxt = benchit "../test.json.10000"
+let testxt_lex = benchit_lex "../test.json.10000"
 let testyj = Yj.benchit "../test.json.10000"
 
 let () = Command.run (Bench.make_command [
-    Bench.Test.create ~name:"parser" testxt
+    Bench.Test.create ~name:"lexxer" testxt_lex
+  ; Bench.Test.create ~name:"parser" testxt
   ; Bench.Test.create ~name:"yojson" testyj
   ])
 
