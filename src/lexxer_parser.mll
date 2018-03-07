@@ -296,6 +296,26 @@ and read_array entries =
     { Compliance.list entries  }
 
 (*
+    and array_value_start () = begin
+      let tok = reader () in
+      match tok with
+      | AE -> Compliance.list []
+      | _ -> array_values_start tok []
+    end
+    and array_values_start tok acc = begin
+      let v = token_value tok in
+      match reader () with
+      | AE -> Compliance.list (List.rev (v::acc))
+      | COMMA -> array_values (v::acc)
+      | tok -> raise (Parse_error (token_error tok))
+    end
+    and array_values acc = begin
+      let v = value () in
+      match reader () with
+      | AE -> Compliance.list (List.rev (v::acc))
+      | COMMA -> array_values (v::acc)
+      | tok -> raise (Parse_error (token_error tok))
+    end
     { AE }
     { COMMA }
     { COLON }
