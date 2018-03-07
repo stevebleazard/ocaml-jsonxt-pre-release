@@ -35,8 +35,8 @@
   let parse_error err = raise (Parse_error err)
 
   let string2num s =
-    try (INT (int_of_string s)) with
-    | Failure _ -> LARGEINT s
+    try (`Int (int_of_string s)) with
+    | Failure _ -> `Largeint s
   
   let update_pos lexbuf =
     let pos = lexbuf.lex_start_p in
@@ -176,19 +176,19 @@
     if !j <> l then Bytes.unsafe_to_string (Bytes.sub s' 0 !j) else s
 
 module type Parser = sig
-  module Compliance : Compliance.S
+  module Compliance : Json_lexxer_types.Compliance.S
 
   val lax
-    :  lexbuf : Lexing.lexbuf
-    -> (Compliance.json option, string) result
+    :  Lexing.lexbuf
+    -> (Json_lexxer_types.token option, string) result
 
   val ecma404
-    :  lexbuf : Lexing.lexbuf
-    -> (Compliance.json option, string) result
+    :  Lexing.lexbuf
+    -> (Json_lexxer_types.token option, string) result
 
 end
 
-module Make (Compliance : Compliance.S) : Parser 
+module Make (Compliance : Json_lexxer_types.Compliance.S) : Parser 
   with module Compliance := Compliance
 = struct
 
@@ -219,46 +219,46 @@ let inifinity = ( "inf" | "Infinity" )
 rule json_value =
   parse
   | "true"
-    { BOOL true }
+    { `Bool true }
   | "false"
-    { BOOL false }
+    { `Bool false }
   | "null"
-    { NULL }
+    { `Null }
   | "{"
-    { OS }
+    { read_object [] lexbuf }
   | "}"
-    { OE }
+    { lex_error "unexpected '}'" }
   | "["
-    { AS }
+    { read_array [] lexbuf }
   | "]"
-    { AE }
+    { lex_error "unexpected ']'" }
   | ","
-    { COMMA }
+    { lex_error "unexpected ','" }
   | ":"
-    { COLON }
+    { lex_error "unexpected ':'" }
   | "-" inifinity
-    { Compliance.lex_number NEGINFINITY }
+    { Compliance.lex_number `Neginfinity }
   | inifinity
-    { Compliance.lex_number INFINITY }
+    { Compliance.lex_number `Infinity }
   | "+" inifinity
-    { Compliance.lex_number INFINITY }
+    { Compliance.lex_number `Infinity }
   | nan
-    { Compliance.lex_number NAN }
+    { Compliance.lex_number `Nan }
   | integer
     {
       match string2num (Lexing.lexeme lexbuf) with
-      | INT _ as tok -> Compliance.lex_integer tok
-      | LARGEINT _ as tok -> Compliance.lex_largeint tok
+      | `Int _ as tok -> Compliance.lex_integer tok
+      | `Largeint _ as tok -> Compliance.lex_largeint tok
       | tok -> tok
     }
   | fp
-    { Compliance.lex_number (FLOAT (float_of_string (Lexing.lexeme lexbuf))) }
+    { Compliance.lex_number (`Float (float_of_string (Lexing.lexeme lexbuf))) }
   | double_quote double_quote
-    { STRING "" }
+    { `String "" }
   | double_quote characters double_quote
-    { STRING (unescape_string (Lexing.lexeme lexbuf)) }
+    { `String (unescape_string (Lexing.lexeme lexbuf)) }
   | eof
-    { EOF }
+    { `Eof }
   | whitespace
     { json_value lexbuf }
   | newline
@@ -266,7 +266,20 @@ rule json_value =
   | _
     { lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
 
+and read_object pairs =
+  parse
+  | "}"
+    { `Assoc pairs  }
+
+and read_array entries =
+  parse
+  | "]"
+    { `List entries  }
+
 (*
+    { AE }
+    { COMMA }
+    { COLON }
 *)
 
 {

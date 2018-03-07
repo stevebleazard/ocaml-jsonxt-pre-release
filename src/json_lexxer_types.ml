@@ -1,23 +1,43 @@
-open Tokens
-
-type json =
+type token =
     [
     | `Null
     | `Bool of bool
     | `Int of int
-    | `Largeint of int
+    | `Largeint of string
     | `Intlit of string
     | `Float of float
     | `Floatlit of string
     | `String of string
     | `Stringlit of string
-    | `Assoc of (string * json) list
-    | `List of json list
+    | `Assoc of (string * token) list
+    | `List of token list
     | `Compliance_error of string
-    | `Tuple of json list
-    | `Variant of (string * json option)
+    | `Tuple of token list
+    | `Variant of (string * token option)
+    | `Infinity
+    | `Neginfinity
+    | `Nan
+    | `Eof
     ]
-type t = json
+
+module Compliance = struct
+  module type S = sig
+    type json
+
+    val lex_number : token -> token
+    val lex_integer : token -> token
+    val lex_largeint : token -> token
+
+    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
+    val integer : int -> json
+    val null : json
+    val string : string -> json
+    val bool : bool -> json
+    val assoc : (string * json) list -> json
+    val list : json list -> json
+  end
+end
+
 
 module Extended = struct
   type json =
@@ -198,7 +218,7 @@ module Stream = struct
       | `Name of string
       | `Value of json
       | `Infinity
-      | `Neg_infinity
+      | `Neginfinity
       | `Nan
       | `Compliance_error of string
       ]
