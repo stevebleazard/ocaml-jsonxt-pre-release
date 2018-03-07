@@ -103,6 +103,8 @@ module New_new_basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
 module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
+module New_basic_parser2_fsm = Parser_basic_fsm.Make(Json_parse_types.Basic)
+module New_basic_parser2_fsm1 = Parser_basic_fsm1.Make(Json_parse_types.Basic)
 
 (* module Lexxer_parser_basic = Lexxer_parser.Make(Json_lexxer_types.Basic) *)
 
@@ -110,8 +112,21 @@ let parsit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
-  let reader () = return (New_basic_lexxer.read lexbuf) in
-  New_basic_parser2.lax ~reader
+  let reader () = return (New_new_basic_lexxer.read lexbuf) in
+  New_basic_parser2_nola.lax ~reader
+  >>= function
+    | Ok None -> Printf.printf "(*None*)\n"
+    | Ok (Some json) -> print_json_value json; printf "\n"
+    | Error s ->
+      let loc = Lexxer.error_pos_msg lexbuf in
+      printf "%s at %s\n" s loc
+
+let parsit3 filename contents =
+  let lexbuf = Lexing.from_string contents in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let open IO in
+  let reader () = return (New_new_basic_lexxer.read lexbuf) in
+  New_basic_parser2_fsm1.lax ~reader
   >>= function
     | Ok None -> Printf.printf "(*None*)\n"
     | Ok (Some json) -> print_json_value json; printf "\n"
@@ -130,6 +145,17 @@ let testit2 filename contents =
     let loc = Lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
+let testit3 filename contents =
+  let lexbuf = Lexing.from_string contents in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let reader () = New_new_basic_lexxer.read lexbuf in
+  match New_basic_parser2_fsm1.lax ~reader with
+  | Ok None -> ()
+  | Ok (Some json) -> ()
+  | Error s ->
+    let loc = Lexxer.error_pos_msg lexbuf in
+      printf "%s at %s\n" s loc
+
 (*
 let () = 
   if Array.length Sys.argv < 2 then
@@ -137,8 +163,9 @@ let () =
   else
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
-      parsit2 filename contents
+      parsit3 filename contents
     (*
+      parsit2 filename contents
       parsit "../test.json"
       lexit "../test.json"
     *)
@@ -179,17 +206,23 @@ let benchit filename =
   let contents = load_file filename in
   (fun () -> ignore(testit2 filename contents))
 
+let benchit2 filename = 
+  let contents = load_file filename in
+  (fun () -> ignore(testit3 filename contents))
+
 let benchit_lex filename = 
   let contents = load_file filename in
   (fun () -> ignore(testit_lex filename contents))
 
 let testxt = benchit "../test.json.10000"
+let testxt2 = benchit2 "../test.json.10000"
 let testxt_lex = benchit_lex "../test.json.10000"
 let testyj = Yj.benchit "../test.json.10000"
 
 let () = Command.run (Bench.make_command [
     Bench.Test.create ~name:"lexxer" testxt_lex
   ; Bench.Test.create ~name:"parser" testxt
+  ; Bench.Test.create ~name:"parserfsm" testxt2
   ; Bench.Test.create ~name:"yojson" testyj
   ])
 
