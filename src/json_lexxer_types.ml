@@ -9,11 +9,11 @@ type token =
     | `Floatlit of string
     | `String of string
     | `Stringlit of string
-    | `Assoc of (string * token) list
-    | `List of token list
+    (* | `Assoc of (string * token) list *)
+    (* | `List of token list *)
     | `Compliance_error of string
-    | `Tuple of token list
-    | `Variant of (string * token option)
+    (* | `Tuple of token list *)
+    (* | `Variant of (string * token option) *)
     | `Infinity
     | `Neginfinity
     | `Nan
@@ -68,7 +68,7 @@ module Extended = struct
     | FP_infinite -> `Infinity
     | FP_nan -> `Nan
     end
-  | _ as token ->  token
+  | token -> token
 
 
   let integer i = `Int i

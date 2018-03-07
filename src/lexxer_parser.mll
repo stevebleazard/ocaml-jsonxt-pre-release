@@ -180,17 +180,41 @@ module type Parser = sig
 
   val lax
     :  Lexing.lexbuf
-    -> (Json_lexxer_types.token option, string) result
+    -> (Compliance.json option, string) result
 
   val ecma404
     :  Lexing.lexbuf
-    -> (Json_lexxer_types.token option, string) result
+    -> (Compliance.json option, string) result
 
 end
 
 module Make (Compliance : Json_lexxer_types.Compliance.S) : Parser 
   with module Compliance := Compliance
 = struct
+
+  let lex_number n = 
+    match Compliance.lex_number n with
+    | `Infinity | `Neginfinity | `Nan | `Float _ as v ->
+      Compliance.number v
+    | `Compliance_error err -> lex_error err
+    | _ -> lex_error "unexpected token in lex_number"
+
+  let lex_integer n = 
+    match string2num n with
+    | `Int _ as tok -> begin
+       match Compliance.lex_integer tok with
+       | `Int  value -> Compliance.integer value
+       | `Compliance_error err -> lex_error err
+       | _ -> lex_error "unexpected token in lex_integer"
+       end
+    | `Largeint _ as tok -> begin
+       match Compliance.lex_largeint tok with
+       | `Infinity | `Neginfinity | `Nan | `Float _ as v ->
+         Compliance.number v
+       | `Compliance_error err -> lex_error err
+       | _ -> lex_error "unexpected token in lex_integer"
+       end
+    | _ -> lex_error "unexpected token in lex_integer"
 
 }
 
@@ -219,11 +243,11 @@ let inifinity = ( "inf" | "Infinity" )
 rule json_value =
   parse
   | "true"
-    { `Bool true }
+    { Compliance.bool true }
   | "false"
-    { `Bool false }
+    { Compliance.bool false }
   | "null"
-    { `Null }
+    { Compliance.null }
   | "{"
     { read_object [] lexbuf }
   | "}"
@@ -237,22 +261,17 @@ rule json_value =
   | ":"
     { lex_error "unexpected ':'" }
   | "-" inifinity
-    { Compliance.lex_number `Neginfinity }
+    { lex_number `Neginfinity }
   | inifinity
-    { Compliance.lex_number `Infinity }
+    { lex_number `Infinity }
   | "+" inifinity
-    { Compliance.lex_number `Infinity }
+    { lex_number `Infinity }
   | nan
-    { Compliance.lex_number `Nan }
+    { lex_number `Nan }
   | integer
-    {
-      match string2num (Lexing.lexeme lexbuf) with
-      | `Int _ as tok -> Compliance.lex_integer tok
-      | `Largeint _ as tok -> Compliance.lex_largeint tok
-      | tok -> tok
-    }
+    { lex_integer (Lexing.lexeme lexbuf) }
   | fp
-    { Compliance.lex_number (`Float (float_of_string (Lexing.lexeme lexbuf))) }
+    { lex_number (`Float (float_of_string (Lexing.lexeme lexbuf))) }
   | double_quote double_quote
     { `String "" }
   | double_quote characters double_quote
