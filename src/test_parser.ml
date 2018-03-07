@@ -103,7 +103,7 @@ module New_new_basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
 module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
-module New_basic_parser2_fsm = Parser_basic_fsm.Make(Json_parse_types.Basic)
+(* module New_basic_parser2_fsm = Parser_basic_fsm.Make(Json_parse_types.Basic) *)
 module New_basic_parser2_fsm1 = Parser_basic_fsm1.Make(Json_parse_types.Basic)
 
 (* module Lexxer_parser_basic = Lexxer_parser.Make(Json_lexxer_types.Basic) *)
@@ -222,7 +222,7 @@ let testyj = Yj.benchit "../test.json.10000"
 let () = Command.run (Bench.make_command [
     Bench.Test.create ~name:"lexxer" testxt_lex
   ; Bench.Test.create ~name:"parser" testxt
-  ; Bench.Test.create ~name:"parserfsm" testxt2
+  (* ; Bench.Test.create ~name:"parserfsm" testxt2 *)
   ; Bench.Test.create ~name:"yojson" testyj
   ])
 
