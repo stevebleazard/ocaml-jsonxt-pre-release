@@ -151,8 +151,8 @@ module Yj = struct
 
   let read contents = Raw.from_string contents
 
-  let benchit () = 
-    let contents = load_file "../test.json.10000" in
+  let benchit filename = 
+    let contents = load_file filename in
     (fun () -> ignore (read contents))
 end
   
@@ -161,11 +161,11 @@ let benchit filename =
   (fun () -> ignore(testit2 filename contents))
 
 let testxt = benchit "../test.json.10000"
-let testyj = Yj.benchit ()
+let testyj = Yj.benchit "../test.json.10000"
 
 let () = Command.run (Bench.make_command [
     Bench.Test.create ~name:"parser" testxt
-  ; Bench.Test.create ~name:"yojson" testyj 
+  ; Bench.Test.create ~name:"yojson" testyj
   ])
 
 (*
