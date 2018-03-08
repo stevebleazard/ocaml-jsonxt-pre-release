@@ -1,3 +1,5 @@
+open Tokens
+
 let load_file f =
   let ic = open_in f in
   let n = in_channel_length ic in
@@ -6,9 +8,9 @@ let load_file f =
   close_in ic;
   (s)
 
-let lex_and_print lexbuf =
+let lex_and_print read lexbuf =
   let rec loop () =
-    match Lexxer.read lexbuf with
+    match read lexbuf with
     | FLOAT f ->  Printf.printf "Float [%g]\n" f; loop ()
     | INT i ->  Printf.printf "Int [%d]\n" i; loop ()
     | LARGEINT s ->  Printf.printf "Largeint [%s]\n" s; loop ()
@@ -63,9 +65,9 @@ module IO = struct
   let (>>=) a f = f a
 end
 
-module New_new_basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
+module Basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
 module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
-module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
+module Basic_parser = Parser.Make(Json_parse_types.Basic)
 
 (* module Lexxer_parser_basic = Lexxer_parser.Make(Json_lexxer_types.Basic) *)
 
@@ -73,24 +75,24 @@ let parsit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
-  let reader () = return (New_new_basic_lexxer.read lexbuf) in
-  New_basic_parser2_nola.lax ~reader
+  let reader () = return (Basic_lexxer.read lexbuf) in
+  Basic_parser.lax ~reader
   >>= function
     | Ok None -> Printf.printf "(*None*)\n"
     | Ok (Some json) -> print_json_value json; printf "\n"
     | Error s ->
-      let loc = Lexxer.error_pos_msg lexbuf in
+      let loc = Compliant_lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
 let testit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  let reader () = New_new_basic_lexxer.read lexbuf in
-  match New_basic_parser2_nola.lax ~reader with
+  let reader () = Basic_lexxer.read lexbuf in
+  match Basic_parser.lax ~reader with
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->
-    let loc = Lexxer.error_pos_msg lexbuf in
+    let loc = Compliant_lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
 let test_run n testf =
@@ -150,7 +152,7 @@ let lex_and_discard reader =
 let testit_lex filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  let reader () = New_new_basic_lexxer.read lexbuf in
+  let reader () = Basic_lexxer.read lexbuf in
     lex_and_discard reader
 
 

@@ -1,6 +1,5 @@
 (jbuild_version 1)
 
-(ocamllex (lexxer))
 (ocamllex (compliant_lexxer))
 
 ;(menhir
