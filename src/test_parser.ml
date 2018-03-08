@@ -124,6 +124,7 @@ module Yj = struct
 end
 
 (*
+*)
 let () = 
   if Array.length Sys.argv < 2 then
     printf "expected filename\n"
@@ -131,17 +132,17 @@ let () =
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
     (* let testf = Yj.testit filename contents in *)
-    let testf = (fun () -> testit filename contents) in
-      test_run 100 testf
-    (*
+    (* let testf = (fun () -> testit filename contents) in *)
       parsit filename contents
+    (*
+      test_run 100 testf
       parsit "../test.json"
       lexit "../test.json"
     *)
-*)
 
 (* module Json_basic = Jsonxt_monad.Make(Json_parse_types.Basic) *)
 
+(*
 open Core
 open Core_bench.Std
 
@@ -186,5 +187,4 @@ let () = Command.run (Bench.make_command [
   ; Bench.Test.create ~name:"yojson" testyj
   ])
 
-(*
 *)
