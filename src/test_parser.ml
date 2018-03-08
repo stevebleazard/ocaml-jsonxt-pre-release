@@ -79,6 +79,12 @@ let parsit filename contents =
       let loc = Lexxer_utils.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
+let parsit2 _filename contents =
+  match Json_basic.json_of_string contents with
+  | Ok None -> Printf.printf "(*None*)\n"
+  | Ok (Some json) -> print_json_value json; printf "\n"
+  | Error s -> printf "%s\n" s
+
 let testit filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
@@ -133,7 +139,7 @@ let () =
     let contents = load_file filename in
     (* let testf = Yj.testit filename contents in *)
     (* let testf = (fun () -> testit filename contents) in *)
-      parsit filename contents
+      parsit2 filename contents
     (*
       test_run 100 testf
       parsit "../test.json"
