@@ -129,6 +129,7 @@ module Make (Compliance : Compliance.S) : Parser
     try Ok (Some (json_value reader)) with
     | Parse_error `Eof -> Ok None
     | Parse_error (`Syntax_error err) -> Error err
+    | Lexxer_utils.Lex_error err -> Error err
 
   let ecma404 = lax
 end
