@@ -29,9 +29,6 @@ let lex_and_print read lexbuf =
     | EOF -> Printf.printf "EOF\n"
     | COMPLIANCE_ERROR err -> Printf.printf "COMPLIANCE_ERROR: %s\n" err; loop ()
     | LEX_ERROR err -> Printf.printf "COMPLIANCE_ERROR: %s\n" err; loop ()
-    (*
-    | _ ->  loop ()
-    *)
   in
     loop ()
 
@@ -66,12 +63,10 @@ module IO = struct
 end
 
 module Basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
-module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
+module Basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
 module Basic_parser = Parser.Make(Json_parse_types.Basic)
 
-(* module Lexxer_parser_basic = Lexxer_parser.Make(Json_lexxer_types.Basic) *)
-
-let parsit2 filename contents =
+let parsit filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
@@ -84,11 +79,22 @@ let parsit2 filename contents =
       let loc = Compliant_lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
-let testit2 filename contents =
+let testit filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let reader () = Basic_lexxer.read lexbuf in
   match Basic_parser.lax ~reader with
+  | Ok None -> ()
+  | Ok (Some json) -> ()
+  | Error s ->
+    let loc = Compliant_lexxer.error_pos_msg lexbuf in
+      printf "%s at %s\n" s loc
+
+let testit2 filename contents =
+  let lexbuf = Lexing.from_string contents in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  let reader () = Basic_lexxer.read lexbuf in
+  match Basic_parser_monad.lax ~reader with
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->
@@ -125,11 +131,10 @@ let () =
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
     (* let testf = Yj.testit filename contents in *)
-    let testf = (fun () -> testit2 filename contents) in
+    let testf = (fun () -> testit filename contents) in
       test_run 100 testf
     (*
-      parsit2 filename contents
-      parsit3 filename contents
+      parsit filename contents
       parsit "../test.json"
       lexit "../test.json"
     *)
@@ -158,19 +163,26 @@ let testit_lex filename contents =
 
 let benchit filename = 
   let contents = load_file filename in
+  (fun () -> ignore(testit filename contents))
+
+let benchit2 filename = 
+  let contents = load_file filename in
   (fun () -> ignore(testit2 filename contents))
 
 let benchit_lex filename = 
   let contents = load_file filename in
   (fun () -> ignore(testit_lex filename contents))
 
-let testxt = benchit "../test.json.10000"
-let testxt_lex = benchit_lex "../test.json.10000"
-let testyj = Yj.benchit "../test.json.10000"
+let filename = "../test.json.10000"
+let testxt = benchit filename
+let testxtm = benchit2 filename
+let testxt_lex = benchit_lex filename
+let testyj = Yj.benchit filename
 
 let () = Command.run (Bench.make_command [
     Bench.Test.create ~name:"lexxer" testxt_lex
   ; Bench.Test.create ~name:"parser" testxt
+  (* ; Bench.Test.create ~name:"parserm" testxtm *)
   ; Bench.Test.create ~name:"yojson" testyj
   ])
 
