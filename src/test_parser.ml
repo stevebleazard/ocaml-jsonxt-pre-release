@@ -81,8 +81,7 @@ let parsit filename contents =
 
 let parsit2 _filename contents =
   match Json_basic.json_of_string contents with
-  | Ok None -> Printf.printf "(*None*)\n"
-  | Ok (Some json) -> print_json_value json; printf "\n"
+  | Ok json -> print_json_value json; printf "\n"
   | Error s -> printf "%s\n" s
 
 let testit filename contents =
