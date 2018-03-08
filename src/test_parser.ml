@@ -76,7 +76,7 @@ let parsit filename contents =
     | Ok None -> Printf.printf "(*None*)\n"
     | Ok (Some json) -> print_json_value json; printf "\n"
     | Error s ->
-      let loc = Compliant_lexxer.error_pos_msg lexbuf in
+      let loc = Lexxer_utils.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
 let testit filename contents =
@@ -87,7 +87,7 @@ let testit filename contents =
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->
-    let loc = Compliant_lexxer.error_pos_msg lexbuf in
+    let loc = Lexxer_utils.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
 let testit2 filename contents =
@@ -98,7 +98,7 @@ let testit2 filename contents =
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->
-    let loc = Compliant_lexxer.error_pos_msg lexbuf in
+    let loc = Lexxer_utils.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
 let test_run n testf =
