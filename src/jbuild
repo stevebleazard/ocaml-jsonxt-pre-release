@@ -1,20 +1,19 @@
 (jbuild_version 1)
 
 (ocamllex (lexxer))
-(ocamllex (lexxer_parser))
 (ocamllex (compliant_lexxer))
 
-(menhir
- ((flags (--only-tokens))
-   (modules (tokens))))
+;(menhir
+; ((flags (--only-tokens))
+;   (modules (tokens))))
 
-(menhir
- ((merge_into parser)
-  (flags (--external-tokens Tokens))
-   (modules (tokens parser))))
+;(menhir
+; ((merge_into parser)
+;  (flags (--external-tokens Tokens))
+;   (modules (tokens parser))))
 
 (executables
- ((names (test_parser test_unescape))
+ ((names (test_parser))
   (libraries (yojson core core_bench))))
 
 ;(executable

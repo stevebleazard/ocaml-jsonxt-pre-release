@@ -56,41 +56,6 @@ let print_json_value json =
   in
   fmt json
 
-module Basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
-module Basic_parser = Parser.Make(Json_parse_types.Basic)
-
-let lexit filename contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  lex_and_print lexbuf
-
-let parsit filename contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  match Basic_parser.lax Basic_lexxer.read lexbuf with
-  | Error s -> begin
-    let loc = Lexxer.error_pos_msg lexbuf in
-    match Basic_lexxer.lex_error () with
-    | None -> printf "%s at %s\n" s loc
-    | Some e -> printf "%s: %s at %s\n" s e loc
-    end
-  | Ok json ->
-    match json with
-    | None -> printf "(*None*)\n";
-    | Some json ->  print_json_value json; printf "\n"
-
-let testit filename contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  match Basic_parser.lax Basic_lexxer.read lexbuf with
-  | Error s -> begin
-    match Basic_lexxer.lex_error () with
-    | None -> printf "%s\n" s
-    | Some e -> printf "%s: %s\n" s e
-    end
-  | Ok _ -> ()
-
-
 module IO = struct
   type 'a t = 'a
   
@@ -98,13 +63,9 @@ module IO = struct
   let (>>=) a f = f a
 end
 
-module New_basic_lexxer = Compliant_lex.Make_lexxer(Json_parse_types.Basic)
 module New_new_basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
 module New_basic_parser_monad = Parser_monad.Make(Json_parse_types.Basic) (IO)
-module New_basic_parser2 = Parser_basic.Make(Json_parse_types.Basic)
 module New_basic_parser2_nola = Parser_basic_nola.Make(Json_parse_types.Basic)
-(* module New_basic_parser2_fsm = Parser_basic_fsm.Make(Json_parse_types.Basic) *)
-module New_basic_parser2_fsm1 = Parser_basic_fsm1.Make(Json_parse_types.Basic)
 
 (* module Lexxer_parser_basic = Lexxer_parser.Make(Json_lexxer_types.Basic) *)
 
@@ -114,19 +75,6 @@ let parsit2 filename contents =
   let open IO in
   let reader () = return (New_new_basic_lexxer.read lexbuf) in
   New_basic_parser2_nola.lax ~reader
-  >>= function
-    | Ok None -> Printf.printf "(*None*)\n"
-    | Ok (Some json) -> print_json_value json; printf "\n"
-    | Error s ->
-      let loc = Lexxer.error_pos_msg lexbuf in
-      printf "%s at %s\n" s loc
-
-let parsit3 filename contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  let open IO in
-  let reader () = return (New_new_basic_lexxer.read lexbuf) in
-  New_basic_parser2_fsm1.lax ~reader
   >>= function
     | Ok None -> Printf.printf "(*None*)\n"
     | Ok (Some json) -> print_json_value json; printf "\n"
@@ -145,16 +93,27 @@ let testit2 filename contents =
     let loc = Lexxer.error_pos_msg lexbuf in
       printf "%s at %s\n" s loc
 
-let testit3 filename contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  let reader () = New_new_basic_lexxer.read lexbuf in
-  match New_basic_parser2_fsm1.lax ~reader with
-  | Ok None -> ()
-  | Ok (Some json) -> ()
-  | Error s ->
-    let loc = Lexxer.error_pos_msg lexbuf in
-      printf "%s at %s\n" s loc
+let test_run n testf =
+  for i = 1 to n do
+    testf () |> ignore
+  done
+
+module Yj = struct
+  open Yojson
+
+  let read contents = Raw.from_string contents
+
+  let benchit filename = 
+    let contents = load_file filename in
+    (fun () -> ignore (read contents))
+
+  let testit _filename contents =
+    Printf.printf "%s\n%!" _filename;
+    (fun () -> ignore (read contents))
+
+  let dumpit _filename contents =
+    (fun () -> read contents |> Raw.to_string |> Printf.printf "%s\n")
+end
 
 (*
 let () = 
@@ -163,9 +122,12 @@ let () =
   else
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
-      parsit3 filename contents
+    (* let testf = Yj.testit filename contents in *)
+    let testf = (fun () -> testit2 filename contents) in
+      test_run 100 testf
     (*
       parsit2 filename contents
+      parsit3 filename contents
       parsit "../test.json"
       lexit "../test.json"
     *)
@@ -176,16 +138,6 @@ let () =
 open Core
 open Core_bench.Std
 
-module Yj = struct
-  open Yojson
-
-  let read contents = Raw.from_string contents
-
-  let benchit filename = 
-    let contents = load_file filename in
-    (fun () -> ignore (read contents))
-end
-  
 let lex_and_discard reader =
   let rec loop () =
     match reader () with
@@ -198,7 +150,7 @@ let lex_and_discard reader =
 let testit_lex filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  let reader () = New_basic_lexxer.read lexbuf in
+  let reader () = New_new_basic_lexxer.read lexbuf in
     lex_and_discard reader
 
 
@@ -206,23 +158,17 @@ let benchit filename =
   let contents = load_file filename in
   (fun () -> ignore(testit2 filename contents))
 
-let benchit2 filename = 
-  let contents = load_file filename in
-  (fun () -> ignore(testit3 filename contents))
-
 let benchit_lex filename = 
   let contents = load_file filename in
   (fun () -> ignore(testit_lex filename contents))
 
 let testxt = benchit "../test.json.10000"
-let testxt2 = benchit2 "../test.json.10000"
 let testxt_lex = benchit_lex "../test.json.10000"
 let testyj = Yj.benchit "../test.json.10000"
 
 let () = Command.run (Bench.make_command [
     Bench.Test.create ~name:"lexxer" testxt_lex
   ; Bench.Test.create ~name:"parser" testxt
-  (* ; Bench.Test.create ~name:"parserfsm" testxt2 *)
   ; Bench.Test.create ~name:"yojson" testyj
   ])
 
