@@ -1,7 +1,5 @@
-open Lexing
-
-module Basic_lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
-module Basic_parser = Parser.Make(Json_parse_types.Basic)
+module Lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
+module Parser = Parser.Make(Json_parse_types.Basic)
 
 type json = Json.Basic.json
 type t = json
@@ -9,11 +7,11 @@ type t = json
 let json_of_string ?strict s =
   let parse =
     match strict with
-    | Some true -> Basic_parser.lax  (* CR sbleazard: fix *)
-    | _ -> Basic_parser.lax
+    | Some true -> Parser.lax  (* CR sbleazard: fix *)
+    | _ -> Parser.lax
   in
   let lexbuf = Lexing.from_string s in
-  let reader () = Basic_lexxer.read lexbuf in
+  let reader () = Lexxer.read lexbuf in
   match parse ~reader with
   | Ok None -> Error "empty string"
   | Ok (Some res) -> Ok res
