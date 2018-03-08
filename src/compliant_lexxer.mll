@@ -21,15 +21,13 @@
   end
   open Lexing
   open Tokens
-  open Lexxer_utils
 
 
-module type Lex = sig
-  val read : Lexing.lexbuf -> Tokens.token
-end
+  module type Lex = sig
+    val read : Lexing.lexbuf -> Tokens.token
+  end
 
-module Make (Compliance : Compliance.S) : Lex = struct
-
+  module Make (Compliance : Compliance.S) : Lex = struct
 }
 
 let digit_1_to_9 = ['1'-'9']
@@ -84,7 +82,7 @@ rule read =
     { Compliance.lex_number NAN }
   | integer
     {
-      match string2num (Lexing.lexeme lexbuf) with
+      match Lexxer_utils.string2num (Lexing.lexeme lexbuf) with
       | INT _ as tok -> Compliance.lex_integer tok
       | LARGEINT _ as tok -> Compliance.lex_largeint tok
       | tok -> tok
@@ -94,16 +92,16 @@ rule read =
   | double_quote double_quote
     { STRING "" }
   | double_quote characters double_quote
-    { STRING (unescape_string (Lexing.lexeme lexbuf)) }
+    { STRING (Lexxer_utils.unescape_string (Lexing.lexeme lexbuf)) }
   | eof
     { EOF }
   | whitespace
     { read lexbuf }
   | newline
-    { update_pos lexbuf; read lexbuf; }
+    { Lexxer_utils.update_pos lexbuf; read lexbuf; }
   | _
-    { lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
+    { Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
 
 {
-end
+  end
 }
