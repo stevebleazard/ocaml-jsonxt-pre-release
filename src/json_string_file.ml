@@ -1,8 +1,5 @@
-module Lexxer = Compliant_lexxer.Make(Json_parse_types.Basic)
-module Parser = Parser.Make(Json_parse_types.Basic)
-
 module type S = sig
-  module Lexxer : Complient_lexxer.Lex
+  module Lexxer : Compliant_lexxer.Lex
   module Parser : Parser.Parser
 
   type json
@@ -15,28 +12,36 @@ module type Json_string_file = sig
 
   val json_of_string : ?strict:bool -> string -> (json, string) result
   val json_of_string_exn : ?strict:bool -> string -> json
+  (*
   val json_of_file : ?strict:bool -> string -> (json, string) result
   val json_of_file_exn : ?strict:bool -> string -> json
+  *)
   val of_string : string -> json
 end
 
-module Make (Lexxer_parser : S) : Json_string_file with type json = Lex_parse.json = struct
+module Make (Lexxer_parser : S) : Json_string_file
+  with type json = Lexxer_parser.json
+= struct
   type json = Lexxer_parser.json
+  type t = json
 
-  let json_of_string ?strict s =
+  let read_json ~strict ~lexbuf =
     let parse =
       match strict with
       | Some true -> Lexxer_parser.Parser.lax  (* CR sbleazard: fix *)
       | _ -> Lexxer_parser.Parser.lax
     in
-    let lexbuf = Lexing.from_string s in
     let reader () = Lexxer_parser.Lexxer.read lexbuf in
     match parse ~reader with
     | Ok None -> Error "empty string"
     | Ok (Some res) -> Ok res
     | Error s ->
-      let loc = Lexxer_parser.Lexxer_utils.error_pos_msg lexbuf in
+      let loc = Lexxer_utils.error_pos_msg lexbuf in
         Error (Printf.sprintf "%s at %s\n" s loc)
+
+  let json_of_string ?strict s =
+    let lexbuf = Lexing.from_string s in
+    read_json ~strict ~lexbuf
 
   let json_of_string_exn ?strict s =
     match json_of_string ?strict s with
