@@ -80,7 +80,7 @@ let parsit filename contents =
       printf "%s at %s\n" s loc
 
 let parsit2 _filename contents =
-  match Json_basic.json_of_string contents with
+  match Basic.json_of_string contents with
   | Ok json -> print_json_value json; printf "\n"
   | Error s -> printf "%s\n" s
 
