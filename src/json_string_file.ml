@@ -1,37 +1,27 @@
-module type S = sig
-  module Lexxer : Compliant_lexxer.Lex
-  module Parser : Parser.Parser
-
-  type json
-
-end
-
 module type Json_string_file = sig
   type json
   type t = json
 
   val json_of_string : ?strict:bool -> string -> (json, string) result
   val json_of_string_exn : ?strict:bool -> string -> json
-  (*
   val json_of_file : ?strict:bool -> string -> (json, string) result
   val json_of_file_exn : ?strict:bool -> string -> json
-  *)
   val of_string : string -> json
 end
 
-module Make (Lexxer_parser : S) : Json_string_file
-  with type json = Lexxer_parser.json
+module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Json_string_file
+  with type json = Parser.Compliance.json
 = struct
-  type json = Lexxer_parser.json
+  type json = Parser.Compliance.json
   type t = json
 
   let read_json ~strict ~lexbuf =
     let parse =
       match strict with
-      | Some true -> Lexxer_parser.Parser.lax  (* CR sbleazard: fix *)
-      | _ -> Lexxer_parser.Parser.lax
+      | Some true -> Parser.lax  (* CR sbleazard: fix *)
+      | _ -> Parser.lax
     in
-    let reader () = Lexxer_parser.Lexxer.read lexbuf in
+    let reader () = Lexxer.read lexbuf in
     match parse ~reader with
     | Ok None -> Error "empty string"
     | Ok (Some res) -> Ok res
@@ -49,5 +39,18 @@ module Make (Lexxer_parser : S) : Json_string_file
     | Error s -> raise (Failure s)
 
   let of_string s = json_of_string_exn s 
+
+  let json_of_file ?strict filename =
+    try begin
+      let inc = open_in filename in
+      let lexbuf = Lexing.from_channel inc in
+      read_json ~strict ~lexbuf
+    end
+    with Sys_error err -> Error err
+
+  let json_of_file_exn ?strict filename =
+    match json_of_string ?strict filename with
+    | Ok res -> res
+    | Error s -> raise (Failure s)
 
 end

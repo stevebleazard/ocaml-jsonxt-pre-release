@@ -12,8 +12,10 @@ module type Parser = sig
 end
 
 module Make (Compliance : Compliance.S) : Parser
-  with module Compliance := Compliance
+  with module Compliance = Compliance
 = struct
+
+  module Compliance = Compliance
 
   exception Parse_error of [`Eof | `Syntax_error of string]
 
