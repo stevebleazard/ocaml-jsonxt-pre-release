@@ -14,7 +14,6 @@
 * Support for string and channel I/O as well as user defined I/O via a simple functor
 * Standard interfaces where appropriate including type `t` and `of_string` / `to_string`
   for strings
-* RFC 7158 compliant when in strict mode
-* RFC 8259 proposal supported as an option
-* RFC7464 JSON text sequences support including error recovery
-* Designed to be fast
+* RFC 8259 compliant when in strict mode
+* RFC 7464 JSON text sequences support including error recovery
+* Designed with performance in mind
