@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(executables
+ ((names (test_parser))
+  (libraries (yojson core core_bench jsonxt))))
+
+(alias
+ ((name DEFAULT)
+  (deps (test_parser.exe))))
