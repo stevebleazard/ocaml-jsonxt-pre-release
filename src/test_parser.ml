@@ -111,6 +111,7 @@ let test_run n testf =
     testf () |> ignore
   done
 
+(*
 module Yj = struct
   open Yojson
 
@@ -127,6 +128,7 @@ module Yj = struct
   let dumpit _filename contents =
     (fun () -> read contents |> Raw.to_string |> Printf.printf "%s\n")
 end
+*)
 
 (*
 *)
