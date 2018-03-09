@@ -1,4 +1,8 @@
+module Json_extended = Json_basic
+module Json_yojson = Json_yojson
 module Json_basic = Json_basic
+module Json_strict = Json_strict
+module Json = Json
 
 module Extended = struct
   include Json_extended
@@ -15,5 +19,3 @@ end
 module Strict = struct
   include Json_strict
 end
-
-module Json = Json
