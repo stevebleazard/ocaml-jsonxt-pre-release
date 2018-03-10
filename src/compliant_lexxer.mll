@@ -91,8 +91,8 @@ rule read =
     { Compliance.lex_number (FLOAT (float_of_string (Lexing.lexeme lexbuf))) }
   | double_quote double_quote
     { STRING "" }
-  | double_quote characters double_quote
-    { STRING (Lexxer_utils.unescape_string (Lexing.lexeme lexbuf)) }
+  | double_quote (characters as s) double_quote
+    { STRING (Lexxer_utils.unescape_string s) }
   | eof
     { EOF }
   | whitespace

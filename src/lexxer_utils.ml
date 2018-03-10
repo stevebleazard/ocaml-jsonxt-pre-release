@@ -85,7 +85,6 @@ let escaping_error msg s c off =
   in
     lex_error (msg ^ " at offset " ^ offs ^ cs ^ ": " ^ s)
 
-(* expects a double quoted string, the double quotes at the start and end are removed *)
 let unescape_string s =
   let l = String.length s in
   let s' = Bytes.create l in
@@ -94,7 +93,7 @@ let unescape_string s =
   let u2 = ref 0 in
   let state = ref `Char in
 
-  for i = 1 to l - 2 do
+  for i = 0 to l - 1 do
     match !state with
     | `Char -> begin
          match s.[i] with
