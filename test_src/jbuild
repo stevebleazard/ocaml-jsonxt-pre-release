@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
 (executables
- ((names (test_parser))
+ ((names (test_parser perf_test test_yojson))
   (libraries (yojson core core_bench jsonxt))))
 
 (alias

@@ -37,8 +37,8 @@ module IO = struct
 end
 
 let parsit contents =
-  match Jsonxt.Basic.json_of_string contents with
-  | Ok json -> print_json_value json; printf "\n"
+  match Jsonxt.Extended.json_of_string contents with
+  | Ok json -> let s = Writer.to_string json in printf "%s\n" s
   | Error s -> printf "%s\n" s
 
 let () = 
