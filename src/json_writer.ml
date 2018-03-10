@@ -15,7 +15,7 @@ let to_string json =
     | `Bool b -> add_string (string_of_bool b)
     | `Int i -> add_int i
     | `Intlit s -> add_quote_string s
-    | `Float f -> add_float f
+    | `Float f -> add_float f (* CR int in fp perf - add c helper *)
     | `Floatlit s -> add_quote_string s
     | `String s -> add_quote_string s
     | `Stringlit s -> add_quote_string s
@@ -23,7 +23,7 @@ let to_string json =
     | `Variant v -> add_char '<';  variant v; add_char '>'
   and json_assoc o =
     let sep = ref "" in List.iter (fun v -> add_string !sep; sep := ","; pair v ) o
-  and pair (k, v) = add_string k; add_char ':'; fmt v
+  and pair (k, v) = add_quote_string k; add_char ':'; fmt v
   and json_list l =
     let sep = ref "" in List.iter (fun v -> add_string !sep; sep := ","; fmt v ) l
   and variant (k, j) =
