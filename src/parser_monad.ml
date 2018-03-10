@@ -4,14 +4,9 @@ module type Parser = sig
   module IO : Io.IO
   module Compliance : Compliance.S
 
-  val lax
+  val decode
     :  reader : (unit -> Tokens.token IO.t)
     -> (Compliance.json option, string) result IO.t
-
-  val ecma404
-    :  reader : (unit -> Tokens.token IO.t)
-    -> (Compliance.json option, string) result IO.t
-
 end
 
 module Make (Compliance : Compliance.S) (IO : IO) : Parser
@@ -142,13 +137,12 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     in
     value ()
 
-  let lax ~reader = 
+  let decode ~reader = 
     json_value reader
     >>= function
       | Ok res -> return (Some res)
       | Error `Eof -> return None
       | Error (`Syntax_error err) -> fail err
 
-  let ecma404 = lax
 end
 

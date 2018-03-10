@@ -71,7 +71,7 @@ let parsit filename contents =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let open IO in
   let reader () = return (Basic_lexxer.read lexbuf) in
-  Basic_parser.lax ~reader
+  Basic_parser.decode ~reader
   >>= function
     | Ok None -> Printf.printf "(*None*)\n"
     | Ok (Some json) -> print_json_value json; printf "\n"
@@ -88,7 +88,7 @@ let testit filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let reader () = Basic_lexxer.read lexbuf in
-  match Basic_parser.lax ~reader with
+  match Basic_parser.decode ~reader with
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->
@@ -99,7 +99,7 @@ let testit2 filename contents =
   let lexbuf = Lexing.from_string contents in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let reader () = Basic_lexxer.read lexbuf in
-  match Basic_parser_monad.lax ~reader with
+  match Basic_parser_monad.decode ~reader with
   | Ok None -> ()
   | Ok (Some json) -> ()
   | Error s ->

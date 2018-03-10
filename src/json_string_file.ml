@@ -18,8 +18,8 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Json_str
   let read_json ~strict ~lexbuf =
     let parse =
       match strict with
-      | Some true -> Parser.lax  (* CR sbleazard: fix *)
-      | _ -> Parser.lax
+      | Some true -> Parser.decode  (* CR sbleazard: fix *)
+      | _ -> Parser.decode
     in
     let reader () = Lexxer.read lexbuf in
     match parse ~reader with
