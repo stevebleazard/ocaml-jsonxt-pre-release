@@ -40,6 +40,11 @@ let benchit contents =
 let contents = load_file "test.json.10000"
 let test = benchbuf 100
 let testxt = benchit contents
+(*
+let ctrl_lots = Bytes.make 100000 '\x1d'
+let testxt_esc () = Writer.to_string (`String ctrl_lots)
+; Bench.Test.create ~name:"escape" testxt_esc
+*)
 let testyj = Yj.benchit contents
 
 let () = Command.run (Bench.make_command [
