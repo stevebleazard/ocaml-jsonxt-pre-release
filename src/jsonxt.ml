@@ -3,4 +3,4 @@ module Extended = Extended
 module Yojson = Yojson
 module Basic = Basic
 module Strict = Strict
-module Floats = Floats
+module Floats = Floats (* CR remove once testing complete *)
