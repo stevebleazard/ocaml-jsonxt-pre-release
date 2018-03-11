@@ -31,7 +31,7 @@ CAMLprim value caml_string_of_float_fast_int(value arg)
     default:
       l = (long long int)d;
       if (d == (double)l)
-        res = caml_alloc_sprintf("%lld.", l);
+        res = caml_alloc_sprintf("%lld", l);
       else
         res = caml_alloc_sprintf("%.12g", d);
       break;
