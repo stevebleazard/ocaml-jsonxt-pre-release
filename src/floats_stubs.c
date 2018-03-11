@@ -10,6 +10,12 @@
 #include "caml/mlvalues.h"
 #include "caml/misc.h"
 
+/* The standard string_of_float is generally slower than it should be
+ * due to the need to add a '.' if missing. Also, in general printing
+ * floats via printf %g is expensive. Detect integers stored in floats
+ * and handle as ints. Also, for JSON, the decimal point must be followed
+ * by a digit if present.
+ */
 
 CAMLprim value caml_string_of_float_fast_int(value arg)
 {
