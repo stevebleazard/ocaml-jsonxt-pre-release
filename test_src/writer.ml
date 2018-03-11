@@ -29,9 +29,9 @@ let to_string json =
   let buf = Buffer.create 100 in
   let add_char = Buffer.add_char buf in
   let add_string = Buffer.add_string buf in
-  let add_quote_string s = add_char '"'; escape buf s; add_char '"' in (* CR escaping *)
+  let add_quote_string s = add_char '"'; escape buf s; add_char '"' in
   let add_int i = add_string (string_of_int i) in
-  let add_float f = add_string (string_of_float f) in
+  let add_float f = add_string (Jsonxt.Floats.string_of_float_fast_int f) in
   let rec fmt value =
     match value with
     | `Assoc o -> add_char '{'; json_assoc o; add_char '}'
