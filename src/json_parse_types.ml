@@ -25,15 +25,8 @@ module Extended = struct
   let lex_integer token = token (* CR sbleazard: fix bounds? *)
 
   let lex_largeint = function
-  | LARGEINT s ->  begin
-    let f = float_of_string s in
-    match classify_float f with
-    | FP_normal | FP_subnormal | FP_zero -> FLOAT f
-    | FP_infinite -> INFINITY
-    | FP_nan -> NAN
-    end
-  | _ as token ->  token
-
+  | LARGEINT s -> FLOAT (float_of_string s)
+  | token -> token
 
   let integer i = `Int i
   let null = `Null
@@ -94,7 +87,10 @@ module Basic = struct
   | _ as token -> token
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
-  let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
+
+  let lex_largeint = function
+  | LARGEINT s -> FLOAT (float_of_string s)
+  | token -> token
 
   let integer i = `Int i
   let null = `Null
@@ -128,10 +124,12 @@ module Strict = struct
   | NEGINFINITY -> COMPLIANCE_ERROR "-inf not supported"
   | NAN -> COMPLIANCE_ERROR "nan not supported"
   | FLOAT _ as token -> token
-  | _ as token -> token
+  | token -> token
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
-  let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
+  let lex_largeint = function
+  | LARGEINT s -> FLOAT (float_of_string s)
+  | token -> token
 
   let integer i = `Float (float_of_int i)
   let null = `Null
