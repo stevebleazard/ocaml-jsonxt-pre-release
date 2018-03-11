@@ -4,6 +4,8 @@
 
 (library
  ((name jsonxt)
+  (c_names (floats_stubs))
+  (c_flags (:standard))
   ;(public_name jsonxt)
   ))
 
