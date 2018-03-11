@@ -3,7 +3,7 @@
 *jsonxt* implements a JSON streaming encoder and decoder with the following features:
 
 * Support for various standard and extended JSON tree types:
-  * Strict follows a strict interpretation of RFC7158 and is compatible
+  * Strict follows a strict interpretation of RFC 8259 and is compatible
     with jsonm
   * Basic extendeds the strict type to include convience types while maintaining
     RFC compliance.  This is compatible with yojson's Basic type
