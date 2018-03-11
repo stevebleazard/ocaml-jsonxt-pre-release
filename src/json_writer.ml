@@ -40,7 +40,7 @@ let to_string json =
     | `Bool b -> add_string (string_of_bool b)
     | `Int i -> add_int i
     | `Intlit s -> add_quote_string s
-    | `Float f -> add_float f (* CR int in fp perf - add c helper *)
+    | `Float f -> add_float f
     | `Floatlit s -> add_quote_string s
     | `String s -> add_quote_string s
     | `Stringlit s -> add_quote_string s

@@ -14,7 +14,6 @@ module Make (Compliance : Compliance.S) : Parser
 
   exception Parse_error of [`Eof | `Syntax_error of string]
 
-  (* CR sbleazard: fix *)
   let token_error tok =
     let open Tokens in
     let err = match tok with
