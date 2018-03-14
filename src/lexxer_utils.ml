@@ -32,41 +32,41 @@ let int_of_hexchar c =
 let utf8_of_code buf idx u =
   let i = ref idx in
 
-  let add_char c = Bytes.unsafe_set buf !i c; i := !i + 1 in
+  let add_char b c = Bytes.unsafe_set b !i c; i := !i + 1 in
 
   let max_used_bits n u = (u lsr n) = 0 in
 
   if max_used_bits 7 u then
-    add_char (Char.chr u)
+    add_char buf (Char.chr u)
   else if max_used_bits 11 u then begin
-    add_char (Char.chr (0b11000000 lor ((u lsr 6) land 0b00011111)));
-    add_char (Char.chr (0b10000000 lor (u         land 0b00111111)))
+    add_char buf (Char.chr (0b11000000 lor ((u lsr 6) land 0b00011111)));
+    add_char buf (Char.chr (0b10000000 lor (u         land 0b00111111)))
   end
   else if max_used_bits 16 u then begin
-    add_char (Char.chr (0b11100000 lor ((u lsr 12) land 0b00001111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor (u          land 0b00111111)))
+    add_char buf (Char.chr (0b11100000 lor ((u lsr 12) land 0b00001111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor (u          land 0b00111111)))
   end
   else if max_used_bits 21 u then begin
-    add_char (Char.chr (0b11110000 lor ((u lsr 18) land 0b00000111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr 12) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor (u          land 0b00111111)));
+    add_char buf (Char.chr (0b11110000 lor ((u lsr 18) land 0b00000111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr 12) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor (u          land 0b00111111)));
   end
   else if max_used_bits 26 u then begin
-    add_char (Char.chr (0b11111000 lor ((u lsr 24) land 0b00000011)));
-    add_char (Char.chr (0b10000000 lor ((u lsr 18) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr 12) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor (u          land 0b00111111)));
+    add_char buf (Char.chr (0b11111000 lor ((u lsr 24) land 0b00000011)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr 18) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr 12) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor (u          land 0b00111111)));
   end
   else begin
-    add_char (Char.chr (0b11111100 lor ((u lsr 30) land 0b00000001)));
-    add_char (Char.chr (0b10000000 lor ((u lsr 24) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr 18) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr 12) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
-    add_char (Char.chr (0b10000000 lor (u          land 0b00111111)));
+    add_char buf (Char.chr (0b11111100 lor ((u lsr 30) land 0b00000001)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr 24) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr 18) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr 12) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor ((u lsr  6) land 0b00111111)));
+    add_char buf (Char.chr (0b10000000 lor (u          land 0b00111111)));
   end;
   !i
 
