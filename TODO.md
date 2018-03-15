@@ -10,8 +10,6 @@
 ## Code completion
 * json_parse_types.ml
   * Review and clean up the compliance functions, remove un-needed ones
-* lexxer_utils.ml
-  * unroll add_char in single char case and check performance
 * compliant_lexxer.mll
   * Tuples
   * Variants
