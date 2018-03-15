@@ -5,6 +5,7 @@
   * once rest of coding complete
   * Create compliant_lexxer_monad
   * Merge parser.ml into parser_monad
+  * Create json_writer_monad
   * Create suitable interface
 ## Code completion
 * json_parse_types.ml
@@ -19,3 +20,7 @@
   * Variants
 * json_writer.ml
   * Integrate into compliance levels
+* json_writer.{ml,mli}
+  * rename to json_to_string
+* file writer
+  * create json_writer_file
