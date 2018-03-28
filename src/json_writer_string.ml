@@ -12,6 +12,36 @@ module type Intf = sig
       | `Stringlit of string
       | `Tuple of 'a list
       | `Variant of string * 'a option ] as 'a)
+   -> (string, string) result
+
+  val json_to_string_exn
+   : ([< `Assoc of (string * 'a) list
+      | `Bool of bool
+      | `Float of float
+      | `Floatlit of string
+      | `Int of int
+      | `Intlit of string
+      | `List of 'a list
+      | `Null
+      | `String of string
+      | `Stringlit of string
+      | `Tuple of 'a list
+      | `Variant of string * 'a option ] as 'a)
+   -> string
+
+  val to_string
+   : ([< `Assoc of (string * 'a) list
+      | `Bool of bool
+      | `Float of float
+      | `Floatlit of string
+      | `Int of int
+      | `Intlit of string
+      | `List of 'a list
+      | `Null
+      | `String of string
+      | `Stringlit of string
+      | `Tuple of 'a list
+      | `Variant of string * 'a option ] as 'a)
    -> string
 end
 
@@ -44,8 +74,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  (* CR does not handle exceptions *)
-  let json_to_string json = 
+  let json_to_string' json = 
     let buf = Buffer.create 100 in
     let add_char = Buffer.add_char buf in
     let add_string = Buffer.add_string buf in
@@ -79,5 +108,13 @@ module Make (Compliance : Compliance.S) : Intf = struct
     in
     fmt json;
     Buffer.contents buf
+
+  let json_to_string json =
+    try Ok (json_to_string' json) with
+    | Failure err -> Error err
+
+  let json_to_string_exn = json_to_string'
+
+  let to_string = json_to_string'
 
 end
