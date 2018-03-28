@@ -16,9 +16,10 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Json_str
   type t = json
 
   let read_json ~strict ~lexbuf =
+    (* CR sbleazard: remove strict as this was for an older json standard  - check first!*)
     let parse =
       match strict with
-      | Some true -> Parser.decode  (* CR sbleazard: fix *)
+      | Some true -> Parser.decode
       | _ -> Parser.decode
     in
     let reader () = Lexxer.read lexbuf in

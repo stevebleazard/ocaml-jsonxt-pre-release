@@ -44,6 +44,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
+  (* CR does not handle exceptions *)
   let json_to_string json = 
     let buf = Buffer.create 100 in
     let add_char = Buffer.add_char buf in
