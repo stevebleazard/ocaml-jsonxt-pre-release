@@ -17,6 +17,12 @@ module Compliance = struct
   | LARGEINT s -> FLOAT (float_of_string s)
   | token -> token
 
+  let number_to_string f =
+    match classify_float f with
+    | FP_normal | FP_subnormal | FP_zero -> Floats.string_of_float_fast_int f
+    | FP_infinite -> raise (Failure "infinity not supported")
+    | FP_nan -> raise (Failure "nan not supported")
+
   let integer i = `Int i
   let null = `Null
   let string s = `String s

@@ -12,9 +12,16 @@ module Compliance = struct
   | token -> token
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
+
   let lex_largeint = function
   | LARGEINT s -> FLOAT (float_of_string s)
   | token -> token
+
+  let number_to_string f =
+    match classify_float f with
+    | FP_normal | FP_subnormal | FP_zero -> Floats.string_of_float_fast_int f
+    | FP_infinite -> raise (Failure "infinity not supported")
+    | FP_nan -> raise (Failure "nan not supported")
 
   let integer i = `Float (float_of_int i)
   let null = `Null
@@ -28,6 +35,7 @@ module Compliance = struct
   | `Infinity ->    `Null
   | `Neginfinity -> `Null
   | `Nan ->         `Null
+
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)

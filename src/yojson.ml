@@ -8,6 +8,15 @@ module Compliance = struct
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
+  let number_to_string f =
+    match classify_float f with
+    | FP_normal | FP_subnormal | FP_zero ->
+      Floats.string_of_float_fast_int f
+    | FP_infinite ->
+      if f < 0. then "-Infinity" else "Infinity"
+    | FP_nan ->
+      "NaN"
+
   let integer i = `Int i
   let null = `Null
   let string s = `String s
