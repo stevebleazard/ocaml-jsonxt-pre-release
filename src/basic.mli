@@ -10,3 +10,6 @@ val of_string : string -> json
 
 val json_to_string : json -> string
 val to_string : json -> string
+
+val json_to_file : string -> json -> unit
+val json_to_channel : out_channel -> json -> unit
