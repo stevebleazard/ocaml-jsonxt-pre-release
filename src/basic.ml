@@ -37,5 +37,5 @@ module Parser = Parser.Make(Compliance)
 
 include Json_string_file.Make (Lexxer) (Parser)
 
-let json_to_string = Json_writer.to_string
-let to_string = Json_writer.to_string
+let json_to_string = Json_writer_string.to_string
+let to_string = Json_writer_string.to_string
