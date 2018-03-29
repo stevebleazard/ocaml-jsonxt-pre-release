@@ -1,7 +1,7 @@
 module type Intf = sig
-  val json_to_string : 'a Json_internal.constained -> (string, string) result
-  val json_to_string_exn : 'a Json_internal.constained -> string
-  val to_string : 'a Json_internal.constained -> string
+  val json_to_string : 'a Json_internal.constrained -> (string, string) result
+  val json_to_string_exn : 'a Json_internal.constrained -> string
+  val to_string : 'a Json_internal.constrained -> string
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct

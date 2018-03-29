@@ -1,4 +1,4 @@
-type 'a constained =
+type 'a constrained =
   [< `Assoc of (string * 'a) list
   | `Bool of bool
   | `Float of float
