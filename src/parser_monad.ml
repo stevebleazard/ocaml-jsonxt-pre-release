@@ -173,7 +173,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
           read ()
           >>= function
             | VE -> return (Compliance.variant k None)
-            | COLON -> variant_end k (Some (value ())) (* fixme *)
+            | COLON -> value () >>=? fun v -> variant_end k (Some v)
             | tok -> fail (token_error tok)
           end
         | VE -> fail (`Syntax_error "variant must have at least a string")
