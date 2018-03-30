@@ -11,3 +11,5 @@
   * Merge parser.ml into parser_monad
   * Create json_write_monad
   * Create suitable interface
+* Code completion
+  * Remove strict (top level must be array or object)  from reader - this is depricated by latest rfc
