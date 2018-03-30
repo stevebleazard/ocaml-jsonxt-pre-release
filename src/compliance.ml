@@ -14,4 +14,6 @@ module type S = sig
   val bool : bool -> json
   val assoc : (string * json) list -> json
   val list : json list -> json
+  val tuple : json list -> json
+  val variant : string -> json option -> json
 end

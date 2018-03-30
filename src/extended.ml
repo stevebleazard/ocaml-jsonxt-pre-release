@@ -19,6 +19,8 @@ module Compliance = struct
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
+  let tuple l = `Tuple l
+  let variant k v = `Variant (k, v)
 
   let number = function
   | `Float f ->     `Float f

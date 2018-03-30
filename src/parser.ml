@@ -35,6 +35,10 @@ module Make (Compliance : Compliance.S) : Parser
       | BOOL b -> "unexpected boolean '" ^ (if b then "true" else "false") ^ "'"
       | AS -> "unexpected '['"
       | AE -> "unexpected ']'"
+      | TS -> "unexpected '('"
+      | TE -> "unexpected ')'"
+      | VS -> "unexpected '<'"
+      | VE -> "unexpected '>'"
     in
       `Syntax_error err
 
@@ -54,10 +58,12 @@ module Make (Compliance : Compliance.S) : Parser
       | LARGEINT s ->
         Compliance.number (`Float (float_of_string s))
       | EOF -> raise (Parse_error `Eof)
-      | COMMA | COLON | AE | OE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
+      | COMMA | COLON | AE | OE | TE | VE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
         raise (Parse_error (token_error tok))
       | AS -> array_value_start ()
       | OS -> object_value_start ()
+      | TS -> tuple_value_start ()
+      | VS -> variant_value_start ()
     end
     and value () = token_value (reader ())
     and array_value_start () = begin
@@ -117,6 +123,42 @@ module Make (Compliance : Compliance.S) : Parser
         | tok -> raise (Parse_error (token_error tok))
         end
       | tok ->  raise (Parse_error (token_error tok))
+    end
+    and tuple_value_start () = begin
+      let v1 = value () in
+      match reader () with
+      | COMMA -> begin
+        let v2 = value () in
+        match reader () with
+        | TE -> Compliance.tuple [v1; v2]
+        | COMMA -> tuple_values [v2; v1]
+        | tok -> raise (Parse_error (token_error tok))
+        end
+      | TE -> raise (Parse_error (`Syntax_error "tuple must have at least 2 elements"))
+      | tok -> raise (Parse_error (token_error tok))
+    end
+    and tuple_values acc = begin
+      let v = value () in
+      match reader () with
+      | TE -> Compliance.tuple (List.rev (v::acc))
+      | COMMA -> tuple_values (v::acc)
+      | tok -> raise (Parse_error (token_error tok))
+    end
+    and variant_value_start () = begin
+      match reader () with
+      | STRING k -> begin
+        match reader () with
+        | VE -> Compliance.variant k None
+        | COLON -> variant_end k (Some (value ()))
+        | tok -> raise (Parse_error (token_error tok))
+        end
+      | VE -> raise (Parse_error (`Syntax_error "variant must have at least a string"))
+      | tok -> raise (Parse_error (token_error tok))
+    end
+    and variant_end k v = begin
+      match reader () with
+      | VE -> Compliance.variant k v
+      | tok -> raise (Parse_error (token_error tok))
     end
     in
     value ()

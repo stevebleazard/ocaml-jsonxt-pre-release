@@ -9,7 +9,7 @@ module Compliance = struct
   | NEGINFINITY -> COMPLIANCE_ERROR "-inf not supported"
   | NAN -> COMPLIANCE_ERROR "nan not supported"
   | FLOAT _ as token -> token
-  | _ as token -> token
+  | token -> token
 
   let lex_integer token = token (* CR sbleazard: fix bounds *)
 
@@ -29,6 +29,8 @@ module Compliance = struct
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
+  let tuple l = raise (Failure "tuples not supported in basic mode")
+  let variant l = raise (Failure "variants not supported in basic mode")
 
   let number = function
   | `Float f ->     `Float f

@@ -29,6 +29,8 @@ module Compliance = struct
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
+  let tuple l = raise (Failure "tuples not supported in strict mode")
+  let variant l = raise (Failure "variants not supported in strict mode")
 
   let number = function
   | `Float f ->     `Float f

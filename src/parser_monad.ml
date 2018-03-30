@@ -64,6 +64,10 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | BOOL b -> "unexpected boolean '" ^ (if b then "true" else "false") ^ "'"
       | AS -> "unexpected '['"
       | AE -> "unexpected ']'"
+      | TS -> "unexpected '('"
+      | TE -> "unexpected ')'"
+      | VS -> "unexpected '<'"
+      | VE -> "unexpected '>'"
     in
       `Syntax_error err
 
@@ -88,10 +92,12 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | LARGEINT s ->
         return (Compliance.number (`Float (float_of_string s)))
       | EOF -> fail `Eof
-      | COMMA | COLON | AE | OE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
+      | COMMA | COLON | AE | OE | TE | VE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
         fail (token_error tok)
       | AS -> array_value_start ()
       | OS -> object_value_start ()
+      | TS -> tuple_value_start ()
+      | VS -> variant_value_start ()
     end
     and array_value_start () = begin
       peek () >>= fun tok ->
@@ -133,6 +139,51 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
             | tok ->  fail (token_error tok)
           end
         | tok ->  fail (token_error tok)
+    end
+    and tuple_value_start () = begin
+      value ()
+      >>=? fun v1 ->
+        read ()
+        >>= function
+          | COMMA -> begin
+            value ()
+            >>=? fun v2 ->
+              read ()
+              >>= function
+                | TE -> return (Compliance.tuple [v1; v2])
+                | COMMA -> tuple_values [v2; v1]
+                | tok -> fail (token_error tok)
+            end
+          | TE -> fail (`Syntax_error "tuple must have at least 2 elements")
+          | tok -> fail (token_error tok)
+    end
+    and tuple_values acc = begin
+      value ()
+      >>=? fun v ->
+        read ()
+        >>= function
+          | TE -> return (Compliance.tuple (List.rev (v::acc)))
+          | COMMA -> tuple_values (v::acc)
+          | tok -> fail (token_error tok)
+    end
+    and variant_value_start () = begin
+      read ()
+      >>= function
+        | STRING k -> begin
+          read ()
+          >>= function
+            | VE -> return (Compliance.variant k None)
+            | COLON -> variant_end k (Some (value ())) (* fixme *)
+            | tok -> fail (token_error tok)
+          end
+        | VE -> fail (`Syntax_error "variant must have at least a string")
+        | tok -> fail (token_error tok)
+    end
+    and variant_end k v = begin
+      read ()
+      >>= function
+        | VE -> return (Compliance.variant k v)
+        | tok -> fail (token_error tok)
     end
     in
     value ()

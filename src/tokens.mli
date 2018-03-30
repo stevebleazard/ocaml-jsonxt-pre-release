@@ -17,3 +17,7 @@ type token =
   | BOOL of bool
   | AS
   | AE
+  | VS
+  | VE
+  | TS
+  | TE
