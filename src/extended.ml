@@ -11,6 +11,9 @@ module Compliance = struct
   | LARGEINT s -> FLOAT (float_of_string s)
   | token -> token
 
+  let lex_variant _ = true
+  let lex_tuple _ = true
+
   let number_to_string f = Floats.string_of_float_fast_int f
 
   let integer i = `Int i

@@ -8,6 +8,9 @@ module Compliance = struct
   let lex_integer token = token (* CR sbleazard: fix bounds *)
   let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
 
+  let lex_variant _ = true
+  let lex_tuple _ = true
+
   let number_to_string f =
     match classify_float f with
     | FP_normal | FP_subnormal | FP_zero ->

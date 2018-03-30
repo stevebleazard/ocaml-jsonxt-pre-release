@@ -17,6 +17,9 @@ module Compliance = struct
   | LARGEINT s -> FLOAT (float_of_string s)
   | token -> token
 
+  let lex_variant _ = false
+  let lex_tuple _ = false
+
   let number_to_string f =
     match classify_float f with
     | FP_normal | FP_subnormal | FP_zero -> Floats.string_of_float_fast_int f

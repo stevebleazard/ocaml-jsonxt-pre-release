@@ -69,13 +69,25 @@ rule read =
   | "]"
     { AE }
   | "("
-    { TS }
+    {
+      if Compliance.lex_tuple TS then TS
+      else Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'")
+    }
   | ")"
-    { TE }
+    {
+      if Compliance.lex_tuple TE then TE
+      else Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'")
+    }
   | "<"
-    { VS }
+    {
+      if Compliance.lex_variant VS then VS
+      else Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'")
+    }
   | ">"
-    { VE }
+    {
+      if Compliance.lex_variant VE then VE
+      else Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'")
+    }
   | ","
     { COMMA }
   | ":"

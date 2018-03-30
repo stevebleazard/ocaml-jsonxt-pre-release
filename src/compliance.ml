@@ -4,6 +4,8 @@ module type S = sig
   val lex_number : Tokens.token -> Tokens.token
   val lex_integer : Tokens.token -> Tokens.token
   val lex_largeint : Tokens.token -> Tokens.token
+  val lex_tuple : Tokens.token -> bool
+  val lex_variant : Tokens.token -> bool
 
   val number_to_string : float -> string
 
