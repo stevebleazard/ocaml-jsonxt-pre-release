@@ -1,6 +1,8 @@
 module type Intf = sig
-  val json_to_file : string -> 'a Json_internal.constrained -> unit
-  val json_to_channel :  out_channel -> 'a Json_internal.constrained -> unit
+  val json_to_file : string -> 'a Json_internal.constrained -> (unit, string) result
+  val json_to_file_exn : string -> 'a Json_internal.constrained -> unit
+  val json_to_channel :  out_channel -> 'a Json_internal.constrained -> (unit, string) result
+  val json_to_channel_exn :  out_channel -> 'a Json_internal.constrained -> unit
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct
@@ -32,8 +34,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  (* CR does not handle exceptions *)
-  let json_to_channel oc json = 
+  let json_to_channel' oc json = 
     let add_char = output_char oc in
     let add_string = output_string oc in
     let add_quote_string s = add_char '"'; escape oc s; add_char '"' in
@@ -66,9 +67,21 @@ module Make (Compliance : Compliance.S) : Intf = struct
     in
     fmt json
 
+  let json_to_channel oc json =
+    try Ok (json_to_channel' oc json) with
+    | Failure err -> Error err
+
+  let json_to_channel_exn = json_to_channel'
+
   let json_to_file file json =
     let oc = open_out file in
-    let _:unit = json_to_channel oc json in
+    let res = json_to_channel oc json in
+    close_out oc;
+    res
+
+  let json_to_file_exn file json =
+    let oc = open_out file in
+    let _:unit = json_to_channel' oc json in
     close_out oc
 
 end
