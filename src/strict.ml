@@ -45,5 +45,7 @@ end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)
 module Parser = Parser.Make(Compliance)
-
 include Json_string_file.Make (Lexxer) (Parser)
+
+include Json_writer_string.Make(Compliance)
+include Json_writer_file.Make(Compliance)
