@@ -11,10 +11,3 @@
   * Merge parser.ml into parser_monad
   * Create json_write_monad
   * Create suitable interface
-## Code completion
-* compliant_lexxer.mll
-  * Tuples
-  * Variants
-* parser.ml
-  * Tuples
-  * Variants
