@@ -78,9 +78,9 @@ let () = Command.run (Bench.make_command [
   ; Bench.Test.create ~name:"FP to string fast int" bench_fp_to_str_fast
   ; Bench.Test.create ~name:"FP to string/w int" bench_fp_to_str_int
   ; Bench.Test.create ~name:"FP to string fast int/w int" bench_fp_to_str_fast_int
-*)
     Bench.Test.create ~name:"buffer" test
-  ; Bench.Test.create ~name:"jsonrdxt" (fun () -> Jsonxt.Basic.of_string contents)
+*)
+    Bench.Test.create ~name:"jsonrdxt" (fun () -> Jsonxt.Basic.of_string contents)
   ; Bench.Test.create ~name:"yjsonrd" (fun () -> Yj.read contents)
 (*
   ; Bench.Test.create ~name:"jsonwrxt" testwrxt
