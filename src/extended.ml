@@ -14,7 +14,7 @@ module Compliance = struct
   let lex_variant _ = true
   let lex_tuple _ = true
 
-  let number_to_string f = Floats.string_of_float_fast_int f
+  let number_to_string f = Json_float.string_of_float_fast_int f
 
   let integer i = `Int i
   let null = `Null

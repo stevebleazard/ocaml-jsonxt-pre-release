@@ -44,7 +44,7 @@ let bench_fp_to_str () =
 
 let bench_fp_to_str_fast () =
   for i = 1 to 1000 do
-    ignore (Jsonxt.Floats.string_of_float_fast_int 11111111111.1)
+    ignore (Jsonxt.Json_float.string_of_float_fast_int 11111111111.1)
   done
 
 let bench_fp_to_str_int () =
@@ -54,7 +54,7 @@ let bench_fp_to_str_int () =
 
 let bench_fp_to_str_fast_int () =
   for i = 1 to 1000 do
-    ignore (Jsonxt.Floats.string_of_float_fast_int 11.)
+    ignore (Jsonxt.Json_float.string_of_float_fast_int 11.)
   done
 
 let contents = load_file "test.json.10000"
@@ -68,7 +68,7 @@ let testxt_esc () = Writer.to_string (`String ctrl_lots)
 let testwryj = Yj.benchwr contents
 
 let () =
-  Printf.printf "%s\n" (Jsonxt.Floats.string_of_float_fast_int 11.)
+  Printf.printf "%s\n" (Jsonxt.Json_float.string_of_float_fast_int 11.)
 (*
 *)
 
