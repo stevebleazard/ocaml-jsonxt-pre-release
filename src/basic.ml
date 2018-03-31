@@ -1,6 +1,5 @@
 module Compliance = struct
   type json = Json.Basic.json
-  type t = json
 
   open Tokens
 
@@ -46,6 +45,7 @@ end
 module Lexxer = Compliant_lexxer.Make(Compliance)
 module Parser = Parser.Make(Compliance)
 include Json_string_file.Make (Lexxer) (Parser)
+type t = json
 
 include Json_writer_string.Make(Compliance)
 include Json_writer_file.Make(Compliance)

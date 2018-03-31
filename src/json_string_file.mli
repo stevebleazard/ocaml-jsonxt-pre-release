@@ -1,6 +1,5 @@
 module type Json_string_file = sig
   type json
-  type t = json
 
   val json_of_string : string -> (json, string) result
   val json_of_string_exn : string -> json
