@@ -12,7 +12,7 @@ let help err =
 
 let help_internal err =
   help_error err;
-  printf "
+  printf "\
    compliance_tester internal [help|run <file>]
 
    run internal compliance testing as defined in <file>. This has the format
@@ -27,10 +27,52 @@ let help_internal err =
      <filename>
        the file containing the test, it is assumed to be in the current directory.
        
-   Note that any number of spaces can seperate the fields.\n"
+   Note that any number of spaces can seperate the fields.\n";
+  exit 0
+
+let execute_internal_tests inc =
+  let read_params () =
+    let l = input_line inc in
+    let p = String.split_on_char ' ' l |> List.filter (fun v -> not (String.equal "" v)) in
+    let (level, passfail, filename) = match p with
+      | lv::pf::fn::[] -> (lv, pf, fn)
+      | _ -> help_internal (Some ("invalid test line: " ^ l));
+    in
+    let _:unit = match level with
+      | "strict" | "basic" | "extended" | "yjsafe" | "yjbasic"  -> ()
+      | _ -> help_internal (Some ("invalid test line, first column invalid level: " ^ l))
+    in
+    let _:unit = match passfail with
+      | "pass" | "fail" -> ()
+      | _ -> help_internal (Some ("invalid test line, second column must be pass or fail: " ^ l))
+    in
+    (level, passfail, filename)
+  in
+  let rec run () = 
+    let (_level, _passfail, _filename) = read_params () in
+    run ()
+  in
+  try run () with
+  | End_of_file -> ()
+
+
 
 let run_internal_tests idx =
-  help_internal None
+  let args = Array.length Sys.argv - idx in
+  if args <= 0 then help_internal (Some "expected run or help");
+
+  match Sys.argv.(idx) with
+  | "help" -> help_internal None
+  | "run" -> begin
+    if args < 2 then help_internal (Some "expected filename of test schedule");
+    let inf =
+      try open_in Sys.argv.(idx + 1) with
+      | _ -> help (Some ("failed to open " ^ Sys.argv.(idx + 1)))
+    in
+      execute_internal_tests inf;
+      close_in inf
+    end
+  | cmd -> help_internal (Some ("unknown internal command " ^ cmd))
   
 let run_test_suite _idx = ()
 
