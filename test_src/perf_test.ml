@@ -35,7 +35,7 @@ let benchbuf bsize =
 
 let benchwr contents =
   let json = Jsonxt.Extended.of_string contents in
-  (fun () -> Writer.to_string json)
+  (fun () -> Jsonxt.Extended.to_string json)
 
 let bench_fp_to_str () =
   for i = 1 to 1000 do
@@ -62,7 +62,7 @@ let test = benchbuf 100
 let testwrxt = benchwr contents
 (*
 let ctrl_lots = Bytes.make 100000 '\x1d'
-let testxt_esc () = Writer.to_string (`String ctrl_lots)
+let testxt_esc () = Jsonxt.Extended.to_string (`String ctrl_lots)
 ; Bench.Test.create ~name:"escape" testxt_esc
 *)
 let testwryj = Yj.benchwr contents
