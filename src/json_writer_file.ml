@@ -7,6 +7,10 @@ module type Intf = sig
   val json_to_file_hum_exn : string -> 'a Json_internal.constrained -> unit
   val json_to_channel_hum :  out_channel -> 'a Json_internal.constrained -> (unit, string) result
   val json_to_channel_hum_exn :  out_channel -> 'a Json_internal.constrained -> unit
+  val to_file : string -> 'a Json_internal.constrained -> unit
+  val to_file_hum : string -> 'a Json_internal.constrained -> unit
+  val to_channel :  out_channel -> 'a Json_internal.constrained -> unit
+  val to_channel_hum :  out_channel -> 'a Json_internal.constrained -> unit
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct
@@ -149,4 +153,8 @@ module Make (Compliance : Compliance.S) : Intf = struct
     let _:unit = json_to_channel_hum' oc json in
     close_out oc
 
+  let to_file = json_to_file_exn
+  let to_file_hum = json_to_file_hum_exn
+  let to_channel = json_to_channel_exn
+  let to_channel_hum = json_to_channel_hum_exn
 end
