@@ -104,11 +104,11 @@ module Make (Compliance : Compliance.S) : Intf = struct
       let sep = ref ldr in
       let newsep = ",\n" ^ ldr in
       List.iter (fun v -> add_string !sep; sep := newsep; pair ldr v ) o
-    and pair ldr (k, v) = add_quote_string k; add_string ": "; fmt (ldr ^ "  ") v
+    and pair ldr (k, v) = add_quote_string k; add_string ": "; fmt ldr v
     and json_list ldr l =
       let sep = ref ldr in
       let newsep = ",\n" ^ ldr in
-      List.iter (fun v -> add_string !sep; sep := newsep; fmt (ldr ^ "  ") v ) l
+      List.iter (fun v -> add_string !sep; sep := newsep; fmt ldr  v ) l
     and variant ldr (k, j) =
       add_quote_string k;
       match j with
