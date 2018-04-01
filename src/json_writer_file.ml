@@ -145,13 +145,13 @@ module Make (Compliance : Compliance.S) : Intf = struct
 
   let json_to_file_exn file json =
     let oc = open_out file in
-    let _:unit = json_to_channel' oc json in
-    close_out oc
+    try (json_to_channel' oc json; close_out oc) with
+    | exn -> close_out oc; raise exn
 
   let json_to_file_hum_exn file json =
     let oc = open_out file in
-    let _:unit = json_to_channel_hum' oc json in
-    close_out oc
+    try (json_to_channel_hum' oc json; close_out oc) with
+    | exn -> close_out oc; raise exn
 
   let to_file = json_to_file_exn
   let to_file_hum = json_to_file_hum_exn
