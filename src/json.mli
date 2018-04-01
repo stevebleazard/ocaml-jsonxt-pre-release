@@ -23,11 +23,6 @@ module Extended : sig
   type t = json
 end
 
-module Yojson : sig
-  type nonrec json = json
-  type t = json
-end
-
 module Basic : sig
   type json =
       [

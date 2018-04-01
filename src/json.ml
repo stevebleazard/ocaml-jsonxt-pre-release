@@ -23,11 +23,6 @@ module Extended = struct
   type t = json
 end
 
-module Yojson = struct
-  type nonrec json = json
-  type t = json
-end
-
 module Basic = struct
   type json =
       [
