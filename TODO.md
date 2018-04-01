@@ -1,6 +1,8 @@
 # TODO
 ## General
 * Coding
+  * string _hum
+  * file _hum
   * Stream encode / decode
   * Streaming json with recovery
 * Review
