@@ -37,7 +37,8 @@ let help_internal err =
      [pass|fail]
        indicates the expected outcome
      <filename>
-       the file containing the test, it is assumed to be in the current directory.
+       the file containing the test, it is assumed to be in the current directory, 
+       .json is automatically appended to the filename.
        
    Note that any number of spaces can seperate the fields.\n";
   exit 0
@@ -73,7 +74,7 @@ let execute_internal_tests inc =
     printf "%s(%s)" result typ
   in
   let run_one level passfail filename =
-    let txt = try load_file filename with Sys_error err -> die err in
+    let txt = try load_file (filename ^ ".json") with Sys_error err -> die err in
     let (of_string, of_file) = match level with
       | `Strict       ->
         let of_string = fun txt ->
@@ -117,7 +118,7 @@ let execute_internal_tests inc =
         (of_string, of_file)
     in
     let str_res = of_string txt in
-    let file_res = of_file filename in
+    let file_res = of_file (filename ^ ".json") in
     report "S" passfail str_res;
     printf " ";
     report "F" passfail file_res;
