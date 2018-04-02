@@ -15,12 +15,15 @@ let help_msg msg err =
   exit 0
 
 let load_file f =
-  let ic = open_in f in
-  let n = in_channel_length ic in
-  let s = Bytes.create n in
-  really_input ic s 0 n;
+  let ic = if String.equal f "-" then stdin else open_in f in
+  let buf = Buffer.create 100 in
+  let rec loop () =
+    try begin Buffer.add_channel buf ic 4096; loop () end with
+    | End_of_file -> ()
+  in
+  loop ();
   close_in ic;
-  s
+  Buffer.contents buf
 
 let command_dump idx sys_argv_len =
   let usage = "\
@@ -64,7 +67,18 @@ let command_dump idx sys_argv_len =
   end;
   if !rdstdin then file := "-";
   if String.equal !file "" then die "expected file to dump";
-  printf "<%s>\n" !file
+  let contents = load_file !file in
+  let dump =
+    try begin
+      match !compliance with
+      | `Strict -> let json = Jsonxt.Strict.of_string contents in Jsonxt.Tools.dump json
+      | `Basic -> let json = Jsonxt.Basic.of_string contents in Jsonxt.Tools.dump json
+      | _ -> die "uncoded compliance level"
+    end
+    with
+    | Failure err -> die err
+  in
+  printf "%s\n" dump
 
 let () =
   let usage = "jsonxtool [help|dump]\n" in
