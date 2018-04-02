@@ -14,6 +14,14 @@ let help err =
   printf "compliance_tester [help|suite|internal]\n";
   exit 0
 
+let load_file f =
+  let ic = open_in f in
+  let n = in_channel_length ic in
+  let s = Bytes.create n in
+  really_input ic s 0 n;
+  close_in ic;
+  s
+
 let help_internal err =
   help_error err;
   printf "\
@@ -57,8 +65,67 @@ let execute_internal_tests inc =
     in
     (level, passfail, filename)
   in
+  let report typ passfail result =
+    let result = match result with
+      | Ok _ -> if passfail = `Pass then "pass" else "fail"
+      | Error _ -> if passfail = `Fail then "pass" else "fail"
+    in
+    printf "%s(%s)" result typ
+  in
+  let run_one level passfail filename =
+    let txt = try load_file filename with Sys_error err -> die err in
+    let (of_string, of_file) = match level with
+      | `Strict       ->
+        let of_string = fun txt ->
+          match Jsonxt.Strict.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
+        in
+        let of_file = fun filename ->
+          match Jsonxt.Strict.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
+        in
+        (of_string, of_file)
+      | `Basic        -> 
+        let of_string = fun txt ->
+          match Jsonxt.Basic.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
+        in
+        let of_file = fun filename ->
+          match Jsonxt.Basic.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
+        in
+        (of_string, of_file)
+      | `Extended     ->
+        let of_string = fun txt ->
+          match Jsonxt.Extended.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
+        in
+        let of_file = fun filename ->
+          match Jsonxt.Extended.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
+        in
+        (of_string, of_file)
+      | `Yojson_basic ->
+        let of_string = fun txt ->
+          match Jsonxt.Yojson.Basic.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
+        in
+        let of_file = fun filename ->
+          match Jsonxt.Yojson.Basic.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
+        in
+        (of_string, of_file)
+      | `Yojson_safe  ->
+        let of_string = fun txt ->
+          match Jsonxt.Yojson.Safe.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
+        in
+        let of_file = fun filename ->
+          match Jsonxt.Yojson.Safe.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
+        in
+        (of_string, of_file)
+    in
+    let str_res = of_string txt in
+    let file_res = of_file filename in
+    report "S" passfail str_res;
+    printf " ";
+    report "F" passfail file_res;
+    printf "...%s\n" filename
+  in
   let rec run () = 
-    let (_level, _passfail, _filename) = read_params () in
+    let (level, passfail, filename) = read_params () in
+    run_one level passfail filename;
     run ()
   in
   try run () with
