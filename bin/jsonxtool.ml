@@ -76,10 +76,9 @@ let command_dump idx sys_argv_len =
       | `Extended -> let json = Jsonxt.Extended.of_string contents in Jsonxt.Tools.dump json
       | `Yojson_basic -> let json = Jsonxt.Yojson.Basic.of_string contents in Jsonxt.Tools.dump json
       | `Yojson_safe -> let json = Jsonxt.Yojson.Safe.of_string contents in Jsonxt.Tools.dump json
-      | _ -> die "uncoded compliance level"
     end
     with
-    | Failure err -> die err
+    | Failure err -> sprintf "Parse failed with: %s" err
   in
   printf "%s\n" dump
 
