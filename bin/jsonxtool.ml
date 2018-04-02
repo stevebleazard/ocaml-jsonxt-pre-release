@@ -24,12 +24,12 @@ let load_file f =
 
 let command_dump idx sys_argv_len =
   let usage = "\
-   jsonxtool dump [-h|-file file] [-compliance [strict|basic|extended|yjbasic|yjsafe]]
+   jsonxtool dump [-help|-h] [-compliance [strict|basic|extended|yjbasic|yjsafe]] file
 
    Load the specified file or stdin of file is minus (-) and dump out in internal tree format.
    The compliance level can be selected, defaulting to extended.\n"
   in
-  let help = ref false in
+  let rdstdin = ref false in
   let file = ref "" in
   let compliance = ref `Extended in
   let set_compliance = function
@@ -38,20 +38,33 @@ let command_dump idx sys_argv_len =
     | "extended" -> compliance := `Extended
     | "yjbasic" -> compliance := `Yojson_basic
     | "yjsafe" -> compliance := `Yojson_safe
-    | level -> help_error (Some ("unknown compliance level: " ^ level))
+    | level -> die ("unknown compliance level: " ^ level)
   in
-  let args = [
-      ("-h", Arg.Set help, "show dump options")
-    ; ("-file", Arg.Set_string file, "file to dump")
-    ; ("-compliance",
+  let anon arg =
+    if String.equal !file "" && not !rdstdin then file := arg
+    else die "only one file maybe dumped"
+  in
+  let set_rdstdin () =
+    if String.equal !file "" && not !rdstdin then rdstdin := true
+    else die "only one file maybe dumped"
+  in
+  let argspec = [
+      ("-compliance",
        Arg.Symbol (["strict"; "basic"; "extended"; "yjbasic"; "yjsafe"], set_compliance),
        "compliance level")
+    ; ("-", Unit set_rdstdin, "read from stdin")
     ]
   in
-  let no_anon arg = help_error (Some ("unexptected anonymous argument: " ^ arg)) in
-  let current = ref idx in
+  let current = ref (idx - 1) in
   if sys_argv_len < 3 then help_msg usage (Some "dump expected at least one option");
-  Arg.parse_argv ~current Sys.argv args no_anon usage
+  begin
+    try Arg.parse_argv ~current Sys.argv argspec anon usage with
+    | Arg.Bad err -> die err
+    | Arg.Help msg -> help_msg msg None
+  end;
+  if !rdstdin then file := "-";
+  if String.equal !file "" then die "expected file to dump";
+  printf "<%s>\n" !file
 
 let () =
   let usage = "jsonxtool [help|dump]\n" in
