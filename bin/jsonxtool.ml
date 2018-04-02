@@ -73,6 +73,9 @@ let command_dump idx sys_argv_len =
       match !compliance with
       | `Strict -> let json = Jsonxt.Strict.of_string contents in Jsonxt.Tools.dump json
       | `Basic -> let json = Jsonxt.Basic.of_string contents in Jsonxt.Tools.dump json
+      | `Extended -> let json = Jsonxt.Extended.of_string contents in Jsonxt.Tools.dump json
+      | `Yojson_basic -> let json = Jsonxt.Yojson.Basic.of_string contents in Jsonxt.Tools.dump json
+      | `Yojson_safe -> let json = Jsonxt.Yojson.Safe.of_string contents in Jsonxt.Tools.dump json
       | _ -> die "uncoded compliance level"
     end
     with
