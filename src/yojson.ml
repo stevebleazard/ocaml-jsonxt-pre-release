@@ -20,6 +20,7 @@ module Basic = struct
       | FP_nan ->
         "NaN"
 
+    let largeint s = `Float (float_of_string s)
     let integer i = `Int i
     let null = `Null
     let string s = `String s
@@ -68,6 +69,7 @@ module Safe = struct
       | FP_nan ->
         "NaN"
 
+    let largeint s = `Intlit s
     let integer i = `Int i
     let null = `Null
     let string s = `String s

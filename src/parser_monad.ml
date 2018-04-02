@@ -88,9 +88,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | NEGINFINITY -> return (Compliance.number `Neginfinity)
       | NAN -> return (Compliance.number `Nan)
       | NULL -> return (Compliance.null)
-        (* LARGEINT is actually handled by the lexxer *)
-      | LARGEINT s ->
-        return (Compliance.number (`Float (float_of_string s)))
+      | LARGEINT s -> return (Compliance.largeint s)
       | EOF -> fail `Eof
       | COMMA | COLON | AE | OE | TE | VE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
         fail (token_error tok)

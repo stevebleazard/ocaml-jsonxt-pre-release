@@ -15,6 +15,7 @@ module Compliance = struct
 
   let number_to_string f = Json_float.string_of_float_fast_int f
 
+  let largeint s = `Float (float_of_string s)
   let integer i = `Int i
   let null = `Null
   let string s = `String s

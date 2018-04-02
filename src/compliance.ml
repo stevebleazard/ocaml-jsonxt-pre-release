@@ -11,6 +11,7 @@ module type S = sig
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
   val integer : int -> json
+  val largeint : string -> json
   val null : json
   val string : string -> json
   val bool : bool -> json

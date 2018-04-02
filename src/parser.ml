@@ -54,9 +54,7 @@ module Make (Compliance : Compliance.S) : Parser
       | NEGINFINITY -> Compliance.number `Neginfinity
       | NAN -> Compliance.number `Nan
       | NULL -> Compliance.null
-        (* LARGEINT is actually handled by the lexxer *)
-      | LARGEINT s ->
-        Compliance.number (`Float (float_of_string s))
+      | LARGEINT s -> Compliance.largeint s
       | EOF -> raise (Parse_error `Eof)
       | COMMA | COLON | AE | OE | TE | VE | LEX_ERROR _ | COMPLIANCE_ERROR _ ->
         raise (Parse_error (token_error tok))

@@ -25,6 +25,7 @@ module Compliance = struct
     | FP_infinite -> raise (Failure "infinity not supported")
     | FP_nan -> raise (Failure "nan not supported")
 
+  let largeint s = `Float (float_of_string s)
   let integer i = `Float (float_of_int i)
   let null = `Null
   let string s = `String s
