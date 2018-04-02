@@ -1,5 +1,9 @@
 open Printf
 
+let die msg = 
+  printf "ERROR: %s\n" msg;
+  exit 255
+
 let help_error err = 
   match err with
   | Some err -> printf "ERROR: %s\n\n" err
@@ -36,15 +40,20 @@ let execute_internal_tests inc =
     let p = String.split_on_char ' ' l |> List.filter (fun v -> not (String.equal "" v)) in
     let (level, passfail, filename) = match p with
       | lv::pf::fn::[] -> (lv, pf, fn)
-      | _ -> help_internal (Some ("invalid test line: " ^ l));
+      | _ -> die ("invalid test line: " ^ l)
     in
-    let _:unit = match level with
-      | "strict" | "basic" | "extended" | "yjsafe" | "yjbasic"  -> ()
-      | _ -> help_internal (Some ("invalid test line, first column invalid level: " ^ l))
+    let level = match level with
+      | "strict"   -> `Strict
+      | "basic"    -> `Basic
+      | "extended" -> `Extended
+      | "yjsafe"   -> `Yojson_safe
+      | "yjbasic"  -> `Yojson_basic
+      | _ -> die ("invalid test line, first column invalid level: " ^ l)
     in
-    let _:unit = match passfail with
-      | "pass" | "fail" -> ()
-      | _ -> help_internal (Some ("invalid test line, second column must be pass or fail: " ^ l))
+    let passfail = match passfail with
+      | "pass" -> `Pass
+      | "fail" -> `Fail
+      | _ -> die ("invalid test line, second column must be pass or fail: " ^ l)
     in
     (level, passfail, filename)
   in
