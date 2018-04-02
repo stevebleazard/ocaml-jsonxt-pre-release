@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(executables
+ ((names (jsonxtool))
+  (libraries (jsonxt))))
+
+(alias
+ ((name DEFAULT)
+  (deps (jsonxtool.exe))))
