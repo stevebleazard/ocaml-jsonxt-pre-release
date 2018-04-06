@@ -75,46 +75,27 @@ let execute_internal_tests inc =
   in
   let run_one level passfail filename =
     let txt = try load_file (filename ^ ".json") with Sys_error err -> die err in
+    let to_error f a = match f a with Ok _ -> Ok () | Error _ -> Error () in
     let (of_string, of_file) = match level with
       | `Strict       ->
-        let of_string = fun txt ->
-          match Jsonxt.Strict.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
-        in
-        let of_file = fun filename ->
-          match Jsonxt.Strict.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
-        in
+        let of_string = to_error Jsonxt.Strict.json_of_string in
+        let of_file = to_error Jsonxt.Strict.json_of_file in
         (of_string, of_file)
       | `Basic        -> 
-        let of_string = fun txt ->
-          match Jsonxt.Basic.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
-        in
-        let of_file = fun filename ->
-          match Jsonxt.Basic.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
-        in
+        let of_string = to_error Jsonxt.Basic.json_of_string in
+        let of_file = to_error Jsonxt.Basic.json_of_file in
         (of_string, of_file)
       | `Extended     ->
-        let of_string = fun txt ->
-          match Jsonxt.Extended.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
-        in
-        let of_file = fun filename ->
-          match Jsonxt.Extended.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
-        in
+        let of_string = to_error Jsonxt.Extended.json_of_string in
+        let of_file = to_error Jsonxt.Extended.json_of_file in
         (of_string, of_file)
       | `Yojson_basic ->
-        let of_string = fun txt ->
-          match Jsonxt.Yojson.Basic.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
-        in
-        let of_file = fun filename ->
-          match Jsonxt.Yojson.Basic.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
-        in
+        let of_string = to_error Jsonxt.Yojson.Basic.json_of_string in
+        let of_file = to_error Jsonxt.Yojson.Basic.json_of_file in
         (of_string, of_file)
       | `Yojson_safe  ->
-        let of_string = fun txt ->
-          match Jsonxt.Yojson.Safe.json_of_string txt with | Ok _ -> Ok () | _ -> Error ()
-        in
-        let of_file = fun filename ->
-          match Jsonxt.Yojson.Safe.json_of_file filename with | Ok _ -> Ok () | _ -> Error ()
-        in
+        let of_string = to_error Jsonxt.Yojson.Safe.json_of_string in
+        let of_file = to_error Jsonxt.Yojson.Safe.json_of_file in
         (of_string, of_file)
     in
     let str_res = of_string txt in
