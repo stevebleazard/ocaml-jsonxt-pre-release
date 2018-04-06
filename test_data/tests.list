@@ -58,3 +58,8 @@ basic    fail neginfinity
 extended pass neginfinity
 yjbasic  pass neginfinity
 yjsafe   pass neginfinity
+strict   fail tuple
+basic    fail tuple
+extended pass tuple
+yjbasic  fail tuple
+yjsafe   pass tuple
