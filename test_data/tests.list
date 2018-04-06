@@ -63,3 +63,8 @@ basic    fail tuple
 extended pass tuple
 yjbasic  fail tuple
 yjsafe   pass tuple
+strict   fail variant
+basic    fail variant
+extended pass variant
+yjbasic  fail variant
+yjsafe   pass variant
