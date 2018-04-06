@@ -3,8 +3,8 @@ module Compliance = struct
 
   open Tokens
 
-  let lex_number token = token (* CR sbleazard: check finite *)
-  let lex_integer token = token (* CR sbleazard: fix bounds? *)
+  let lex_number token = token
+  let lex_integer token = token
 
   let lex_largeint = function
   | LARGEINT s -> FLOAT (float_of_string s)
