@@ -38,6 +38,16 @@ basic    fail nan
 extended pass nan
 yjbasic  pass nan
 yjsafe   pass nan
+strict   fail negnan
+basic    fail negnan
+extended pass negnan
+yjbasic  pass negnan
+yjsafe   pass negnan
+strict   fail camelnan
+basic    fail camelnan
+extended pass camelnan
+yjbasic  pass camelnan
+yjsafe   pass camelnan
 strict   fail infinity
 basic    fail infinity
 extended pass infinity
