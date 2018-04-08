@@ -42,85 +42,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  let json_to_channel' oc json = 
-    let add_char = output_char oc in
-    let add_string = output_string oc in
-    let add_quote_string s = add_char '"'; escape oc s; add_char '"' in
-    let add_int i = add_string (string_of_int i) in
-    let add_float f = add_string (Compliance.number_to_string f) in
-    let rec fmt value =
-      match value with
-      | `Assoc o -> add_char '{'; json_assoc o; add_char '}'
-      | `List l -> add_char '['; json_list l; add_char ']'
-      | `Null -> add_string "null"
-      | `Bool b -> add_string (string_of_bool b)
-      | `Int i -> add_int i
-      | `Intlit s -> add_quote_string s
-      | `Float f -> add_float f
-      | `Floatlit s -> add_quote_string s
-      | `String s -> add_quote_string s
-      | `Stringlit s -> add_quote_string s
-      | `Tuple t -> add_char '('; json_list t; add_char ')'
-      | `Variant v -> add_char '<';  variant v; add_char '>'
-    and json_assoc o =
-      let sep = ref "" in List.iter (fun v -> add_string !sep; sep := ","; pair v ) o
-    and pair (k, v) = add_quote_string k; add_char ':'; fmt v
-    and json_list l =
-      let sep = ref "" in List.iter (fun v -> add_string !sep; sep := ","; fmt v ) l
-    and variant (k, j) =
-      add_quote_string k;
-      match j with
-      | Some j -> add_char ':'; fmt j
-      | None -> ()
-    in
-    fmt json
-
-  let json_to_channel_hum' oc json = 
-    let add_char = output_char oc in
-    let add_string = output_string oc in
-    let add_quote_string s = add_char '"'; escape oc s; add_char '"' in
-    let add_int i = add_string (string_of_int i) in
-    let add_float f = add_string (Compliance.number_to_string f) in
-    let rec fmt ldr value =
-      match value with
-      | `Assoc o ->
-        add_string "{\n"; json_assoc (ldr ^ "  ") o;
-        add_char '\n'; add_string ldr; add_char '}'
-      | `List l ->
-        add_string "[\n"; json_list (ldr ^ "  ") l;
-        add_char '\n'; add_string ldr; add_char ']'
-      | `Null -> add_string "null"
-      | `Bool b -> add_string (string_of_bool b)
-      | `Int i -> add_int i
-      | `Intlit s -> add_quote_string s
-      | `Float f -> add_float f
-      | `Floatlit s -> add_quote_string s
-      | `String s -> add_quote_string s
-      | `Stringlit s -> add_quote_string s
-      | `Tuple t ->
-        add_string "(\n"; json_list (ldr ^ "  ") t;
-        add_char '\n'; add_string ldr; add_char ')'
-      | `Variant v ->
-        add_string "<";  variant (ldr ^ "  ") v;
-        add_char '\n'; add_string ldr; add_char '>'
-    and json_assoc ldr o =
-      let sep = ref ldr in
-      let newsep = ",\n" ^ ldr in
-      List.iter (fun v -> add_string !sep; sep := newsep; pair ldr v ) o
-    and pair ldr (k, v) = add_quote_string k; add_string ": "; fmt ldr v
-    and json_list ldr l =
-      let sep = ref ldr in
-      let newsep = ",\n" ^ ldr in
-      List.iter (fun v -> add_string !sep; sep := newsep; fmt ldr  v ) l
-    and variant ldr (k, j) =
-      add_quote_string k;
-      match j with
-      | Some j -> add_string ": "; fmt (ldr ^ "  ") j
-      | None -> ()
-    in
-    fmt "" json
-
-  let json_to_channel_fmt' oc json ~off ~eol ~incr = 
+  let json_to_channel_fmt oc json ~eol ~incr = 
     let add_char = output_char oc in
     let add_string = output_string oc in
     let add_quote_string s = add_char '"'; escape oc s; add_char '"' in
@@ -135,7 +57,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `List l ->
         let ldr = String.make off ' ' in
         add_char '['; add_string eol; json_list (off + incr) l;
-        add_char '\n'; add_string ldr; add_char ']'
+        add_string eol; add_string ldr; add_char ']'
       | `Null -> add_string "null"
       | `Bool b -> add_string (string_of_bool b)
       | `Int i -> add_int i
@@ -147,18 +69,18 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `Tuple t ->
         let ldr = String.make off ' ' in
         add_char '('; add_string eol; json_list (off + incr) t;
-        add_char '\n'; add_string ldr; add_char ')'
+        add_string eol; add_string ldr; add_char ')'
       | `Variant v ->
         let ldr = String.make off ' ' in
         add_char '<'; add_string eol;  variant (off + incr) v;
-        add_char '\n'; add_string ldr; add_char '>'
+        add_string eol; add_string ldr; add_char '>'
     and json_assoc off o =
       let ldr = String.make off ' ' in
       let sep = ref ldr in
       let newsep = "," ^ eol ^ ldr in
       List.iter (fun v -> add_string !sep; sep := newsep; pair off v ) o
     and pair off (k, v) = add_quote_string k; add_string ": "; fmt off v
-    and json_list ldr l =
+    and json_list off l =
       let ldr = String.make off ' ' in
       let sep = ref ldr in
       let newsep = "," ^ eol ^ ldr in
@@ -170,6 +92,9 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | None -> ()
     in
     fmt 0 json
+
+  let json_to_channel' = json_to_channel_fmt ~eol:"" ~incr:0
+  let json_to_channel_hum' = json_to_channel_fmt ~eol:"\n" ~incr:2
 
   let json_to_channel oc json =
     try Ok (json_to_channel' oc json) with
