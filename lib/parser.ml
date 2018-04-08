@@ -162,7 +162,7 @@ module Make (Compliance : Compliance.S) : Parser
     value ()
 
   let decode ~reader = 
-    try Ok (Some (json_value reader)) with
+    try Ok (Some (json_value ~reader)) with
     | Parse_error `Eof -> Ok None
     | Parse_error (`Syntax_error err) -> Error err
     | Lexxer_utils.Lex_error err -> Error err

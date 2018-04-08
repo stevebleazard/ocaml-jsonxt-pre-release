@@ -187,7 +187,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     value ()
 
   let decode ~reader = 
-    json_value reader
+    json_value ~reader
     >>= function
       | Ok res -> return (Some res)
       | Error `Eof -> return None
