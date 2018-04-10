@@ -3,7 +3,7 @@ module Basic : sig
   type t = json
 
   include (Reader_string_file.Reader_string_file with type json := json)
-  include (Json_writer_intf.Intf with type json := Json.Basic.json)
+  include (Writer_intf.Intf with type json := Json.Basic.json)
 end
 
 module Safe : sig
@@ -11,5 +11,5 @@ module Safe : sig
   type t = json
 
   include (Reader_string_file.Reader_string_file with type json := json)
-  include (Json_writer_intf.Intf with type json := Json.Extended.json)
+  include (Writer_intf.Intf with type json := Json.Extended.json)
 end
