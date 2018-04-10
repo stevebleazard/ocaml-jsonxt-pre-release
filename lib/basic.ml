@@ -37,9 +37,9 @@ module Compliance = struct
 
   let number = function
   | `Float f ->     `Float f
-  | `Infinity ->    `Null
-  | `Neginfinity -> `Null
-  | `Nan ->         `Null
+  | `Infinity ->    raise (Failure "inf not supported in basic mode")
+  | `Neginfinity -> raise (Failure "-inf not supported in basic mode")
+  | `Nan ->         raise (Failure "nan not supported in basic mode")
 
 end
 
