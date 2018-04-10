@@ -44,7 +44,7 @@ module Basic = struct
   type t = json
 
   include Json_writer_string.Make(Compliance)
-  include Json_writer_file.Make(Compliance)
+  include Writer_file.Make(Compliance)
 end
 
 module Safe = struct
@@ -93,5 +93,5 @@ module Safe = struct
   type t = json
 
   include Json_writer_string.Make(Compliance)
-  include Json_writer_file.Make(Compliance)
+  include Writer_file.Make(Compliance)
 end

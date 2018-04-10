@@ -49,4 +49,4 @@ include Reader_string_file.Make (Lexxer) (Parser)
 type t = json
 
 include Json_writer_string.Make(Compliance)
-include Json_writer_file.Make(Compliance)
+include Writer_file.Make(Compliance)
