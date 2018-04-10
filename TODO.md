@@ -1,8 +1,6 @@
 # TODO
 ## General
 * Coding
-  * string _hum
-  * file _hum
   * Stream encode / decode
   * Streaming json with recovery
 * Review
@@ -17,6 +15,7 @@
   * General
   * Function
   * Examples
+  * CODING-NOTES.md
 * Monad version
   * once rest of coding complete
   * Create compliant_lexxer_monad
