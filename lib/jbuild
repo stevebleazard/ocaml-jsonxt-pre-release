@@ -6,6 +6,6 @@
  ((name jsonxt)
   (c_names (json_float_stubs))
   (c_flags (:standard))
-  ;(public_name jsonxt)
+  (public_name jsonxt)
   ))
 

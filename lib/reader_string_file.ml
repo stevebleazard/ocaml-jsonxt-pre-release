@@ -1,4 +1,4 @@
-module type Json_string_file = sig
+module type Reader_string_file = sig
   type json
 
   val json_of_string : string -> (json, string) result
@@ -12,7 +12,7 @@ module type Json_string_file = sig
   val of_channel : in_channel -> json
 end
 
-module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Json_string_file
+module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
   with type json = Parser.Compliance.json
 = struct
   type json = Parser.Compliance.json
