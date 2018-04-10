@@ -43,7 +43,7 @@ module Basic = struct
   include Reader_string_file.Make (Lexxer) (Parser)
   type t = json
 
-  include Json_writer_string.Make(Compliance)
+  include Writer_string.Make(Compliance)
   include Writer_file.Make(Compliance)
 end
 
@@ -92,6 +92,6 @@ module Safe = struct
   include Reader_string_file.Make (Lexxer) (Parser)
   type t = json
 
-  include Json_writer_string.Make(Compliance)
+  include Writer_string.Make(Compliance)
   include Writer_file.Make(Compliance)
 end
