@@ -14,36 +14,9 @@ module Make (Compliance : Compliance.S) : Parser
 
   exception Parse_error of [`Eof | `Syntax_error of string]
 
-  let token_error tok =
-    let open Tokens in
-    let err = match tok with
-      | STRING s -> "unexpected string '" ^ s ^ "'"
-      | OS -> "unexpected '{'"
-      | OE -> "unexpected '}'"
-      | NULL -> "unexpected null value"
-      | NEGINFINITY -> "unexpected negative infinity"
-      | NAN -> "unexpected Not-a-Number"
-      | LEX_ERROR s -> s
-      | LARGEINT s -> "unexpected large integer '" ^ s ^ "'"
-      | INT i -> "unexpected integer '" ^ (string_of_int i) ^ "'"
-      | INFINITY -> "unexpected infinity"
-      | FLOAT f -> "unexpected float '" ^ (string_of_float f) ^ "'"
-      | EOF -> "unexpected end-of-file"
-      | COMPLIANCE_ERROR s -> "compliance error '" ^ s ^ "'"
-      | COMMA -> "unexpected ','"
-      | COLON -> "unexpected ':'"
-      | BOOL b -> "unexpected boolean '" ^ (if b then "true" else "false") ^ "'"
-      | AS -> "unexpected '['"
-      | AE -> "unexpected ']'"
-      | TS -> "unexpected '('"
-      | TE -> "unexpected ')'"
-      | VS -> "unexpected '<'"
-      | VE -> "unexpected '>'"
-    in
-      `Syntax_error err
-
   let json_value ~reader = 
     let open Tokens in
+    let open Parser_tools in
     let rec token_value tok = begin
       match tok with
       | INT i -> Compliance.integer i
