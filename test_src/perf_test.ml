@@ -37,26 +37,6 @@ let benchwr contents =
   let json = Jsonxt.Extended.of_string contents in
   (fun () -> Jsonxt.Extended.to_string json)
 
-let bench_fp_to_str () =
-  for i = 1 to 1000 do
-    ignore (string_of_float 11111111111.1)
-  done
-
-let bench_fp_to_str_fast () =
-  for i = 1 to 1000 do
-    ignore (Jsonxt.Json_float.string_of_float_fast_int 11111111111.1)
-  done
-
-let bench_fp_to_str_int () =
-  for i = 1 to 1000 do
-    ignore (string_of_float 11.)
-  done
-
-let bench_fp_to_str_fast_int () =
-  for i = 1 to 1000 do
-    ignore (Jsonxt.Json_float.string_of_float_fast_int 11.)
-  done
-
 let contents = load_file "test.json.10000"
 let test = benchbuf 100
 let testwrxt = benchwr contents
@@ -66,11 +46,6 @@ let testxt_esc () = Jsonxt.Extended.to_string (`String ctrl_lots)
 ; Bench.Test.create ~name:"escape" testxt_esc
 *)
 let testwryj = Yj.benchwr contents
-
-let () =
-  Printf.printf "%s\n" (Jsonxt.Json_float.string_of_float_fast_int 11.)
-(*
-*)
 
 let () = Command.run (Bench.make_command [
 (*
