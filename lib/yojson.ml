@@ -45,6 +45,7 @@ module Basic = struct
     let tuple_end () = raise (Failure "tuples not supported in yojson basic mode")
     let variant_start () = raise (Failure "variants not supported in yojson basic mode")
     let variant_end () = raise (Failure "variants not supported in yojson basic mode")
+    let name s = `Name s
   end
 
   module Lexxer = Compliant_lexxer.Make(Compliance)
@@ -103,6 +104,7 @@ module Safe = struct
     let tuple_end () = `Te
     let variant_start () = `Vs
     let variant_end () = `Ve
+    let name s = `Name s
   end
 
   module Lexxer = Compliant_lexxer.Make(Compliance)

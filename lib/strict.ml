@@ -50,6 +50,7 @@ module Compliance = struct
   let tuple_end () = raise (Failure "tuples not supported in strict mode")
   let variant_start () = raise (Failure "variants not supported in strict mode")
   let variant_end () = raise (Failure "variants not supported in strict mode")
+  let name s = `Name s
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)

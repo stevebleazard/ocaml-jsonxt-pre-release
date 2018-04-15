@@ -31,4 +31,5 @@ module type S = sig
   val tuple_end : unit -> json_stream
   val variant_start : unit -> json_stream
   val variant_end : unit -> json_stream
+  val name : string -> json_stream
 end

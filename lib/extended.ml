@@ -40,6 +40,7 @@ module Compliance = struct
   let tuple_end () = `Te
   let variant_start () = `Vs
   let variant_end () = `Ve
+  let name s = `Name s
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)
