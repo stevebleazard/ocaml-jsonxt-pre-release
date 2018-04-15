@@ -1,5 +1,6 @@
 module Compliance = struct
   type json = Json.Basic.json
+  type json_stream = Json_stream.Basic.json
 
   open Tokens
 
@@ -41,6 +42,14 @@ module Compliance = struct
   | `Neginfinity -> raise (Failure "-inf not supported in basic mode")
   | `Nan ->         raise (Failure "nan not supported in basic mode")
 
+  let array_start () = `As
+  let array_end () = `Ae
+  let object_start () = `Os
+  let object_end () = `Oe
+  let tuple_start () = raise (Failure "tuples not supported in basic mode")
+  let tuple_end () = raise (Failure "tuples not supported in basic mode")
+  let variant_start () = raise (Failure "variants not supported in basic mode")
+  let variant_end () = raise (Failure "variants not supported in basic mode")
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)

@@ -1,5 +1,6 @@
 module Compliance = struct
   type json = Json.json
+  type json_stream = Json_stream.json
 
   open Tokens
 
@@ -31,6 +32,14 @@ module Compliance = struct
   | `Neginfinity -> `Float (-1.0 /. 0.0)
   | `Nan ->         `Float (0.0 /. 0.0)
 
+  let array_start () = `As
+  let array_end () = `Ae
+  let object_start () = `Os
+  let object_end () = `Oe
+  let tuple_start () = `Ts
+  let tuple_end () = `Te
+  let variant_start () = `Vs
+  let variant_end () = `Ve
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)

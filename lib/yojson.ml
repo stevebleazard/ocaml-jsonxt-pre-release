@@ -1,6 +1,7 @@
 module Basic = struct
   module Compliance = struct
     type json = Json.Basic.json
+    type json_stream = Json_stream.Basic.json
 
     open Tokens
 
@@ -36,6 +37,14 @@ module Basic = struct
     | `Neginfinity -> `Float (-1.0 /. 0.0)
     | `Nan ->         `Float (0.0 /. 0.0)
 
+    let array_start () = `As
+    let array_end () = `Ae
+    let object_start () = `Os
+    let object_end () = `Oe
+    let tuple_start () = raise (Failure "tuples not supported in yojson basic mode")
+    let tuple_end () = raise (Failure "tuples not supported in yojson basic mode")
+    let variant_start () = raise (Failure "variants not supported in yojson basic mode")
+    let variant_end () = raise (Failure "variants not supported in yojson basic mode")
   end
 
   module Lexxer = Compliant_lexxer.Make(Compliance)
@@ -50,6 +59,7 @@ end
 module Safe = struct
   module Compliance = struct
     type json = Json.Extended.json
+    type json_stream = Json_stream.Extended.json
 
     open Tokens
 
@@ -85,6 +95,14 @@ module Safe = struct
     | `Neginfinity -> `Float (-1.0 /. 0.0)
     | `Nan ->         `Float (0.0 /. 0.0)
 
+    let array_start () = `As
+    let array_end () = `Ae
+    let object_start () = `Os
+    let object_end () = `Oe
+    let tuple_start () = `Ts
+    let tuple_end () = `Te
+    let variant_start () = `Vs
+    let variant_end () = `Ve
   end
 
   module Lexxer = Compliant_lexxer.Make(Compliance)

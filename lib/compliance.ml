@@ -1,5 +1,6 @@
 module type S = sig
   type json
+  type json_stream
 
   val lex_number : Tokens.token -> Tokens.token
   val lex_integer : Tokens.token -> Tokens.token
@@ -19,4 +20,15 @@ module type S = sig
   val list : json list -> json
   val tuple : json list -> json
   val variant : string -> json option -> json
+
+  (* streaming functions *)
+
+  val array_start : unit -> json_stream
+  val array_end : unit -> json_stream
+  val object_start : unit -> json_stream
+  val object_end : unit -> json_stream
+  val tuple_start : unit -> json_stream
+  val tuple_end : unit -> json_stream
+  val variant_start : unit -> json_stream
+  val variant_end : unit -> json_stream
 end
