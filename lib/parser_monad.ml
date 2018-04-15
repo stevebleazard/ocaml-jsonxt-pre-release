@@ -163,7 +163,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     json_value ~reader
     >>= function
       | Ok res -> return (Some res)
-      | Error `Eof -> return None
+      | Error `Eof -> fail "unexpected end-of-file"
       | Error (`Syntax_error err) -> fail err
 
 end

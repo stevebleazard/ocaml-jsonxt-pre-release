@@ -137,7 +137,7 @@ module Make (Compliance : Compliance.S) : Parser
 
   let decode t = 
     try Ok (Some (json_stream t)) with
-    | Parse_error `Eof -> Ok None
+    | Parse_error `Eof -> Error "unexpected end-of-file"
     | Parse_error (`Syntax_error err) -> Error err
     | Lexxer_utils.Lex_error err -> Error err
 
