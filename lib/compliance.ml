@@ -23,13 +23,22 @@ module type S = sig
 
   (* streaming functions *)
 
-  val array_start : unit -> json_stream
-  val array_end : unit -> json_stream
-  val object_start : unit -> json_stream
-  val object_end : unit -> json_stream
-  val tuple_start : unit -> json_stream
-  val tuple_end : unit -> json_stream
-  val variant_start : unit -> json_stream
-  val variant_end : unit -> json_stream
-  val name : string -> json_stream
+  module Stream : sig
+    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json_stream
+    val integer : int -> json_stream
+    val largeint : string -> json_stream
+    val null : json_stream
+    val string : string -> json_stream
+    val bool : bool -> json_stream
+
+    val array_start : unit -> json_stream
+    val array_end : unit -> json_stream
+    val object_start : unit -> json_stream
+    val object_end : unit -> json_stream
+    val tuple_start : unit -> json_stream
+    val tuple_end : unit -> json_stream
+    val variant_start : unit -> json_stream
+    val variant_end : unit -> json_stream
+    val name : string -> json_stream
+  end
 end

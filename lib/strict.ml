@@ -42,15 +42,24 @@ module Compliance = struct
   | `Neginfinity -> raise (Failure "-inf not supported in strict mode")
   | `Nan ->         raise (Failure "nan not supported in strict mode")
 
-  let array_start () = `As
-  let array_end () = `Ae
-  let object_start () = `Os
-  let object_end () = `Oe
-  let tuple_start () = raise (Failure "tuples not supported in strict mode")
-  let tuple_end () = raise (Failure "tuples not supported in strict mode")
-  let variant_start () = raise (Failure "variants not supported in strict mode")
-  let variant_end () = raise (Failure "variants not supported in strict mode")
-  let name s = `Name s
+  module Stream = struct
+    let number = number
+    let largeint = largeint
+    let integer = integer
+    let null = null
+    let string = string
+    let bool = bool
+
+    let array_start () = `As
+    let array_end () = `Ae
+    let object_start () = `Os
+    let object_end () = `Oe
+    let tuple_start () = raise (Failure "tuples not supported in strict mode")
+    let tuple_end () = raise (Failure "tuples not supported in strict mode")
+    let variant_start () = raise (Failure "variants not supported in strict mode")
+    let variant_end () = raise (Failure "variants not supported in strict mode")
+    let name s = `Name s
+  end
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)

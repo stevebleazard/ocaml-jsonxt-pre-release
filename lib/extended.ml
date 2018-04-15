@@ -32,15 +32,24 @@ module Compliance = struct
   | `Neginfinity -> `Float (-1.0 /. 0.0)
   | `Nan ->         `Float (0.0 /. 0.0)
 
-  let array_start () = `As
-  let array_end () = `Ae
-  let object_start () = `Os
-  let object_end () = `Oe
-  let tuple_start () = `Ts
-  let tuple_end () = `Te
-  let variant_start () = `Vs
-  let variant_end () = `Ve
-  let name s = `Name s
+  module Stream = struct
+    let number = number
+    let largeint = largeint
+    let integer = integer
+    let null = null
+    let string = string
+    let bool = bool
+
+    let array_start () = `As
+    let array_end () = `Ae
+    let object_start () = `Os
+    let object_end () = `Oe
+    let tuple_start () = `Ts
+    let tuple_end () = `Te
+    let variant_start () = `Vs
+    let variant_end () = `Ve
+    let name s = `Name s
+  end
 end
 
 module Lexxer = Compliant_lexxer.Make(Compliance)
