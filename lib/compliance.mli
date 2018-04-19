@@ -42,24 +42,3 @@ module type S = sig
     val name : string -> json_stream
   end
 end
-
-module Strict : sig
-  include (S with type json = Json.Strict.json and type json_stream = Json_stream.Strict.json)
-end
-
-module Basic : sig
-  include (S with type json = Json.Basic.json and type json_stream = Json_stream.Basic.json)
-end
-
-module Extended : sig
-  include (S with type json = Json.Extended.json and type json_stream = Json_stream.Extended.json)
-end
-
-module Yojson : sig
-  module Basic : sig
-    include (S with type json = Json.Basic.json and type json_stream = Json_stream.Basic.json)
-  end
-  module Safe : sig
-    include (S with type json = Json.Extended.json and type json_stream = Json_stream.Extended.json)
-  end
-end
