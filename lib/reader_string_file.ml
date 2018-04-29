@@ -41,7 +41,9 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
     try begin
       let inc = open_in filename in
       let lexbuf = Lexing.from_channel inc in
-      read_json ~lexbuf
+      let res = read_json ~lexbuf in
+        close_in inc;
+        res
     end
     with Sys_error err -> Error err
 
