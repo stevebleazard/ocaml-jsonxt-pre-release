@@ -3,7 +3,7 @@ module type Parser = sig
   type t
 
   val create :  reader : (unit -> Tokens.token) -> t
-  val decode : t -> (Compliance.json_stream option, string) result
+  val decode : t -> (Compliance.json_stream, string) result
 end
 
 module Make (Compliance : Compliance.S) : Parser
@@ -136,7 +136,7 @@ module Make (Compliance : Compliance.S) : Parser
     else (Stack.pop t.continuation) ()
 
   let decode t = 
-    try Ok (Some (json_stream t)) with
+    try Ok (json_stream t) with
     | Parse_error `Eof -> Error "unexpected end-of-file"
     | Parse_error (`Syntax_error err) -> Error err
     | Lexxer_utils.Lex_error err -> Error err
