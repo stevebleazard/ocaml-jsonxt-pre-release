@@ -21,7 +21,8 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   let read_json ~lexbuf =
     let reader () = Lexxer.read lexbuf in
     match Parser.decode ~reader with
-    | Ok res -> Ok res
+    | Ok None -> Error "empty string"
+    | Ok (Some res) -> Ok res
     | Error s ->
       let loc = Lexxer_utils.error_pos_msg lexbuf in
         Error (Printf.sprintf "%s at %s\n" s loc)

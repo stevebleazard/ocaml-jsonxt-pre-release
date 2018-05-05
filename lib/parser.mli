@@ -3,7 +3,7 @@ module type Parser = sig
 
   val decode
     :  reader : (unit -> Tokens.token)
-    -> (Compliance.json, string) result
+    -> (Compliance.json option, string) result
 end
 
 module Make (Compliance : Compliance.S) : Parser
