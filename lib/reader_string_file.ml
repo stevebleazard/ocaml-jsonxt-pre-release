@@ -25,7 +25,7 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
     | Ok (Some res) -> Ok res
     | Error s ->
       let loc = Lexxer_utils.error_pos_msg lexbuf in
-        Error (Printf.sprintf "%s at %s\n" s loc)
+        Error (Printf.sprintf "%s at %s" s loc)
 
   let json_of_string s =
     let lexbuf = Lexing.from_string s in
