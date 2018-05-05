@@ -47,7 +47,6 @@ module Make (Compliance : Compliance.S) : Parser
       | TS -> Stack.push tuple_value t.continuation; Compliance.Stream.tuple_start ()
       | VS -> Stack.push variant_value t.continuation; Compliance.Stream.variant_start ()
     end
-    and value () = token_value (t.reader ())
     and array_value () = begin
       let tok = t.reader () in
       match tok with
@@ -132,13 +131,18 @@ module Make (Compliance : Compliance.S) : Parser
       | tok -> raise (Parse_error (token_error tok))
     end
     in
-    if Stack.is_empty t.continuation then value ()
-    else (Stack.pop t.continuation) ()
+    if Stack.is_empty t.continuation then begin
+      match t.reader () with
+      | exception (Parse_error `Eof) -> None
+      | exception exn_ -> raise exn_
+      | tok -> Some (token_value tok)
+    end
+    else Some ((Stack.pop t.continuation) ())
 
   let decode t = 
-    try Ok (Some (json_stream t)) with
-    | Parse_error `Eof -> Error "unexpected end-of-file"
-    | Parse_error (`Syntax_error err) -> Error err
-    | Lexxer_utils.Lex_error err -> Error err
+    match json_stream t with
+    | exception (Parse_error (`Syntax_error err)) -> Error err
+    | exception (Lexxer_utils.Lex_error err) -> Error err
+    | res -> Ok res
 
 end
