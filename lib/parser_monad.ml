@@ -1,7 +1,7 @@
 module type IO = Io.IO
 
 module type Parser = sig
-  module IO : Io.IO
+  module IO : IO
   module Compliance : Compliance.S
 
   val decode
