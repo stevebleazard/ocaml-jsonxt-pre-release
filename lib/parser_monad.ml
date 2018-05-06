@@ -16,20 +16,6 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
 
   open IO
 
-  module LA = struct
-    let labuf = ref None
-    
-    let read reader () = 
-      match !labuf with
-      | Some tok -> labuf := None; return tok
-      | None -> reader ()
-
-    let peek reader () =
-      match !labuf with
-      | None -> reader () >>= fun tok -> labuf := Some tok; return tok
-      | Some tok -> return tok
-  end
-
   module Error_or = struct
     let return v = IO.return (Ok v)
     let fail err = IO.return (Error err)
@@ -46,12 +32,8 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
   let json_value ~reader = 
     let open Tokens in
     let open Parser_tools in
-    let read = LA.read reader in
-    let peek = LA.peek reader in
-    let discard () = read () >>= fun _ -> IO.return () in
 
-    let rec value () = begin
-      read () >>= fun tok ->
+    let rec token_value tok = begin
       match tok with
       | INT i -> return (Compliance.integer i)
       | STRING s -> return (Compliance.string s)
@@ -70,101 +52,131 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | TS -> tuple_value_start ()
       | VS -> variant_value_start ()
     end
+    let value () = begin
+      reader () >>= fun tok -> token_value tok
+    end
     and array_value_start () = begin
-      peek () >>= fun tok ->
+      reader () >>= fun tok -> 
       match tok with
-      | AE -> discard () >>= fun () -> return (Compliance.list [])
-      | _ -> array_values []
+      | AE -> return (Compliance.list [])
+      | _ -> array_values_start tok []
+    end
+    and array_values_start tok acc = begin
+      token_value tok >>=? fun v ->
+      reader () >>= fun tok -> 
+      match tok with
+      | AE -> return (Compliance.list (List.rev (v::acc)))
+      | COMMA -> array_values (v::acc)
+      | tok -> fail (token_error tok)
     end
     and array_values acc = begin
-      value ()
-      >>=? fun v ->
-        read () >>= fun tok -> 
-        match tok with
-        | AE -> return (Compliance.list (List.rev (v::acc)))
-        | COMMA -> array_values (v::acc)
-        | tok -> fail (token_error tok)
+      value () >>=? fun v ->
+      reader () >>= fun tok -> 
+      match tok with
+      | AE -> return (Compliance.list (List.rev (v::acc)))
+      | COMMA -> array_values (v::acc)
+      | tok -> fail (token_error tok)
     end
     and object_value_start () = begin
-      peek () >>= fun tok ->
+      reader () >>= fun tok -> 
       match tok with
-      | OE -> discard () >>= fun () -> return (Compliance.assoc [])
-      | _ -> object_values []
+      | OE -> return (Compliance.assoc [])
+      | _ -> object_values_start tok []
+    end
+    and object_values_start tok acc = begin
+      colon_value tok () >>= fun v ->
+      reader () >>= fun tok -> 
+      match tok with
+      | OE -> return (Compliance.assoc (List.rev (v::acc)))
+      | COMMA -> object_values (v::acc)
+      | tok -> fail (token_error tok)
     end
     and object_values acc = begin
-      key_colon_value ()
-      >>=? fun v ->
-        read () >>= fun tok -> 
+      key_colon_value () >>= fun v ->
+      reader () >>= fun tok -> 
+      match tok with
+      | OE -> Compliance.assoc (List.rev (v::acc))
+      | COMMA -> object_values (v::acc)
+      | tok -> fail (token_error tok)
+    end
+    and colon_value v () = begin
+      match v with
+      | STRING k -> begin
+        reader () >>= fun tok -> 
         match tok with
-        | OE -> return (Compliance.assoc (List.rev (v::acc)))
-        | COMMA -> object_values (v::acc)
+        | COLON ->
+          value () >>=? fun v -> return (k, v)
         | tok -> fail (token_error tok)
+        end
+      | tok -> fail (token_error tok)
     end
     and key_colon_value () = begin
-      read ()
-      >>= function
-        | STRING k -> begin
-          read ()
-          >>= function
-            | COLON -> begin value () >>=? fun v -> return (k, v) end
-            | tok ->  fail (token_error tok)
-          end
-        | tok ->  fail (token_error tok)
+      reader () >>= fun tok -> 
+      match tok with
+      | STRING k -> begin
+        reader () >>= fun tok -> 
+        match tok with
+        | COLON ->
+          value () >>=? fun v -> return (k, v)
+        | tok -> fail (token_error tok)
+        end
+      | tok -> fail (token_error tok)
     end
     and tuple_value_start () = begin
-      value ()
-      >>=? fun v1 ->
-        read ()
-        >>= function
-          | COMMA -> begin
-            value ()
-            >>=? fun v2 ->
-              read ()
-              >>= function
-                | TE -> return (Compliance.tuple [v1; v2])
-                | COMMA -> tuple_values [v2; v1]
-                | tok -> fail (token_error tok)
-            end
-          | TE -> fail (`Syntax_error "tuple must have at least 2 elements")
-          | tok -> fail (token_error tok)
+      value () >>=? fun v1 ->
+      reader () >>= fun tok -> 
+      match tok with
+      | COMMA -> begin
+        value () >>=? fun v2 ->
+        reader () >>= fun tok -> 
+        match tok with
+        | TE -> return (Compliance.tuple [v1; v2])
+        | COMMA -> tuple_values [v2; v1]
+        | tok -> fail (token_error tok)
+        end
+      | TE -> fail (`Syntax_error "tuple must have at least 2 elements")
+      | tok -> fail (token_error tok)
     end
     and tuple_values acc = begin
-      value ()
-      >>=? fun v ->
-        read ()
-        >>= function
-          | TE -> return (Compliance.tuple (List.rev (v::acc)))
-          | COMMA -> tuple_values (v::acc)
-          | tok -> fail (token_error tok)
+      value () >>=? fun v ->
+      reader () >>= fun tok -> 
+      match tok with
+      | TE -> return (Compliance.tuple (List.rev (v::acc)))
+      | COMMA -> tuple_values (v::acc)
+      | tok -> fail (token_error tok)
     end
     and variant_value_start () = begin
-      read ()
-      >>= function
-        | STRING k -> begin
-          read ()
-          >>= function
-            | VE -> return (Compliance.variant k None)
-            | COLON -> value () >>=? fun v -> variant_end k (Some v)
-            | tok -> fail (token_error tok)
-          end
-        | VE -> fail (`Syntax_error "variant must have at least a string")
+      reader () >>= fun tok -> 
+      match tok with
+      | STRING k -> begin
+        reader () >>= fun tok -> 
+        match tok with
+        | VE -> return (Compliance.variant k None)
+        | COLON ->
+          value () >>=? fun v -> variant_end k (Some v)
         | tok -> fail (token_error tok)
+        end
+      | VE -> fail (`Syntax_error "variant must have at least a string")
+      | tok -> fail (token_error tok)
     end
     and variant_end k v = begin
-      read ()
-      >>= function
-        | VE -> return (Compliance.variant k v)
-        | tok -> fail (token_error tok)
+      reader () >>= fun tok -> 
+      match tok with
+      | VE -> return (Compliance.variant k v)
+      | tok -> fail (token_error tok)
     end
     in
-    value ()
+    reader () >>= fun tok -> 
+    match tok with
+    | Error `Eof -> Ok None
+    | Error _ as err -> err
+    | Ok tok -> token_value tok
 
   let decode ~reader = 
     json_value ~reader
     >>= function
-      | Ok res -> return (Some res)
-      | Error `Eof -> fail "unexpected end-of-file"
-      | Error (`Syntax_error err) -> fail err
+    | Ok res -> return res
+    | Error (`Syntax_error err) -> fail err
 
 end
 
