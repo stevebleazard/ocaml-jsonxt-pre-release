@@ -52,7 +52,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | TS -> tuple_value_start ()
       | VS -> variant_value_start ()
     end
-    let value () = begin
+    and value () = begin
       reader () >>= fun tok -> token_value tok
     end
     and array_value_start () = begin
@@ -84,7 +84,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | _ -> object_values_start tok []
     end
     and object_values_start tok acc = begin
-      colon_value tok () >>= fun v ->
+      colon_value tok () >>=? fun v ->
       reader () >>= fun tok -> 
       match tok with
       | OE -> return (Compliance.assoc (List.rev (v::acc)))
@@ -92,10 +92,10 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
       | tok -> fail (token_error tok)
     end
     and object_values acc = begin
-      key_colon_value () >>= fun v ->
+      key_colon_value () >>=? fun v ->
       reader () >>= fun tok -> 
       match tok with
-      | OE -> Compliance.assoc (List.rev (v::acc))
+      | OE -> return (Compliance.assoc (List.rev (v::acc)))
       | COMMA -> object_values (v::acc)
       | tok -> fail (token_error tok)
     end
@@ -168,15 +168,15 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     in
     reader () >>= fun tok -> 
     match tok with
-    | Error `Eof -> Ok None
-    | Error _ as err -> err
-    | Ok tok -> token_value tok
+    | EOF -> return None
+    | tok -> token_value tok >>=? fun res -> return (Some res)
 
   let decode ~reader = 
     json_value ~reader
     >>= function
     | Ok res -> return res
     | Error (`Syntax_error err) -> fail err
+    | Error `Eof  -> fail "unexpected end-of-file"
 
 end
 
