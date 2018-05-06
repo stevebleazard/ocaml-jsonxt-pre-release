@@ -15,19 +15,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
 = struct
 
   open IO
-
-  module Error_or = struct
-    let return v = IO.return (Ok v)
-    let fail err = IO.return (Error err)
-
-    let (>>=?) a f =
-      a >>= fun a ->
-      match a with
-      | Ok a -> f a
-      | Error err -> IO.return (Error err)
-  end
-
-  open Error_or
+  include Error_or.Make(IO)
 
   let json_value ~reader = 
     let open Tokens in
