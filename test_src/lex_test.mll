@@ -1,43 +1,9 @@
 {
 type token = EOL | INT of int | PLUS | EOF
 
-module Make (M : sig
-               type 'a t
-               val return: 'a -> 'a t
-               val bind: 'a t -> ('a -> 'b t) -> 'b t
-               val fail : string -> 'a t
-
-               (* Set up lexbuf *)
-               val on_refill : Lexing.lexbuf -> unit t
-             end)
-= struct
-
-let refill_handler k lexbuf =
-    M.bind (M.on_refill lexbuf) (fun () -> k lexbuf)
-
-}
-
-refill {refill_handler}
-
-rule token = parse
-| [' ' '\t']
-    { token lexbuf }
-| '\n'
-    { M.return EOL }
-| ['0'-'9']+ as i
-    { M.return (INT (int_of_string i)) }
-| '+'
-    { M.return PLUS }
-| eof
-    { M.return EOF }
-| _
-    { M.fail "unexpected character" }
-{
-end
-
 open Lexing
 
-let fill_lexbuf aux_buffer read_len lexbuf =
+let fill_lexbuf buf read_len lexbuf =
   let n = if read_len > 0 then read_len else (lexbuf.lex_eof_reached <- true; 0) in
   (* Current state of the buffer:
         <-------|---------------------|----------->
@@ -84,9 +50,53 @@ let fill_lexbuf aux_buffer read_len lexbuf =
     done
   end;
   (* There is now enough space at the end of the buffer *)
-  Bytes.blit aux_buffer 0 lexbuf.lex_buffer lexbuf.lex_buffer_len n;
+  Bytes.blit buf 0 lexbuf.lex_buffer lexbuf.lex_buffer_len n;
   lexbuf.lex_buffer_len <- lexbuf.lex_buffer_len + n
 ;;
+
+module Make (M : sig
+               type 'a t
+               val return: 'a -> 'a t
+               val bind: 'a t -> ('a -> 'b t) -> 'b t
+               val fail : string -> 'a t
+
+               (* Set up lexbuf *)
+               val on_refill : Lexing.lexbuf -> unit t
+               (* val read : Bytes.t -> int -> int t *)
+             end)
+= struct
+
+
+  let refill_handler k lexbuf =
+      M.bind (M.on_refill lexbuf) (fun () -> k lexbuf)
+
+  (*
+  let refiller =
+    let buf = Bytes.create 512 in
+    fun k lexbuf ->
+      M.bind (M.read buf (Bytes.length buf)) (fun n -> fill_lexbuf buf n lexbuf; k lexbuf)
+  *)
+}
+
+
+refill {refill_handler}
+
+rule token _state = parse 
+| [' ' '\t']
+    { token _state lexbuf  }
+| '\n'
+    { M.return EOL }
+| ['0'-'9']+ as i
+    { M.return (INT (int_of_string i)) }
+| '+'
+    { M.return PLUS }
+| eof
+    { M.return EOF }
+| _
+    { M.fail "unexpected character" }
+
+{
+end
 
 let zero_pos = {
   pos_fname = "";
@@ -98,7 +108,7 @@ let zero_pos = {
 
 let create_lexbuf () =
   {
-    refill_buff = (fun _lexbuf -> ());
+    refill_buff = (fun _lexbuf -> Printf.printf "[refill_buf]%!");
     lex_buffer = Bytes.create 1024;
     lex_buffer_len = 0;
     lex_abs_pos = 0;
@@ -138,7 +148,7 @@ module Lexxer = Make (struct
 let () =
   let lexbuf = create_lexbuf () in
   let rec loop () = 
-    match Lexxer.token lexbuf with
+    match Lexxer.token 1 lexbuf with
     | Ok EOL -> Printf.printf "EOL "; loop ()
     | Ok (INT i) -> Printf.printf "INT(%d) " i; loop ()
     | Ok PLUS -> Printf.printf "PLUS "; loop ()
