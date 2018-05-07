@@ -1,6 +1,6 @@
 (jbuild_version 1)
 
-(ocamllex (compliant_lexxer))
+(ocamllex (compliant_lexxer compliant_lexxer_monad))
 
 (library
  ((name jsonxt)
