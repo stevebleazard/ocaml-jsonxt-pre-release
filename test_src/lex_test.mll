@@ -9,14 +9,18 @@ module Make (M : sig
                val bind: 'a t -> ('a -> 'b t) -> 'b t
                val fail : string -> 'a t
 
-               (* Set up lexbuf *)
-               val on_refill : Lexing.lexbuf -> unit t
                val read : Bytes.t -> int -> int t
              end)
 = struct
 
+  let on_refill lexbuf =
+    let buf = Bytes.create 512 in
+    M.bind (M.read buf 512) (fun len ->
+      Lexutils.fill_lexbuf buf len lexbuf;
+      M.return ())
+
   let refill_handler k lexbuf =
-      M.bind (M.on_refill lexbuf) (fun () -> k lexbuf)
+      M.bind (on_refill lexbuf) (fun () -> k lexbuf)
 
 }
 
@@ -50,8 +54,6 @@ let create_lexxer ~reader =
         | Error _ as err -> err
         | Ok a -> f a
       
-      let (>>=?) = bind
-
       let fail s = Error s
 
       let read buf len =
@@ -59,13 +61,6 @@ let create_lexxer ~reader =
         | exception End_of_file -> return 0
         | exception Failure err -> fail err
         | len -> return len
-
-      let on_refill lexbuf =
-        let buf = Bytes.create 512 in
-        read buf 512
-        >>=? fun len ->
-          Lexutils.fill_lexbuf buf len lexbuf;
-          return ()
 
     end)
   in
