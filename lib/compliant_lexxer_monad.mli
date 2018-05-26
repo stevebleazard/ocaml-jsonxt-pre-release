@@ -3,7 +3,7 @@ module type IO = Io.IO
 module type LexIO = sig
   module IO : IO
 
-  val on_refill : Lexing.lexbuf -> unit IO.t
+   val read : Bytes.t -> int -> int IO.t
 end
 
 module type Lex = sig

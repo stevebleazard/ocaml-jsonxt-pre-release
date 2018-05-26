@@ -26,7 +26,7 @@
   module type LexIO = sig
     module IO : IO
 
-    val on_refill : Lexing.lexbuf -> unit IO.t
+    val read : Bytes.t -> int -> int IO.t
   end
 
   module type Lex = sig
@@ -39,10 +39,18 @@
 
     open LexIO.IO
     module Error_or = Error_or.Make(LexIO.IO)
-    open Error_or
+
+    let on_refill lexbuf =
+      let buf = Bytes.create 512 in
+      LexIO.read buf 512
+      >>= fun len ->
+        Lexutils.fill_lexbuf buf len lexbuf;
+        return ()
 
     let refill_handler k lexbuf =
-      LexIO.on_refill lexbuf >>= fun () -> k lexbuf
+      on_refill lexbuf >>= fun () -> k lexbuf
+
+    open Error_or
 }
 
 let digit_1_to_9 = ['1'-'9']
