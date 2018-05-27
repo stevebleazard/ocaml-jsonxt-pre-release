@@ -1,28 +1,31 @@
 module type Reader_monad = sig
-  module IO
+  module IO : Io.IO
   type json
 
   val read_json : reader:(Bytes.t -> int -> int IO.t) -> (json, string) result IO.t
 end
 
 module Make
-    (Lexxer : Compliant_lexxer_monad.Lex )
     (Parser : Parser_monad.Parser)
   : Reader_monad with type json = Parser.Compliance.json
 = struct
   type json = Parser.Compliance.json
   type t = json
 
-  let create_lexxer reader =
-    let module Lexxer_internal = Lexxer.Make(struct
-      include Lexxer.IO
-      let read buf len = reader buf len
-    end)
-  in
-  fun lexbuf -> Lexxer_internal.read lexbuf
+  let create_lex_reader reader =
+    let module Lexxer = Compliant_lexxer_monad.Make (Parser.Compliance)
+        (struct
+          module IO = Parser.IO
+          include IO
+          let read buf len = reader buf len
+        end)
+    in
+    fun lexbuf -> Lexxer.read lexbuf
 
   let read_json ~reader =
-    let reader () = create_lexxer reader in
+    let lexbuf = Lexutils.create_lexbuf () in
+    let lex_reader = create_lex_reader reader in
+    let reader () = lex_reader lexbuf in
     match Parser.decode ~reader with
     | Ok None -> Error "empty string"
     | Ok (Some res) -> Ok res
