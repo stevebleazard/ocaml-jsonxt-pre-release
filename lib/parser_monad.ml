@@ -10,9 +10,12 @@ module type Parser = sig
 end
 
 module Make (Compliance : Compliance.S) (IO : IO) : Parser
-  with module IO := IO
-   and module Compliance := Compliance
+  with module IO = IO
+   and module Compliance = Compliance
 = struct
+
+  module IO = IO
+  module Compliance = Compliance
 
   open IO
   module Error_or = Error_or.Make(IO)

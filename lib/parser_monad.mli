@@ -10,5 +10,5 @@ module type Parser = sig
 end
 
 module Make (Compliance : Compliance.S) (IO : IO) : Parser
-  with module IO := IO
-   and module Compliance := Compliance
+  with module IO = IO
+   and module Compliance = Compliance
