@@ -7,10 +7,12 @@ end
 
 module Make
     (Parser : Parser_monad.Parser)
-  : Reader_monad with type json = Parser.Compliance.json
+  : Reader_monad with type json = Parser.Compliance.json and module IO := Parser.IO
 = struct
   type json = Parser.Compliance.json
   type t = json
+
+  open Parser.IO
 
   let create_lex_reader reader =
     let module Lexxer = Compliant_lexxer_monad.Make (Parser.Compliance)
@@ -25,11 +27,17 @@ module Make
   let read_json ~reader =
     let lexbuf = Lexutils.create_lexbuf () in
     let lex_reader = create_lex_reader reader in
-    let reader () = lex_reader lexbuf in
-    match Parser.decode ~reader with
-    | Ok None -> Error "empty string"
-    | Ok (Some res) -> Ok res
+    let reader () = 
+      lex_reader lexbuf
+      >>= function
+      | Ok tok -> return tok
+      | Error err -> return (Tokens.LEX_ERROR err)
+    in
+    Parser.decode ~reader
+    >>= function
+    | Ok None -> return (Error "empty string")
+    | Ok (Some res) -> return (Ok res)
     | Error s ->
       let loc = Lexxer_utils.error_pos_msg lexbuf in
-        Error (Printf.sprintf "%s at %s" s loc)
+        return (Error (Printf.sprintf "%s at %s" s loc))
 end
