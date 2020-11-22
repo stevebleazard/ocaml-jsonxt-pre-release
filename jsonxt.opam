@@ -6,7 +6,7 @@ bug-reports: "https://www.github.com/stevebleazard/ocaml-jsonxt/issues"
 license: "MIT"
 dev-repo: "https://www.github.com/stevebleazard/ocaml-jsonxt.git"
 doc: "https://stevebleazard.github.io/ocaml-jsonxt/"
-description: "JSON parser with yojson compatibility"
+synopsis: "JSON parser with yojson compatibility"
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
