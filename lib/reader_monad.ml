@@ -10,7 +10,6 @@ module Make
   : Reader_monad with type json = Parser.Compliance.json and module IO := Parser.IO
 = struct
   type json = Parser.Compliance.json
-  type t = json
 
   open Parser.IO
 

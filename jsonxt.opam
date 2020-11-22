@@ -6,12 +6,14 @@ bug-reports: "https://www.github.com/stevebleazard/ocaml-jsonxt/issues"
 license: "MIT"
 dev-repo: "https://www.github.com/stevebleazard/ocaml-jsonxt.git"
 doc: "https://stevebleazard.github.io/ocaml-jsonxt/"
+description: "JSON parser with yojson compatibility"
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs "@install"]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 
 depends: [
-  "jbuilder"  {build}
+  "dune"  {build}
 ]
 
-available: [ ocaml-version >= "4.03.0" ]
+available: [ ocaml-version >= "4.05.0" ]

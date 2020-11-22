@@ -1,5 +1,3 @@
-open Printf
-
 let nibble_to_hex i = char_of_int (if i > 9 then 65 + i - 10 else 48 + i)
 
 let add_hex_byte buf i =

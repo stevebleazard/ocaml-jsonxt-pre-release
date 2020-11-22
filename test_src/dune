@@ -1,0 +1,14 @@
+(ocamllex lex_test)
+
+(tests
+ (modes byte exe)
+ (names test_parser perf_test test_yojson compliance_tester lex_test)
+ (libraries yojson core core_bench jsonxt))
+
+(alias
+ (name default)
+ (deps))
+
+;(alias
+; (name default)
+; (deps test_parser.exe))

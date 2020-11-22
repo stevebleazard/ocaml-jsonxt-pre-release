@@ -1,8 +1,6 @@
 {
 type token = EOL | INT of int | PLUS | EOF
 
-open Lexing
-
 module Make (M : sig
                type 'a t
                val return: 'a -> 'a t

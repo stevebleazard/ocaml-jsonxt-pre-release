@@ -21,8 +21,8 @@ let print_json_value json =
     | `Floatlit s -> printf "%s " s
     | `String s -> printf "%s " s
     | `Stringlit s -> printf "%s " s
-    | `Tuple t -> printf "tuple "
-    | `Variant t -> printf "variant "
+    | `Tuple _t -> printf "tuple "
+    | `Variant _t -> printf "variant "
   and print_json_assoc o = List.iter print_pair o
   and print_pair (k, v) = printf "%s : " k; fmt v; printf ","
   and print_json_list l = List.iter (fun v -> fmt v; printf ",") l

@@ -1,0 +1,9 @@
+(ocamllex compliant_lexxer compliant_lexxer_monad)
+
+(library
+ (foreign_stubs
+  (language c)
+  (names json_float_stubs)
+  (flags :standard))
+ (name jsonxt)
+ (public_name jsonxt))

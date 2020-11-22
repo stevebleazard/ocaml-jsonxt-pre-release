@@ -1,0 +1,8 @@
+(executables
+ (modes byte exe)
+ (names jsonxtool)
+ (libraries jsonxt))
+
+(alias
+ (name DEFAULT)
+ (deps jsonxtool.exe))

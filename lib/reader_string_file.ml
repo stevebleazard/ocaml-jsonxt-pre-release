@@ -16,7 +16,6 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   with type json = Parser.Compliance.json
 = struct
   type json = Parser.Compliance.json
-  type t = json
 
   let read_json ~lexbuf =
     let reader () = Lexxer.read lexbuf in

@@ -28,8 +28,8 @@ module Basic = struct
     let bool b = `Bool b
     let assoc a = `Assoc a
     let list l = `List l
-    let tuple l = raise (Failure "tuples not supported in yojson basic mode")
-    let variant l = raise (Failure "variants not supported in yojson basic mode")
+    let tuple _l = raise (Failure "tuples not supported in yojson basic mode")
+    let variant _l = raise (Failure "variants not supported in yojson basic mode")
 
     let number = function
     | `Float f ->     `Float f
@@ -70,8 +70,6 @@ module Safe = struct
   module Compliance = struct
     type json = Json.Extended.json
     type json_stream = Json_stream.Extended.json
-
-    open Tokens
 
     let lex_number token = token
     let lex_integer token = token

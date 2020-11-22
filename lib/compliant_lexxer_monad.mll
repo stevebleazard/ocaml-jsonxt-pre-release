@@ -19,7 +19,6 @@
       *)
       result
   end
-  open Lexing
   open Tokens
 
   module type IO = Io.IO
