@@ -15,7 +15,7 @@ module Basic = struct
     let number_to_string f =
       match classify_float f with
       | FP_normal | FP_subnormal | FP_zero ->
-        Json_float.string_of_float_fast_int f
+        Json_float.string_of_float_json f
       | FP_infinite ->
         if f < 0. then "-Infinity" else "Infinity"
       | FP_nan ->
@@ -81,7 +81,7 @@ module Safe = struct
     let number_to_string f =
       match classify_float f with
       | FP_normal | FP_subnormal | FP_zero ->
-        Json_float.string_of_float_fast_int f
+        Json_float.string_of_float_json f
       | FP_infinite ->
         if f < 0. then "-Infinity" else "Infinity"
       | FP_nan ->

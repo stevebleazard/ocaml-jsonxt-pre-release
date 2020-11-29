@@ -36,10 +36,10 @@ CAMLprim value caml_string_of_float_fast_int(value arg)
       break;
     default:
       l = (long long int)d;
-      if (d == (double)l)
+      if (llabs(l) <= 9007199254740991ll) /* IEEE max int in a float */
         res = caml_alloc_sprintf("%lld", l);
       else
-        res = caml_alloc_sprintf("%.12g", d);
+        res = caml_alloc_sprintf("%.17g", d);
       break;
   }
   CAMLreturn(res);
