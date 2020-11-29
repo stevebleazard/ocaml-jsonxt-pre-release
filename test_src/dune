@@ -6,8 +6,8 @@
  (libraries yojson core core_bench jsonxt))
 
 (alias
- (name default)
- (deps))
+ (name compliance_tests)
+ (deps compliance_tester.exe))
 
 ;(alias
 ; (name default)

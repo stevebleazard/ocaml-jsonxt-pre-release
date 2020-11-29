@@ -10,10 +10,13 @@ synopsis: "JSON parser with yojson compatibility"
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p" name "-j" jobs "@compliance_tests"] {with-test}
 ]
 
 depends: [
-  "dune"  {build}
+  "dune"        {build}
+  "yojson"      {with-test}
+  "core"        {with-test}
+  "core_bench"  {with-test}
 ]
-
-available: [ ocaml-version >= "4.05.0" ]
+  #"ocaml"       {>= "4.05.0"}
