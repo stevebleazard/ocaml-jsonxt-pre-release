@@ -1,6 +1,7 @@
 %parameter<Compliance : Compliance.S>
 
 %{
+open Tokens
 %}
 
 %start <(Compliance.json option, string) result> lax
