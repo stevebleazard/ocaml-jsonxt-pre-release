@@ -1,3 +1,4 @@
+(*
 val dump 
   :  ([< `Assoc of (string * 'a) list
       | `Bool of bool
@@ -13,4 +14,6 @@ val dump
       | `Variant of string * 'a option ]
      as 'a)
   -> string
-
+*)
+val dump : 'a Json_internal.constrained -> string
+val json_to_string : 'a Json_internal.constrained -> string
