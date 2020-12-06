@@ -50,7 +50,7 @@ module Make (Compliance : Compliance.S) : Parser
     and array_value () = begin
       let tok = t.reader () in
       match tok with
-      | AE -> Compliance.Stream.array_start ()
+      | AE -> Compliance.Stream.array_end ()
       | tok -> Stack.push array_value_next t.continuation; token_value tok
     end
     and array_value_next () = begin
@@ -65,7 +65,7 @@ module Make (Compliance : Compliance.S) : Parser
     and object_value () = begin
       let tok = t.reader () in
       match tok with
-      | OE -> Compliance.Stream.object_start ()
+      | OE -> Compliance.Stream.object_end ()
       | STRING s -> Stack.push object_colon_value t.continuation; Compliance.Stream.name s
       | tok -> raise (Parse_error (token_error tok))
     end
@@ -141,6 +141,7 @@ module Make (Compliance : Compliance.S) : Parser
 
   let decode t = 
     match json_stream t with
+    | exception (Parse_error (`Eof)) -> Ok None
     | exception (Parse_error (`Syntax_error err)) -> Error err
     | exception (Lexxer_utils.Lex_error err) -> Error err
     | res -> Ok res
