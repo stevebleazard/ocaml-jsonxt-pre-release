@@ -3,6 +3,7 @@ module type Reader_stream = sig
   type stream
 
   val json_stream_of_string : string -> stream
+  val json_stream_of_channel : in_channel -> stream
   val decode_stream : stream -> (json_stream option, string) result
 end
 
