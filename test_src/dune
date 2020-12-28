@@ -2,7 +2,7 @@
 
 (tests
  (modes byte exe)
- (names test_parser perf_test test_yojson compliance_tester lex_test)
+ (names test_parser perf_test test_yojson compliance_tester lex_test test_parser_stream)
  (libraries yojson core core_bench jsonxt))
 
 (alias
