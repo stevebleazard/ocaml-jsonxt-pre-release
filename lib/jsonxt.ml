@@ -2,6 +2,7 @@ module Json = Json
 module Extended = Extended
 module Basic = Basic
 module Basic_stream = Basic_stream
+module Extended_stream = Extended_stream
 module Strict = Strict
 module Tools = Tools
 module Yojson = Yojson
