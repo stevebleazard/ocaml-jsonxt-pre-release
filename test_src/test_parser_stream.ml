@@ -99,6 +99,20 @@ let parsit contents =
     | Ok (Some tok) -> Printer.print printer tok; loop ()
     | Error s -> printf "Error %s\n" s
   in
+    printf "Local\n";
+    loop ();
+  printf "\n"
+
+let parsit_writer contents =
+  let stream = Jsonxt.Extended_stream.json_stream_of_string contents in
+  let printer = Jsonxt.Extended_stream.create_encoder' ~add_char:(printf "%c") ~add_string:(printf "%s") ~incr:0 ~eol:"" in
+  let rec loop () =
+    match Jsonxt.Extended_stream.decode_stream stream with
+    | Ok None -> ()
+    | Ok (Some tok) -> Jsonxt.Extended_stream.json_stream_encode_exn printer tok; loop ()
+    | Error s -> printf "Error %s\n" s
+  in
+    printf "WRITER\n";
     loop ();
   printf "\n"
 
@@ -108,4 +122,5 @@ let () =
   else
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
-      parsit contents
+      parsit contents;
+      parsit_writer contents
