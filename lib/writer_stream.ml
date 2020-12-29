@@ -21,8 +21,8 @@ module type Intf = sig
   val create_encoder_channel : out_channel -> t
   val create_encoder_channel_hum : out_channel -> t
 
-  val json_stream_encode_exn : t -> 'a Json_internal.constrained_stream -> unit
-  val json_stream_encode : t -> 'a Json_internal.constrained_stream -> (unit, string) result
+  val encode_stream_exn : t -> 'a Json_internal.constrained_stream -> unit
+  val encode_stream : t -> 'a Json_internal.constrained_stream -> (unit, string) result
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct
@@ -80,7 +80,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  let json_stream_encode_exn t (tok:'a Json_internal.constrained_stream) =
+  let encode_stream_exn t (tok:'a Json_internal.constrained_stream) =
     let add_char = t.add_char in
     let add_string = t.add_string in
     let add_quote_string s = add_char '"'; escape ~add_char ~add_string s; add_char '"' in
@@ -192,7 +192,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
     | Variant_end -> fmt_variant_end t off tok
       
 
-  let json_stream_encode t (tok:'a Json_internal.constrained_stream) =
-    try Ok (json_stream_encode_exn t tok) with
+  let encode_stream t (tok:'a Json_internal.constrained_stream) =
+    try Ok (encode_stream_exn t tok) with
     | Failure err -> Error err
 end

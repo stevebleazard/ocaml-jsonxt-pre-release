@@ -109,7 +109,7 @@ let parsit_writer contents =
   let rec loop () =
     match Jsonxt.Extended_stream.decode_stream stream with
     | Ok None -> ()
-    | Ok (Some tok) -> Jsonxt.Extended_stream.json_stream_encode_exn printer tok; loop ()
+    | Ok (Some tok) -> Jsonxt.Extended_stream.encode_stream_exn printer tok; loop ()
     | Error s -> printf "Error %s\n" s
   in
     printf "WRITER\n";
