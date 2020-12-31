@@ -84,8 +84,12 @@ module Make (Compliance : Compliance.S) : Intf = struct
     let add_char = t.add_char in
     let add_string = t.add_string in
     let add_quote_string s = add_char '"'; escape ~add_char ~add_string s; add_char '"' in
+    let add_leader off = add_string (String.make off ' ') in
+    let add_eol () = add_string t.eol in
+    let add_comma_eol_ldr off = add_char ','; add_eol (); add_leader off in
     let add_int i = add_string (string_of_int i) in
     let add_float f = add_string (Compliance.number_to_string f) in
+    let end_of_obj_list off c = add_leader (off - t.incr); add_char c in
     let fmt t off (tok:'a Json_internal.constrained_stream) =
       match tok with
       | `Null -> add_string "null"
@@ -101,47 +105,42 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `Neg_infinity -> add_string "-inf"
       | `Nan -> add_string "nan"
       | `As ->
-        add_char '['; add_string t.eol;
+        add_char '['; add_eol ();
         Stack.push (List_start, (off + t.incr)) t.stack
       | `Ae -> ()
       | `Os ->
-        add_char '{'; add_string t.eol;
+        add_char '{'; add_eol ();
         Stack.push (Object_name, (off + t.incr)) t.stack
       | `Oe -> ()
       | `Ts ->
-        add_char '('; add_string t.eol;
+        add_char '('; add_eol ();
         Stack.push (Tuple_start, (off + t.incr)) t.stack
       | `Te -> ()
       | `Vs ->
-        add_char '<'; add_string t.eol;
+        add_char '<'; add_eol ();
         Stack.push (Variant_start, (off + t.incr)) t.stack
       | `Ve -> ()
     in
-    let end_of_obj_list off c = add_string (String.make (off - t.incr) ' '); add_char c in
     let fmt_list_start t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
       | `Ae -> end_of_obj_list off ']'
-      | _ -> let () = Stack.push (List_next, off) t.stack in add_string ldr; fmt t off tok
+      | _ -> let () = Stack.push (List_next, off) t.stack in add_leader off; fmt t off tok
     in
     let fmt_list_next t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
-      | `Ae -> add_string t.eol; end_of_obj_list off ']'
-      | _ -> let () = Stack.push (List_next, off) t.stack in add_string ("," ^ t.eol ^ ldr); fmt t off tok
+      | `Ae -> add_eol (); end_of_obj_list off ']'
+      | _ -> let () = Stack.push (List_next, off) t.stack in add_comma_eol_ldr off; fmt t off tok
     in
     let fmt_object_name t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
       | `Oe -> end_of_obj_list off '}'
-      | `Name s -> add_string ldr; add_quote_string s; add_char ':'; Stack.push (Object_value, off) t.stack
+      | `Name s -> add_leader off; add_quote_string s; add_char ':'; Stack.push (Object_value, off) t.stack
       | _ -> raise (Failure "Unexpected token, expected object key")
     in
     let fmt_object_name_next t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
-      | `Oe -> add_string t.eol; end_of_obj_list off '}'
-      | `Name s -> add_string ("," ^ t.eol ^ ldr); add_quote_string s; add_char ':'; Stack.push (Object_value, off) t.stack
+      | `Oe -> add_eol (); end_of_obj_list off '}'
+      | `Name s -> add_comma_eol_ldr off; add_quote_string s; add_char ':'; Stack.push (Object_value, off) t.stack
       | _ -> raise (Failure "Unexpected token, expected object key")
     in
     let fmt_object_value t off (tok:'a Json_internal.constrained_stream) =
@@ -150,31 +149,28 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _ -> Stack.push (Object_name_next, off) t.stack; fmt t off tok
     in
     let fmt_tuple_start t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
       | `Te -> end_of_obj_list off ')'
-      | _ -> let () = Stack.push (Tuple_next, off) t.stack in add_string ldr; fmt t off tok
+      | _ -> let () = Stack.push (Tuple_next, off) t.stack in add_leader off; fmt t off tok
     in
     let fmt_tuple_next t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
-      | `Te -> add_string t.eol; end_of_obj_list off ')'
-      | _ -> let () = Stack.push (Tuple_next, off) t.stack in add_string ("," ^ t.eol ^ ldr); fmt t off tok
+      | `Te -> add_eol (); end_of_obj_list off ')'
+      | _ -> let () = Stack.push (Tuple_next, off) t.stack in add_comma_eol_ldr off; fmt t off tok
     in
     let fmt_variant_start t off (tok:'a Json_internal.constrained_stream) =
-      let ldr = String.make off ' ' in
       match tok with
-      | `Name s -> add_string ldr; add_quote_string s; Stack.push (Variant_value, off) t.stack
+      | `Name s -> add_leader off; add_quote_string s; Stack.push (Variant_value, off) t.stack
       | _ -> raise (Failure "Unexpected token, expected varient name")
     in
     let fmt_variant_value t off (tok:'a Json_internal.constrained_stream) =
       match tok with
-      | `Ve -> add_string t.eol; end_of_obj_list off '>'
+      | `Ve -> add_eol (); end_of_obj_list off '>'
       | _ -> Stack.push (Variant_end, off) t.stack; add_char ':'; fmt t off tok
     in
     let fmt_variant_end _t off (tok:'a Json_internal.constrained_stream) =
       match tok with
-      | `Ve -> add_string t.eol; end_of_obj_list off '>'
+      | `Ve -> add_eol (); end_of_obj_list off '>'
       | _ -> raise (Failure "Unexpected token, expected varient end (`Ve)")
     in
     let state, off = if Stack.is_empty t.stack then (Token, 0) else Stack.pop t.stack in
