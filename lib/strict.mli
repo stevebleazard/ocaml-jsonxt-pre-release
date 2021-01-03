@@ -1,3 +1,6 @@
+(** [Strict] supports parsing and writing JSON data that conforms to the
+    [Strict] json type.  *)
+
 type json = Json.Strict.json
 type t = json
 

@@ -1,3 +1,6 @@
+(** [Extended] supports parsing and writing JSON data that conforms to the
+    [Extended] json type.  *)
+
 type json = Json.Extended.json
 type t = json
 
