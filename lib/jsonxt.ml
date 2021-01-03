@@ -19,15 +19,17 @@
     - Basic supports floats and integers
     - Strict only supports floats with integers converted to floats
     
-    In addition a Yojson compatability modules supports basic Yojson functions
+    In addition Yojson compatability modules supports basic Yojson functions
     including inter-operability with [ppx_deriving_yojson] and [ppx_yojson_conv]
 
     {1 Writers}
     [Jsonxt] supports writers for each of the access methods and compliance levels
     including compact and human readable versions. This includes
     - File, string and channel output
-    - Stream writer for a json token stream such as produded bu the stream parser
+    - Stream writer for a json token stream such as produded by the stream parser
     - A monadic writer
+    
+    {1 Modules}
     *)
 
 module Json = Json

@@ -59,6 +59,8 @@ module type Reader_string_file = sig
   (** [of_function] is an alias for json_of_function_exn *)
   val of_function : (bytes -> int -> int) -> json
 
+  (** {2 [Stream.t] readers} *)
+
   (** [stream_from_string string] converts [string] containing zero or more json
       object to a [json Stream.t] value raising a [Failure] exception if the
       string has syntax, grammar or compliance errors *)
