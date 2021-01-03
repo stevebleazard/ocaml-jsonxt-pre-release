@@ -1,4 +1,4 @@
-let json_tree_to_string json = 
+let json_to_string_repr json = 
   let buf = Buffer.create 100 in
   let add_char = Buffer.add_char buf in
   let add_string = Buffer.add_string buf in
