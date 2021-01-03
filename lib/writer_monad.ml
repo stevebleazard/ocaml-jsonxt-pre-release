@@ -63,7 +63,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
       in
       let first = function
         | [] -> return ()
-        | hd::tl -> write_string ldr >>= fun () -> f hd >>= fun () -> loop tl
+        | hd::tl -> write_string (eol ^ ldr) >>= fun () -> f hd >>= fun () -> loop tl
       in
       first l
     in
@@ -71,12 +71,12 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
       match value with
       | `Assoc o ->
         let ldr = String.make off ' ' in
-        write_string ("{" ^ eol)
+        write_string "{"
         >>= fun () -> json_assoc (off + incr) o
         >>= fun () -> write_string (eol ^ ldr ^ "}")
       | `List l ->
         let ldr = String.make off ' ' in
-        write_string ("[" ^ eol)
+        write_string "["
         >>= fun () -> json_list (off + incr) l;
         >>= fun () -> write_string (eol ^ ldr ^ "]")
       | `Null -> write_string "null"
@@ -109,7 +109,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
         | Some j -> write_string ": " >>= fun () -> fmt (off + incr) j
         | None -> return ()
     in
-    fmt 0 json
+    fmt 0 json >>= fun () -> write_string eol
 
   let write_json ~writer json = json_writer ~writer ~eol:"" ~incr:0 json
   let write_json_hum ~writer json = json_writer ~writer ~eol:"\n" ~incr:2 json
