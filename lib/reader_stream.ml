@@ -5,6 +5,8 @@ module type Reader_stream = sig
   val json_stream_of_string : string -> stream
   val json_stream_of_channel : in_channel -> stream
   val decode_stream : stream -> (json_stream option, string) result
+  val stream_from_string : string -> json_stream Stream.t
+  val stream_from_channel : in_channel -> json_stream Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser_stream.Parser) : Reader_stream
@@ -26,5 +28,23 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser_stream.Parser) : R
       create_parser ~lexbuf
 
   let decode_stream t = Parser.decode t
+
+  let stream_from_lexbuf lexbuf =
+    let decoder = create_parser ~lexbuf in
+    let f _i =
+      match decode_stream decoder with
+      | Ok None -> None
+      | Ok Some v -> Some v
+      | Error err -> raise (Failure err)
+    in
+    Stream.from f
+
+  let stream_from_string s =
+    let lexbuf = Lexing.from_string s in
+    stream_from_lexbuf lexbuf
+
+  let stream_from_channel inc =
+    let lexbuf = Lexing.from_channel inc in
+    stream_from_lexbuf lexbuf
 
 end
