@@ -26,7 +26,8 @@ let parse_function filename =
   let ic = open_in filename in
   printf "json_of_function\n";
   match Jsonxt.Basic.json_of_function (fun buf len -> input ic buf 0 len) with
-  | Ok json -> let s = Jsonxt.Basic.to_string json in printf "%s\n" s
+  (* | Ok json -> let s = Jsonxt.Basic.to_string json in printf "%s\n" s *)
+  | Ok json -> let s = Jsonxt.Tools.json_tree_to_string json in printf "%s\n" s
   | Error s -> printf "ERROR %s\n" s
 
 let () =
