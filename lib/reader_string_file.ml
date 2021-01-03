@@ -10,6 +10,8 @@ module type Reader_string_file = sig
   val of_string : string -> json
   val of_file : string -> json
   val of_channel : in_channel -> json
+  val stream_from_string : string -> json Stream.t
+  val stream_from_channel : in_channel -> json Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
@@ -35,7 +37,7 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
     | Ok res -> res
     | Error s -> raise (Failure s)
 
-  let of_string s = json_of_string_exn s 
+  let of_string s = json_of_string_exn s
 
   let json_of_file filename =
     try begin
@@ -60,8 +62,28 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
     match json_of_channel inc with
     | Ok res -> res
     | Error s -> raise (Failure s)
-  
+
   let of_file = json_of_file_exn
   let of_channel = json_of_channel_exn
+
+  let read_json_stream ~lexbuf =
+    let reader () = Lexxer.read lexbuf in
+    let f _i =
+      match Parser.decode ~reader with
+      | Ok None -> None
+      | Ok (Some res) -> Some res
+      | Error err ->
+        let loc = Lexxer_utils.error_pos_msg lexbuf in
+          raise (Failure (Printf.sprintf "%s at %s" err loc))
+    in
+    Stream.from f
+
+  let stream_from_string s =
+    let lexbuf = Lexing.from_string s in
+    read_json_stream ~lexbuf
+
+  let stream_from_channel inc =
+    let lexbuf = Lexing.from_channel inc in
+    read_json_stream ~lexbuf
 
 end

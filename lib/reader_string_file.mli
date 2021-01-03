@@ -36,6 +36,16 @@ module type Reader_string_file = sig
 
   (** [of_channel] is an alias for json_of_channel_exn *)
   val of_channel : in_channel -> json
+
+  (** [stream_from_string string] converts [string] containing one or more json
+      object to a [json Stream.t] value raising a [Failure] exception if the
+      string has syntax, grammar or compliance errors *)
+  val stream_from_string : string -> json Stream.t
+
+  (** [stream_from_channel in_channel] converts the text from [in_channel], containing
+      one or more json object, to a [json Stream.t] value raising a [Failure] exception
+      if the file has syntax, grammar or compliance errors *)
+  val stream_from_channel : in_channel -> json Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
