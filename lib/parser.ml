@@ -139,6 +139,7 @@ module Make (Compliance : Compliance.S) : Parser
 
   let decode ~reader = 
     match json_value ~reader with
+    | exception (Parse_error `Eof) -> Ok None
     | exception (Parse_error (`Syntax_error err)) -> Error err
     | exception (Lexxer_utils.Lex_error err) -> Error err
     | res -> Ok res
