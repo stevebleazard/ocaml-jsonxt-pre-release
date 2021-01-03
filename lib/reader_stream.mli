@@ -4,9 +4,11 @@ module type Reader_stream = sig
 
   val json_stream_of_string : string -> stream
   val json_stream_of_channel : in_channel -> stream
+  val json_stream_of_function : (bytes -> int -> int) -> stream
   val decode_stream : stream -> (json_stream option, string) result
   val stream_from_string : string -> json_stream Stream.t
   val stream_from_channel : in_channel -> json_stream Stream.t
+  val stream_from_function : (bytes -> int -> int) -> json_stream Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser_stream.Parser) : Reader_stream
