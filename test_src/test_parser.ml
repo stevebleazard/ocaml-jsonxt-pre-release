@@ -8,43 +8,25 @@ let load_file f =
 
 open Printf
 
-let print_json_value json = 
-  let rec fmt value =
-    match value with
-    | `Assoc o -> printf "{"; print_json_assoc o; printf "}"
-    | `List l -> printf "["; print_json_list l; printf "]"
-    | `Null -> printf "Null "
-    | `Bool b -> printf "%s " (if b then "true" else "false")
-    | `Int i -> printf "%d " i
-    | `Intlit s -> printf "%s " s
-    | `Float f -> printf "%g" f
-    | `Floatlit s -> printf "%s " s
-    | `String s -> printf "%s " s
-    | `Stringlit s -> printf "%s " s
-    | `Tuple _t -> printf "tuple "
-    | `Variant _t -> printf "variant "
-  and print_json_assoc o = List.iter print_pair o
-  and print_pair (k, v) = printf "%s : " k; fmt v; printf ","
-  and print_json_list l = List.iter (fun v -> fmt v; printf ",") l
-  in
-  fmt json
-
-module IO = struct
-  type 'a t = 'a
-  
-  let return v = v
-  let (>>=) a f = f a
-end
-
 let parsit contents =
   match Jsonxt.Basic.json_of_string contents with
   | Ok json -> let s = Jsonxt.Basic.to_string json in printf "%s\n" s
   | Error s -> printf "%s\n" s
 
-let () = 
+let parse_stream contents =
+  let stream = Jsonxt.Basic.stream_from_string contents in
+  Stream.iter (fun json -> let s = Jsonxt.Basic.to_string json in printf "STREAM:\n%s\n" s) stream
+
+let parse_stream_file filename =
+  let ic = open_in filename in
+  let stream = Jsonxt.Basic.stream_from_channel ic in
+  Stream.iter (fun json -> let s = Jsonxt.Basic.to_string json in printf "STREAM:\n%s\n" s) stream
+
+let () =
   if Array.length Sys.argv < 2 then
     printf "expected filename\n"
   else
     let filename = Sys.argv.(1) in
     let contents = load_file filename in
-      parsit contents
+      parsit contents;
+      parse_stream_file filename
