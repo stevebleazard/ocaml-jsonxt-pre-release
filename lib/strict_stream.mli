@@ -1,5 +1,7 @@
-(** [Strict_stream] supports parsing and writing JSON data that conforms to the
-    [Json_stream.Strict.json] type as a stream of [json_stream] objects.  *)
+(** [Strict_stream] supports parsing and writing JSON data that
+    conforms to the {!type:Json_stream.Strict.json} type as a stream
+    of {!type:Json_stream.Strict.json} objects.  This only supports types
+    supported by the JSON standard and explicity excludes integers *)
 
 type json_stream = Json_stream.Strict.json
 

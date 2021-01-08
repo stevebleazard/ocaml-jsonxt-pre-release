@@ -59,7 +59,14 @@ module type Reader_string_file = sig
   (** [of_function] is an alias for json_of_function_exn *)
   val of_function : (bytes -> int -> int) -> json
 
-  (** {2 [Stream.t] readers} *)
+  (** {2 [Stream.t] readers}
+
+      [Stream.t] readers provide a mechanism to read a stream of JSON values. eg
+      {[
+        {"datapoint": 1, "value": 2}
+        {"datapoint": 2, "value": 5}
+      ]}
+      *)
 
   (** [stream_from_string string] converts [string] containing zero or more json
       object to a [json Stream.t] value raising a [Failure] exception if the

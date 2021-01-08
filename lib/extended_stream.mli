@@ -1,5 +1,8 @@
-(** [Extended_stream] supports parsing and writing JSON data that conforms to the
-    [Json_stream.Extended.json] type as a stream of [json_stream] objects.  *)
+(** [Extended_stream] supports parsing and writing JSON data that
+    conforms to the {!type:Json_stream.Extended.json} type as a stream
+    of {!type:Json_stream.Extended.json} objects.  This supports non-standard
+    JSON types including integer as well as tuples and variants introduced
+    by [Yojson] *)
 
 type json_stream = Json_stream.Extended.json
 

@@ -5,6 +5,7 @@ module type Intf = sig
   (** [create_encoder' ~add_char ~add_string ~incr ~eol] is the low level function
       used to create the various stream encoders.  The [add_char c] and [add_string s]
       functions handle adding a [char] [c] and [string] [s] to the output respectively.
+
       [incr] and [eol] work together to output human readable output. [incr]
       defines the increase in indentation and [eol] the end of line sequence.
       A type [t] is returned *)

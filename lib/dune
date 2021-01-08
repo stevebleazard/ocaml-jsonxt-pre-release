@@ -3,3 +3,5 @@
 (library
  (name jsonxt)
  (public_name jsonxt))
+
+(documentation (mld_files index))

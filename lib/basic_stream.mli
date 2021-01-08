@@ -1,5 +1,7 @@
-(** [Basic_stream] supports parsing and writing JSON data that conforms to the
-    [Json_stream.Basic.json] type as a stream of [json_stream] objects.  *)
+(** [Basic_stream] supports parsing and writing JSON data that
+    conforms to the {!type:Json_stream.Basic.json} type as a stream
+    of {!type:Json_stream.Basic.json} objects.  This includes support
+    for integers which are not part of the JSON standard *)
 
 type json_stream = Json_stream.Basic.json
 

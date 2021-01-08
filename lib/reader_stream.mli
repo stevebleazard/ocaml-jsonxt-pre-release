@@ -31,7 +31,10 @@ module type Reader_stream = sig
       end of the stream *)
   val decode_stream : stream -> (json_stream option, string) result
 
-  (** {2 [Stream.t] functions} *)
+  (** {2 [Stream.t] functions}
+      These functions provide a [Stream.t] API on top of the 
+      json_stream_of_* and decode_stream functions.
+      *)
 
   (** [stream_from_string s] creates a [json_stream Stream.t] from [json_stream_of_string s] 
       and [decode_stream] *)

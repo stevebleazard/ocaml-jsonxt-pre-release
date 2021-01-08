@@ -1,5 +1,6 @@
 (** [Basic] supports parsing and writing JSON data that conforms to the
-    [Basic] json type.  *)
+    {!type:Json.Basic.json} json type.  This includes support for
+    integers which are not part of the JSON standard *)
 
 type json = Json.Basic.json
 type t = json

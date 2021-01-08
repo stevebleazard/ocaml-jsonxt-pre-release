@@ -3,11 +3,11 @@ module type Intf = sig
   type json
 
   (** [json_writer ~writer ~eol ~incr json] converts [json] to a string [s]
-      and writes it out using the [writer] function.  [incr] and [eol] work
-      together to output human readable output. [incr] defines the increase
+      and writes it out using the [writer string] function.  [incr] and [eol]
+      work together to output human readable output. [incr] defines the increase
       in indentation and [eol] the end of line sequence.
 
-      The [writer s] function takes a string and returns a [unit IO.t]
+      The [writer string] function takes a string and returns a [unit IO.t]
   *)
   val json_writer
        : writer:(string -> unit IO.t)

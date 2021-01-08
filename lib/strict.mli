@@ -1,5 +1,6 @@
 (** [Strict] supports parsing and writing JSON data that conforms to the
-    [Strict] json type.  *)
+    {!type:Json.Strict.json} json type.  This only supports types
+    supported by the JSON standard and explicity excludes integers *)
 
 type json = Json.Strict.json
 type t = json

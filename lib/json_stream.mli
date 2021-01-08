@@ -1,3 +1,5 @@
+(** Json stream types for the various compliance levels *)
+
 type json =
     [
     | `Null
@@ -24,11 +26,17 @@ type json =
 type t = json
 
 module Extended : sig
+  (** [Extended] supports all Json types including the non-standard
+      tuple and variant introduced by [Yojson] *)
+
   type nonrec json = json
   type t = json
 end
 
 module Basic : sig
+  (** [Basic] supports standard Json types that are supported by the
+      JSON standard but also supports integers rather than just floats *)
+
   type json =
       [
       | `Null
@@ -46,6 +54,9 @@ module Basic : sig
 end
 
 module Strict : sig
+  (** [Strict] supports only types that are supported by the JSON standard.
+      Integers are not supported *)
+
   type json =
       [
       | `Null

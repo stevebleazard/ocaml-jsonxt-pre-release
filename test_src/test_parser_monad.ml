@@ -28,4 +28,4 @@ let parsit () =
     | Ok json -> JsonIO.write_json_hum ~writer json
 
 
-let () = let _ = parsit () in ()
+let _ = parsit ()

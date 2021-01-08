@@ -10,8 +10,8 @@
     various access methods and levels of compliance with the JSON standard.
     Access methods include
     - File and string parsing including [Stream.t] support
-    - A stream parser that delivers a stream of json tokens rather than a
-      whole json tree with  [Stream.t] support.
+    - A stream parser, that delivers a stream of json tokens rather than a
+      whole json tree, with [Stream.t] support.
     - a monadic parser
 
     JSON compliance has a number of levels
@@ -33,6 +33,7 @@
     *)
 
 module Json = Json
+module Json_stream = Json_stream
 module Basic = Basic
 module Basic_stream = Basic_stream
 module Basic_monad = Basic_monad

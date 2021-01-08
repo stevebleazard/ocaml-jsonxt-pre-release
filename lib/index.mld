@@ -1,0 +1,48 @@
+{1 JSON parsers for files, strings and more}
+
+Jsonxt provides a number JSON parsers and writers with
+a focus on performance especially for the core file and
+string functions
+
+{2 API Documentation}
+- {!module:Jsonxt} provides detailed module and function documentation
+
+{2 Quick Start}
+The following covers various use cases
+
+{3 Convert a string and print the internal representation}
+{[
+let () =
+  let json = Jsonxt.Basic.of_string "[1,2,3]" in
+  print_endline (Jsonxt.Tools.json_to_string_repr json);;
+]}
+
+{3 Reading a file and printing to stdout}
+{[
+let () = 
+  let json = Jsonxt.Basic.of_file "test.json" in
+  Jsonxt.Basic.to_channel_hum stdout json;;
+]}
+
+{3 Reading and writing a file using the monad functions}
+{[
+module IO = struct
+  type 'a t = 'a
+
+  let return v = v
+  let (>>=) v f = f v
+end
+
+module JsonIO = Jsonxt.Basic_monad.Make(IO)
+open IO
+
+let _ =
+  let ic = open_in "test.json" in
+  let reader buf len = return (input ic buf 0 len) in
+  let writer s = return (output_string stdout s) in
+  JsonIO.read_json ~reader
+  >>= function
+    | Error err -> print_endline ("ERROR: " ^ err); return ()
+    | Ok json -> JsonIO.write_json_hum ~writer json
+;;
+]}
