@@ -4,4 +4,4 @@
  (name jsonxt)
  (public_name jsonxt))
 
-(documentation (mld_files index))
+(documentation (package jsonxt) (mld_files index))
