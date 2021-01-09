@@ -17,6 +17,71 @@ module JsonSexp = struct
     ] [@@deriving sexp]
 end
 
+module JsonStreamSexp = struct
+  open Core_kernel
+  type json_stream =
+    [
+    | `Null
+    | `Bool of bool
+    | `Int of int
+    | `Intlit of string
+    | `Float of float
+    | `Floatlit of string
+    | `String of string
+    | `Stringlit of string
+    | `As
+    | `Ae
+    | `Os
+    | `Oe
+    | `Ts
+    | `Te
+    | `Vs
+    | `Ve
+    | `Name of string
+    | `Infinity
+    | `Neg_infinity
+    | `Nan
+    ] list [@@deriving sexp]
+end
+
+module IO : sig
+  type 'a t
+
+  val return : 'a -> 'a t
+  val (>>=)  : 'a t -> ('a -> 'b t) -> 'b t
+  val result : 'a t -> 'a
+end = struct
+  type 'a t = 'a
+
+  let return v = v
+  let (>>=) v f = f v
+  let result t = t
+end
+
+module StringIO = struct
+  type t = {
+    str : string
+  ; len : int
+  ; off : int ref
+  }
+
+  let create s = { str = s; len = String.length s; off = ref 0 }
+
+  let read t buf len =
+    let noff = !(t.off) + len in
+    let noff = if noff > t.len then t.len else noff in
+    let clen = noff - !(t.off) in
+    if clen <= 0 then 0
+    else begin
+      Bytes.blit_string t.str !(t.off) buf 0 clen;
+      t.off := noff;
+      clen
+    end
+end
+
+module JsonIO = Jsonxt.Extended_monad.Make(IO)
+(* open IO *)
+
 open Printf
 
 let die msg = 
@@ -158,15 +223,17 @@ let help_suite err =
    run the parser test suite, parsing and verifying each of the
    json strings defined in <file>. This is a tab seperated list
    of json and expected sexp in the format:
-      json\\tsexp
+      json\\tsexp\\tsexp_strem
 
    where
      json
        is the json to parse
      sexp
        is the expected sexp
+     sexp_stream
+       is the expected sexp from the stream parser
        
-   When in gen mode the sexp is ignored and a file
+   When in gen mode the sexps are ignored and a file
    suitable for using with run is output to stdout\n";
   exit 0
 
@@ -174,40 +241,73 @@ let execute_test_suite mode inc =
   let read_json_sexp () =
     let l = input_line inc in
     let p = String.split_on_char '\t' l in
-    let (jsons, sexps) = match p with
-      | jv::sv::[] -> (jv, sv)
-      | jv::[] -> (jv, "")
+    let (jsons, sexps, sexps_json_stream) = match p with
+      | jv::sv::ssv::[] -> (jv, sv, ssv)
+      | jv::[] -> (jv, "", "")
       | _ -> die ("invalid test line: " ^ l)
     in
-    (jsons, sexps)
+    (jsons, sexps, sexps_json_stream)
   in
-  let report result jsons sexps =
+  let report typ result jsons sexps =
     let result = match result with
-      | Ok json -> begin
-        match Core_kernel.Sexp.compare (JsonSexp.sexp_of_json json) (Core_kernel.Sexp.of_string sexps) with
+      | Ok jsonsexp -> begin
+        match Core_kernel.Sexp.compare jsonsexp (Core_kernel.Sexp.of_string sexps) with
         | 0 -> "pass"
         | _ -> "check failed"
         end
       | Error _ -> "parse failed"
     in
-    printf "%s...%s\n" result jsons
+    printf "%s%s...%s\n" typ result jsons
   in
-  let output_sexp jsons json =
-    printf "%s\t%s\n" jsons (JsonSexp.sexp_of_json json |> Core_kernel.Sexp.to_string)
+  let report_std result jsons sexps =
+    match result with
+    | Ok json -> report "standard..." (Ok (JsonSexp.sexp_of_json json)) jsons sexps
+    | Error err -> report "standard..." (Error err) jsons sexps
   in
-  let run_one jsons sexps =
+  let report_stream result jsons sexps =
+    match result with
+    | Ok json_stream -> report "stream....." (Ok (JsonStreamSexp.sexp_of_json_stream json_stream)) jsons sexps
+    | Error err -> report "stream....." (Error err) jsons sexps
+  in
+  let get_json_stream jsons =
+    let stream = Jsonxt.Extended_stream.json_stream_of_string jsons in
+    let rec loop res =
+      match Jsonxt.Extended_stream.decode_stream stream with
+      | Error err -> Error err
+      | Ok None -> Ok (List.rev res)
+      | Ok Some tok -> loop (tok::res)
+    in
+    loop []
+  in
+  let output_sexp jsons json json_stream =
+    printf "%s\t%s\t%s\n"
+      jsons
+      (JsonSexp.sexp_of_json json |> Core_kernel.Sexp.to_string)
+      (JsonStreamSexp.sexp_of_json_stream json_stream |> Core_kernel.Sexp.to_string)
+  in
+  let run_one jsons sexps sexps_json_stream =
     let json_result = Jsonxt.Extended.json_of_string jsons in
+    let json_stream_result = get_json_stream jsons in
     match mode with
-    | `Run -> report json_result jsons sexps
-    | `Gen -> begin
+    | `Run ->
+      report_std json_result jsons sexps;
+      report_stream json_stream_result jsons sexps_json_stream
+    | `Gen ->
+      let json = 
         match json_result with
-        | Ok json -> output_sexp jsons json
+        | Ok json -> json
         | Error err -> sprintf "failed to parse \"%s\": %s" jsons err |> die
-      end
+      in
+      let json_stream = 
+        match json_stream_result with
+        | Ok json_stream -> json_stream
+        | Error err -> sprintf "failed to parse stream \"%s\": %s" jsons err |> die
+      in
+      output_sexp jsons json json_stream
   in
   let rec run () =
-    let (jsons, sexps) = read_json_sexp () in
-    run_one jsons sexps;
+    let (jsons, sexps, sexps_json_stream) = read_json_sexp () in
+    run_one jsons sexps sexps_json_stream;
     run ()
   in
   try run () with
