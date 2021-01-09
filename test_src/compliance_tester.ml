@@ -1,3 +1,22 @@
+module JsonSexp = struct
+  open Core_kernel
+  type json =
+    [
+    | `Null
+    | `Bool of bool
+    | `Int of int
+    | `Intlit of string
+    | `Float of float
+    | `Floatlit of string
+    | `String of string
+    | `Stringlit of string
+    | `Assoc of (string * json) list
+    | `List of json list
+    | `Tuple of json list
+    | `Variant of (string * json option)
+    ] [@@deriving sexp]
+end
+
 open Printf
 
 let die msg = 
@@ -113,8 +132,6 @@ let execute_internal_tests inc =
   try run () with
   | End_of_file -> ()
 
-
-
 let run_internal_tests idx =
   let args = Array.length Sys.argv - idx in
   if args <= 0 then help_internal (Some "expected run or help");
@@ -132,7 +149,87 @@ let run_internal_tests idx =
     end
   | cmd -> help_internal (Some ("unknown internal command " ^ cmd))
   
-let run_test_suite _idx = ()
+
+let help_suite err =
+  help_error err;
+  printf "\
+   compliance_tester suite [help|run <file>|gen <file>]
+
+   run the parser test suite, parsing and verifying each of the
+   json strings defined in <file>. This is a tab seperated list
+   of json and expected sexp in the format:
+      json\\tsexp
+
+   where
+     json
+       is the json to parse
+     sexp
+       is the expected sexp
+       
+   When in gen mode the sexp is ignored and a file
+   suitable for using with run is output to stdout\n";
+  exit 0
+
+let execute_test_suite mode inc =
+  let read_json_sexp () =
+    let l = input_line inc in
+    let p = String.split_on_char '\t' l in
+    let (jsons, sexps) = match p with
+      | jv::sv::[] -> (jv, sv)
+      | jv::[] -> (jv, "")
+      | _ -> die ("invalid test line: " ^ l)
+    in
+    (jsons, sexps)
+  in
+  let report result jsons sexps =
+    let result = match result with
+      | Ok json -> begin
+        match Core_kernel.Sexp.compare (JsonSexp.sexp_of_json json) (Core_kernel.Sexp.of_string sexps) with
+        | 0 -> "pass"
+        | _ -> "check failed"
+        end
+      | Error _ -> "parse failed"
+    in
+    printf "%s...%s\n" result jsons
+  in
+  let output_sexp jsons json =
+    printf "%s\t%s\n" jsons (JsonSexp.sexp_of_json json |> Core_kernel.Sexp.to_string)
+  in
+  let run_one jsons sexps =
+    let json_result = Jsonxt.Extended.json_of_string jsons in
+    match mode with
+    | `Run -> report json_result jsons sexps
+    | `Gen -> begin
+        match json_result with
+        | Ok json -> output_sexp jsons json
+        | Error err -> sprintf "failed to parse \"%s\": %s" jsons err |> die
+      end
+  in
+  let rec run () =
+    let (jsons, sexps) = read_json_sexp () in
+    run_one jsons sexps;
+    run ()
+  in
+  try run () with
+  | End_of_file -> ()
+
+
+let run_test_suite idx =
+  let args = Array.length Sys.argv - idx in
+  if args <= 0 then help_suite (Some "expected run or help");
+  match Sys.argv.(idx) with
+  | "help" -> help_suite None
+  | "run" | "gen" -> begin
+    if args < 2 then help_suite (Some "expected filename of test schedule");
+    let inf =
+      try open_in Sys.argv.(idx + 1) with
+      | _ -> help (Some ("failed to open " ^ Sys.argv.(idx + 1)))
+    in
+      let mode = match Sys.argv.(idx) with | "gen" -> `Gen | _ -> `Run in
+      execute_test_suite mode inf;
+      close_in inf
+    end
+  | cmd -> help_suite (Some ("unknown suite command " ^ cmd))
 
 
 let () =

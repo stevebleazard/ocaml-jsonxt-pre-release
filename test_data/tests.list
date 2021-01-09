@@ -68,3 +68,8 @@ basic    fail variant
 extended pass variant
 yjbasic  fail variant
 yjsafe   pass variant
+strict   pass unicode
+basic    pass unicode
+extended pass unicode
+yjbasic  pass unicode
+yjsafe   pass unicode
