@@ -5,10 +5,7 @@ module Basic = struct
 
     open Tokens
 
-    let lex_string = function
-      | Tokens.STRING s -> Tokens.STRING (Lexxer_utils.unescape_string s)
-      | token -> token
-
+    let lex_string s = Lexxer_utils.unescape_string s
     let lex_number token = token
     let lex_integer token = token
     let lex_largeint _ = COMPLIANCE_ERROR "Integer out of bounds"
@@ -76,10 +73,7 @@ module Safe = struct
     type json = Json.Extended.json
     type json_stream = Json_stream.Extended.json
 
-    let lex_string = function
-      | Tokens.STRING s -> Tokens.STRING (Lexxer_utils.unescape_string s)
-      | token -> token
-
+    let lex_string s = Lexxer_utils.unescape_string s
     let lex_number token = token
     let lex_integer token = token
     let lex_largeint token = token
@@ -147,10 +141,7 @@ module Raw = struct
     type json = Json.Extended.json
     type json_stream = Json_stream.Extended.json
 
-    let lex_string = function
-      | Tokens.STRING s -> Tokens.STRING ("\"" ^ s ^ "\"")
-      | token -> token
-
+    let lex_string s = "\"" ^ s ^ "\""
     let lex_number token = token
     let lex_integer token = token
     let lex_largeint token = token
