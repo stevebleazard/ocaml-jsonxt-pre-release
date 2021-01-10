@@ -15,7 +15,14 @@ module Compliance = struct
   let lex_variant _ = true
   let lex_tuple _ = true
 
-  let number_to_string f = Json_float.string_of_float_json f
+  let number_to_string f =
+    match classify_float f with
+    | FP_normal | FP_subnormal | FP_zero ->
+      Json_float.string_of_float_json f
+    | FP_infinite ->
+      if f < 0. then "-Infinity" else "Infinity"
+    | FP_nan ->
+      "NaN"
 
   let largeint s = `Float (float_of_string s)
   let integer i = `Int i
