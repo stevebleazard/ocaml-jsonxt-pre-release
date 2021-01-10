@@ -73,3 +73,8 @@ basic    pass unicode
 extended pass unicode
 yjbasic  pass unicode
 yjsafe   pass unicode
+strict   pass unicodepair
+basic    pass unicodepair
+extended pass unicodepair
+yjbasic  pass unicodepair
+yjsafe   pass unicodepair
