@@ -2,6 +2,7 @@ module type S = sig
   type json
   type json_stream
 
+  val lex_string : Tokens.token -> Tokens.token
   val lex_number : Tokens.token -> Tokens.token
   val lex_integer : Tokens.token -> Tokens.token
   val lex_largeint : Tokens.token -> Tokens.token
@@ -10,7 +11,7 @@ module type S = sig
 
   val number_to_string : float -> string
 
-  val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json
+  val number : [`Float of float | `Infinity | `Neginfinity | `Nan | `Floatlit of string ] -> json
   val integer : int -> json
   val largeint : string -> json
   val null : json
@@ -24,7 +25,7 @@ module type S = sig
   (* streaming functions *)
 
   module Stream : sig
-    val number : [`Float of float | `Infinity | `Neginfinity | `Nan ] -> json_stream
+    val number : [`Float of float | `Infinity | `Neginfinity | `Nan | `Floatlit of string  ] -> json_stream
     val integer : int -> json_stream
     val largeint : string -> json_stream
     val null : json_stream

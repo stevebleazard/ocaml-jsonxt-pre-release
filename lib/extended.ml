@@ -4,6 +4,10 @@ module Compliance = struct
 
   open Tokens
 
+  let lex_string = function
+    | STRING s -> STRING (Lexxer_utils.unescape_string s)
+    | token -> token
+
   let lex_number token = token
   let lex_integer token = token
 
@@ -31,6 +35,7 @@ module Compliance = struct
   | `Infinity ->    `Float (1.0 /. 0.0)
   | `Neginfinity -> `Float (-1.0 /. 0.0)
   | `Nan ->         `Float (0.0 /. 0.0)
+  | `Floatlit _ ->  raise (Failure "floatlit not supported in basic mode")
 
   module Stream = struct
     let number = number
