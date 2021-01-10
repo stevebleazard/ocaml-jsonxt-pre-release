@@ -1,0 +1,14 @@
+(executable
+ (name compliance_tester)
+ (preprocess (pps ppx_sexp_conv))
+ (libraries jsonxt core))
+
+(rule
+ (alias compliance_tests)
+ (deps compliance_tester.exe (glob_files ../data/*))
+ (action (chdir ../data (run ../compliance/compliance_tester.exe internal run tests.list))))
+
+(rule
+ (alias compliance_tests)
+ (deps compliance_tester.exe (glob_files ../data/json_tests.list))
+ (action (run ./compliance_tester.exe suite run ../data/json_tests.list)))
