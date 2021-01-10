@@ -2,7 +2,7 @@ module type S = sig
   type json
   type json_stream
 
-  val lex_string : Tokens.token -> Tokens.token
+  val lex_string : string -> string
   val lex_number : Tokens.token -> Tokens.token
   val lex_integer : Tokens.token -> Tokens.token
   val lex_largeint : Tokens.token -> Tokens.token

@@ -4,10 +4,7 @@ module Compliance = struct
 
   open Tokens
 
-  let lex_string = function
-    | STRING s -> STRING (Lexxer_utils.unescape_string s)
-    | token -> token
-
+  let lex_string s = Lexxer_utils.unescape_string s
   let lex_number token = token
   let lex_integer token = token
 
