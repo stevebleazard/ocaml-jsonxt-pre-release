@@ -104,6 +104,7 @@ let unescape_string s =
       match s.[i] with
        | '"'  -> Bytes.unsafe_set s' !j '"';    state := `Char; j := !j + 1
        | '\\' -> Bytes.unsafe_set s' !j '\\';   state := `Char; j := !j + 1
+       | '/'  -> Bytes.unsafe_set s' !j '/';    state := `Char; j := !j + 1
        | 'b'  -> Bytes.unsafe_set s' !j '\b';   state := `Char; j := !j + 1
        | 'f'  -> Bytes.unsafe_set s' !j '\012'; state := `Char; j := !j + 1
        | 'n'  -> Bytes.unsafe_set s' !j '\n';   state := `Char; j := !j + 1
