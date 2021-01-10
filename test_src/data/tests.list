@@ -78,3 +78,8 @@ basic    pass unicodepair
 extended pass unicodepair
 yjbasic  pass unicodepair
 yjsafe   pass unicodepair
+strict   pass escapes
+basic    pass escapes
+extended pass escapes
+yjbasic  pass escapes
+yjsafe   pass escapes
