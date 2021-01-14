@@ -46,9 +46,18 @@ module CmdlineOptions = struct
     Term.(const f $ tfile $ alco_opts),
     Term.info "compliance" ~exits:Term.default_exits ~doc
 
-  let validation_cmd f =
+  let validation_cmd gen validate =
+    let gen_run subcmd tfile alco_opts =
+      match subcmd with
+      | "gen" -> gen tfile alco_opts; `Ok ()
+      | "run" -> validate tfile alco_opts; `Ok ()
+      | _ -> `Error (true, "expected run or gen")
+    in
+    let alco_opts = Arg.(value & pos_right 0 string [] & info [] ~docv:"-- [AlcoTest options]") in
+    let doc = "run to run encode/decode, gen to generated validation data" in
+    let subcmd = Arg.(required & pos 0 (some string) None & info [] ~docv:"[gen|run]" ~doc) in
     let doc = "perform decode and encode validation" in
-    Term.(const f $ tfile $ alco_opts),
+    Term.(ret (const gen_run $ subcmd $ tfile $ alco_opts)),
     Term.info "validation" ~exits:Term.default_exits ~doc
 
   let default_cmd =
@@ -67,10 +76,16 @@ end
 let tester_compliance file alco_opts =
   Printf.printf "command: compliance\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
 
-let tester_validation file alco_opts =
-  Printf.printf "command: validate\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
+let tester_validation_run file alco_opts =
+  Printf.printf "command: validate run\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
+
+let tester_validation_gen file alco_opts =
+  Printf.printf "command: validate gen\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
 
 
 (* let () = Cmdliner.Term.(exit @@ eval CmdlineOptions.cmd) *)
-let cmds = [CmdlineOptions.compliance_cmd tester_compliance; CmdlineOptions.validation_cmd tester_validation]
+let cmds = [
+    CmdlineOptions.compliance_cmd tester_compliance
+  ; CmdlineOptions.validation_cmd tester_validation_gen tester_validation_run
+  ]
 let () = Cmdliner.Term.(exit @@ eval_choice CmdlineOptions.default_cmd cmds)
