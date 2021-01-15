@@ -1,37 +1,3 @@
-(*
-module To_test = struct
-  let lowercase = String.lowercase_ascii
-  let capitalize = String.capitalize_ascii
-  let str_concat = String.concat ""
-  let list_concat = List.append
-end
-
-(* The tests *)
-let test_lowercase () =
-  Alcotest.(check string) "same string" "hello!" (To_test.lowercase "hELLO!")
-
-let test_capitalize () =
-  Alcotest.(check string) "same string" "World." (To_test.capitalize "world.")
-
-let test_str_concat () =
-  Alcotest.(check string) "same string" "foobar" (To_test.str_concat ["foo"; "bar"])
-
-let test_list_concat () =
-  Alcotest.(check (list int)) "same lists" [1; 2; 3] (To_test.list_concat [1] [2; 3])
-
-(* Run it *)
-let () =
-  let open Alcotest in
-  run "Utils" [
-      "string-case", [
-          test_case "Lower case"     `Quick test_lowercase;
-          test_case "Capitalization" `Quick test_capitalize;
-        ];
-      "string-concat", [ test_case "String mashing" `Quick test_str_concat  ];
-      "list-concat",   [ test_case "List mashing"   `Slow  test_list_concat ];
-    ]
-*)
-
 module Utils = struct
   let die msg = 
     Printf.fprintf stderr "\nERROR: %s\n" msg;
@@ -182,16 +148,91 @@ module ComplianceTests = struct
              ((Alcotest.test_case msg `Quick (tester file_parse_test level filename passfail))::file)
       | exception End_of_file -> (str, file)
     in
-    let str_t, file_t = loop [] [] in [ "string", str_t; "file", file_t ]
+    let str_t, file_t = loop [] [] in [ "string", (List.rev str_t); "file", (List.rev file_t) ]
 
   let run_tests filename alco_opts =
     let argv = Array.of_list ("compliance"::alco_opts) in
     Alcotest.run ~argv "Compliance" (gen_tests filename)
 end
 
-let tester_compliance file alco_opts =
-  Printf.printf "command: compliance\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts);
-  ComplianceTests.run_tests file alco_opts
+
+module ValidationTests = struct
+  module JsonSexp = struct
+    open Core_kernel
+    type json = [
+         `Null | `Bool of bool | `Int of int | `Intlit of string | `Float of float
+      | `Floatlit of string | `String of string | `Stringlit of string
+      | `Assoc of (string * json) list | `List of json list | `Tuple of json list
+      | `Variant of (string * json option) ] [@@deriving sexp]
+  end
+
+  module JsonStreamSexp = struct
+    open Core_kernel
+    type json_stream = [
+        `Null | `Bool of bool | `Int of int | `Intlit of string | `Float of float
+      | `Floatlit of string | `String of string | `Stringlit of string
+      | `As | `Ae | `Os | `Oe | `Ts | `Te | `Vs | `Ve | `Name of string
+      | `Infinity | `Neg_infinity | `Nan ] list [@@deriving sexp]
+  end
+
+  let read_json_sexp inc =
+    let l = input_line inc in
+    let p = String.split_on_char '\t' l in
+    let (jsons, sexps, sexps_json_stream) = match p with
+      | jv::sv::ssv::[] -> (jv, sv, ssv)
+      | jv::[] -> (jv, "", "")
+      | _ -> Utils.die ("invalid test line: " ^ l)
+    in
+    (jsons, sexps, sexps_json_stream)
+
+  let check_sexp =
+    let pp ppf v = Fmt.pf ppf "%s" (Core_kernel.Sexp.to_string v) in
+    let sexp_eq a b = match Core_kernel.Sexp.compare a b with | 0 -> true | _ -> false in
+    Alcotest.testable pp sexp_eq
+
+  let output_validation_config jsons json json_stream =
+    Printf.printf "%s\t%s\t%s\n"
+      jsons
+      (JsonSexp.sexp_of_json json |> Core_kernel.Sexp.to_string)
+      (JsonStreamSexp.sexp_of_json_stream json_stream |> Core_kernel.Sexp.to_string)
+
+  let get_json_stream jsons =
+    let stream = Jsonxt.Extended_stream.json_stream_of_string jsons in
+    let rec loop res =
+      match Jsonxt.Extended_stream.decode_stream stream with
+      | Error err -> Error err
+      | Ok None -> Ok (List.rev res)
+      | Ok Some tok -> loop (tok::res)
+    in
+    loop []
+  
+  let parse_json jsons =
+    let json_result = Jsonxt.Extended.json_of_string jsons in
+    let json_stream_result = get_json_stream jsons in
+    let json = 
+      match json_result with
+      | Ok json -> json
+      | Error err -> Printf.sprintf "failed to parse \"%s\": %s" jsons err |> Utils.die
+    in
+    let json_stream = 
+      match json_stream_result with
+      | Ok json_stream -> json_stream
+      | Error err -> Printf.sprintf "failed to parse stream \"%s\": %s" jsons err |> Utils.die
+    in
+    (json, json_stream)
+
+  let gen_config filename _alco_opts =
+    let inc = try open_in filename with | Sys_error err -> Utils.die err in
+    let rec loop () =
+      match read_json_sexp inc with
+      | jsons, _sexps, _sexps_json_stream ->
+        let json, json_stream = parse_json jsons in
+        output_validation_config jsons json json_stream;
+        loop ()
+      | exception End_of_file -> ()
+    in loop ()
+
+end
 
 let tester_validation_run file alco_opts =
   Printf.printf "command: validate run\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
@@ -202,7 +243,7 @@ let tester_validation_gen file alco_opts =
 
 (* let () = Cmdliner.Term.(exit @@ eval CmdlineOptions.cmd) *)
 let cmds = [
-    CmdlineOptions.compliance_cmd tester_compliance
-  ; CmdlineOptions.validation_cmd tester_validation_gen tester_validation_run
+    CmdlineOptions.compliance_cmd ComplianceTests.run_tests
+  ; CmdlineOptions.validation_cmd ValidationTests.gen_config tester_validation_run
   ]
 let () = Cmdliner.Term.(exit @@ eval_choice CmdlineOptions.default_cmd cmds)
