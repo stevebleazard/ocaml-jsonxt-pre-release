@@ -104,6 +104,23 @@ let string_parse_test jsons sexps () =
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
 
+let string_write_test jsons sexps () =
+  let jsonsexp = 
+    match Jsonxt.Extended.json_of_string jsons with
+    | Ok json -> begin
+      match Jsonxt.Extended.json_to_string json with
+      | Ok str -> begin
+          match Jsonxt.Extended.json_of_string str with
+          | Ok json -> JsonSexp.sexp_of_json json
+          | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to re-parse written json '%s': %s" str err)
+        end
+      | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to write parsed json '%s': %s" jsons err)
+      end
+    | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to parse '%s': %s" jsons err)
+  in
+  let sexpv = Core_kernel.Sexp.of_string sexps in
+  Alcotest.(check sexp) jsons sexpv jsonsexp 
+
 let stream_parse_test jsons sexp_streams () =
   let json_stream_sexp = 
     match get_json_stream jsons with
@@ -115,15 +132,21 @@ let stream_parse_test jsons sexp_streams () =
   
 let gen_tests filename =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
-  let rec loop std stream =
+  let rec loop std stream stdwrite =
     match read_json_sexp inc with
     | jsons, sexps, sexps_json_stream ->
       let msg = jsons in
       loop ((Alcotest.test_case msg `Quick (string_parse_test jsons sexps))::std)
            ((Alcotest.test_case msg `Quick (stream_parse_test jsons sexps_json_stream))::stream)
-    | exception End_of_file -> (std, stream)
+           ((Alcotest.test_case msg `Quick (string_write_test jsons sexps))::stdwrite)
+    | exception End_of_file -> (std, stream, stdwrite)
   in
-  let std_t, stream_t = loop [] [] in [ "standard", (List.rev std_t); "stream", (List.rev stream_t) ]
+  let std_t, stream_t, strwrite_t = loop [] [] [] in
+  [
+    "standard", (List.rev std_t);
+    "standard-write", (List.rev strwrite_t);
+    "stream", (List.rev stream_t)
+  ]
 
 let run_tests filename alco_opts =
   let argv = Array.of_list ("compliance"::alco_opts) in
