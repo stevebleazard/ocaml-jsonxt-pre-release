@@ -1,8 +1,10 @@
 let read_test_data inc =
   let l = input_line inc in
   let p = String.split_on_char ' ' l |> List.filter (fun v -> not (String.equal "" v)) in
-  let (level, passfail, filename) = match p with
-    | lv::pf::fn::[] -> (lv, pf, fn)
+  let (level, passfail, filename, bits) = match p with
+    | lv::pf::fn::"32"::[] -> (lv, pf, fn, "32")
+    | lv::pf::fn::"64"::[] -> (lv, pf, fn, "64")
+    | lv::pf::fn::[] -> (lv, pf, fn, "64")
     | _ -> Utils.die ("invalid test line: " ^ l)
   in
   let level = match level with
@@ -17,7 +19,7 @@ let read_test_data inc =
     | "pass" | "fail" as v -> v
     | _ -> Utils.die ("invalid test line, second column must be pass or fail: " ^ l)
   in
-  (level, passfail, filename)
+  (level, passfail, filename, bits)
 
 let of_error f a = match f a with Ok _ -> "pass" | Error _ -> "fail"
 
@@ -58,10 +60,14 @@ let gen_tests filename =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
   let rec loop str file =
     match read_test_data inc with
-    | level, passfail, filename ->
+    | level, passfail, filename, bits -> begin
       let msg = filename ^ " " ^ (level_to_string level) in
-      loop ((Alcotest.test_case msg `Quick (tester string_parse_test level filename passfail))::str)
-           ((Alcotest.test_case msg `Quick (tester file_parse_test level filename passfail))::file)
+      let stest = Alcotest.test_case msg `Quick (tester string_parse_test level filename passfail) in
+      let ftest = Alcotest.test_case msg `Quick (tester file_parse_test level filename passfail) in
+      match bits with
+      | "32" when Utils.int_bits = 64 -> loop str file
+      | _ -> loop (stest::str) (ftest::file)
+      end
     | exception End_of_file -> (str, file)
   in
   let str_t, file_t = loop [] [] in [ "string", (List.rev str_t); "file", (List.rev file_t) ]

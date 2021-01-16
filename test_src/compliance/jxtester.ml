@@ -11,7 +11,7 @@ module CmdlineOptions = struct
     let man = [
       `S Manpage.s_description;
       `P "run internal compliance testing as defined in -t FILE. This has the format:";
-      `Pre "  <level> [pass|fail] <filename>";
+      `Pre "  <level> [pass|fail] <filename> [32|64]";
       `P "Where the fields are defined as follows";
       `I ("level",
           "one of strict, basic, extended, yjbasic and yjsafe. These correspond)
@@ -19,7 +19,8 @@ module CmdlineOptions = struct
       `I ("[pass|fail]", "indicates the expected outcome");
       `I ("<filename>",
           "the file containing the test, it is assumed to be in the current directory,
-           .json is automatically appended to the filename.")
+           .json is automatically appended to the filename.");
+      `I ("[32|64]", "is optional and defines the mimimum int size to run the test on, defaults to 64.")
     ]
     in
     Term.(const f $ tfile $ alco_opts),

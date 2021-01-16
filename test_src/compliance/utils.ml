@@ -1,3 +1,11 @@
+(* Determine the size of an integer, handles 31bit, 63bit and Jsoo using 32bit ints *)
+let int_bits =
+  let rec log2 n = if n <= 1 then 0 else 1 + log2(n asr 1) in
+  let bits n = log2 n + 1 in
+  match bits max_int with
+  | 30|31|32 -> 32
+  | _ -> 64
+
 let die msg = 
   Printf.fprintf stderr "\nERROR: %s\n" msg;
   exit 255
