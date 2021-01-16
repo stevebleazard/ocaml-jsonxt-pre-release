@@ -185,11 +185,6 @@ module ValidationTests = struct
     in
     (jsons, sexps, sexps_json_stream)
 
-  let check_sexp =
-    let pp ppf v = Fmt.pf ppf "%s" (Core_kernel.Sexp.to_string v) in
-    let sexp_eq a b = match Core_kernel.Sexp.compare a b with | 0 -> true | _ -> false in
-    Alcotest.testable pp sexp_eq
-
   let output_validation_config jsons json json_stream =
     Printf.printf "%s\t%s\t%s\n"
       jsons
@@ -232,6 +227,57 @@ module ValidationTests = struct
       | exception End_of_file -> ()
     in loop ()
 
+  let get_json_stream jsons =
+    let stream = Jsonxt.Extended_stream.json_stream_of_string jsons in
+    let rec loop res =
+      match Jsonxt.Extended_stream.decode_stream stream with
+      | Error err -> Error err
+      | Ok None -> Ok (List.rev res)
+      | Ok Some tok -> loop (tok::res)
+    in
+    loop []
+
+  let json_stream_to_string stream =
+    let buf = Buffer.create 100 in
+    let add_char c = Buffer.add_char buf c in
+    let add_string s = Buffer.add_string buf s in
+    let encoder = Jsonxt.Extended_stream.create_encoder ~add_char ~add_string in
+    let encode () =
+      List.iter (fun v -> Jsonxt.Extended_stream.encode_stream_exn encoder v) stream;
+      Buffer.contents buf
+    in
+    try Ok (encode ()) with
+    | Failure err -> Error err
+
+  let sexp =
+    let pp ppf v = Fmt.pf ppf "%s" (Core_kernel.Sexp.to_string v) in
+    let sexp_eq a b = match Core_kernel.Sexp.compare a b with | 0 -> true | _ -> false in
+    Alcotest.testable pp sexp_eq
+
+  let string_parse_test jsons sexps () =
+    let jsonsexp = 
+      match Jsonxt.Extended.json_of_string jsons with
+      | Ok json -> JsonSexp.sexp_of_json json
+      | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to parse '%s': %s" jsons err)
+    in
+    let sexpv = Core_kernel.Sexp.of_string sexps in
+    Alcotest.(check sexp) jsons sexpv jsonsexp 
+    
+  let gen_tests filename =
+    let inc = try open_in filename with | Sys_error err -> Utils.die err in
+    let rec loop std stream =
+      match read_json_sexp inc with
+      | jsons, sexps, _sexps_json_stream ->
+        let msg = jsons in
+        loop ((Alcotest.test_case msg `Quick (string_parse_test jsons sexps))::std)
+             stream
+      | exception End_of_file -> (std, stream)
+    in
+    let std_t, stream_t = loop [] [] in [ "standard", (List.rev std_t); "stream", (List.rev stream_t) ]
+
+  let run_tests filename alco_opts =
+    let argv = Array.of_list ("compliance"::alco_opts) in
+    Alcotest.run ~argv "Validation" (gen_tests filename)
 end
 
 let tester_validation_run file alco_opts =
@@ -244,6 +290,6 @@ let tester_validation_gen file alco_opts =
 (* let () = Cmdliner.Term.(exit @@ eval CmdlineOptions.cmd) *)
 let cmds = [
     CmdlineOptions.compliance_cmd ComplianceTests.run_tests
-  ; CmdlineOptions.validation_cmd ValidationTests.gen_config tester_validation_run
+  ; CmdlineOptions.validation_cmd ValidationTests.gen_config ValidationTests.run_tests
   ]
 let () = Cmdliner.Term.(exit @@ eval_choice CmdlineOptions.default_cmd cmds)
