@@ -4,7 +4,8 @@ let read_test_data inc =
   let (level, passfail, filename, bits) = match p with
     | lv::pf::fn::"32"::[] -> (lv, pf, fn, "32")
     | lv::pf::fn::"64"::[] -> (lv, pf, fn, "64")
-    | lv::pf::fn::[] -> (lv, pf, fn, "64")
+    | lv::pf::fn::"all"::[] -> (lv, pf, fn, "all")
+    | lv::pf::fn::[] -> (lv, pf, fn, "all")
     | _ -> Utils.die ("invalid test line: " ^ l)
   in
   let level = match level with
@@ -65,6 +66,7 @@ let gen_tests filename =
       let stest = Alcotest.test_case msg `Quick (tester string_parse_test level filename passfail) in
       let ftest = Alcotest.test_case msg `Quick (tester file_parse_test level filename passfail) in
       match bits with
+      | "64" when Utils.int_bits = 32 -> loop str file
       | "32" when Utils.int_bits = 64 -> loop str file
       | _ -> loop (stest::str) (ftest::file)
       end
