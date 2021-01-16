@@ -103,15 +103,24 @@ let string_parse_test jsons sexps () =
   in
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
+
+let stream_parse_test jsons sexp_streams () =
+  let json_stream_sexp = 
+    match get_json_stream jsons with
+    | Ok json_stream -> JsonStreamSexp.sexp_of_json_stream json_stream
+    | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to parse '%s': %s" jsons err)
+  in
+  let sexp_stream = Core_kernel.Sexp.of_string sexp_streams in
+  Alcotest.(check sexp) jsons sexp_stream json_stream_sexp 
   
 let gen_tests filename =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
   let rec loop std stream =
     match read_json_sexp inc with
-    | jsons, sexps, _sexps_json_stream ->
+    | jsons, sexps, sexps_json_stream ->
       let msg = jsons in
       loop ((Alcotest.test_case msg `Quick (string_parse_test jsons sexps))::std)
-           stream
+           ((Alcotest.test_case msg `Quick (stream_parse_test jsons sexps_json_stream))::stream)
     | exception End_of_file -> (std, stream)
   in
   let std_t, stream_t = loop [] [] in [ "standard", (List.rev std_t); "stream", (List.rev stream_t) ]

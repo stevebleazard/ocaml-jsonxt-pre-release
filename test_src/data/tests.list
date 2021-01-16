@@ -83,3 +83,13 @@ basic    pass escapes
 extended pass escapes
 yjbasic  pass escapes
 yjsafe   pass escapes
+strict   pass assoc
+basic    pass assoc
+extended pass assoc
+yjbasic  pass assoc
+yjsafe   pass assoc
+strict   pass array
+basic    pass array
+extended pass array
+yjbasic  pass array
+yjsafe   pass array
