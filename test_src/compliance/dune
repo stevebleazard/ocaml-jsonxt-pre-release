@@ -1,7 +1,7 @@
-(executable
- (name compliance_tester)
+(executables
+ (names compliance_tester jxtester)
  (preprocess (pps ppx_sexp_conv))
- (libraries jsonxt core))
+ (libraries jsonxt core_kernel alcotest cmdliner fmt))
 
 (rule
  (alias compliance_tests)
