@@ -70,13 +70,13 @@ module CmdlineOptions = struct
   let default_cmd =
     let exits = Term.default_exits in
     Term.(ret (const (fun _ -> `Help (`Pager, None)) $ alco_opts)),
-    Term.info "jxttester" ~version:"%%VERSION%%" ~exits
+    Term.info "jxtester" ~version:"%%VERSION%%" ~exits
 
   let command = Arg.(required & pos 0 (some string) None & info [] ~docv:"[compliance|validation]")
   
   let cmd =
     Term.(const tester $ command $ tfile $ alco_opts),
-    Term.info "jxttester" ~version:"%%VERSION%%" ~exits:Term.default_exits
+    Term.info "jxtester" ~version:"%%VERSION%%" ~exits:Term.default_exits
 
 end
 
