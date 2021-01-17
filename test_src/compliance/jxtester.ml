@@ -32,8 +32,9 @@ module CmdlineOptions = struct
       `P "run the parser test suite, parsing and verifying each of the
           json strings defined in -t FILE. This is a tab seperated list
           of json and expected sexp in the format:";
-      `Pre "  json <tab> sexp <tab> sexp_strem";
+      `Pre "  bits <tab> json <tab> sexp <tab> sexp_strem";
       `P "Where the fields are defined as follows";
+      `I ("bits", "bit size of platform to run test on. Either 32, 64 or all");
       `I ("json", "json to parse");
       `I ("sexp", "is the expected sexp");
       `I ("sexp_stream", "is the expected sexp from the stream parser");
