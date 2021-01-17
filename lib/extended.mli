@@ -3,7 +3,7 @@
     JSON types including integer as well as tuples and variants introduced
     by [Yojson].
 
-    The muximim/minimum size of an integer is architecture specific,
+    The maximim/minimum size of an integer is architecture specific,
     typically 31 or 63 bits depending on the platform *)
 
 type json = Json.Extended.json
