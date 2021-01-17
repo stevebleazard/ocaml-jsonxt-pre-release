@@ -55,6 +55,20 @@ module CmdlineOptions = struct
     Term.(ret (const gen_run $ subcmd $ tfile $ alco_opts)),
     Term.info "validation" ~exits:Term.default_exits ~doc ~man
 
+  let suite_cmd std_f stream_f monad_f =
+    let suite_run subcmd files =
+      match subcmd with
+      | "std" -> std_f files; `Ok ()
+      | "stream" -> stream_f files; `Ok ()
+      | "monad" -> monad_f files; `Ok ()
+      | _ -> `Error (true, "expected std, stream or monad")
+    in
+    let doc = "Process the JsonSuite files available from https://github.com/nst/JSONTestSuite" in
+    let subcmd = Arg.(required & pos 0 (some string) None & info [] ~docv:"[std|stream|monad]" ~doc) in
+    let files = Arg.(value & pos_right 0 string [] & info [] ~docv:"FILES") in
+    Term.(ret (const suite_run $ subcmd $ files)),
+    Term.info "suite" ~exits:Term.default_exits ~doc
+
   let default_cmd =
     let exits = Term.default_exits in
     Term.(ret (const (fun _ -> `Help (`Pager, None)) $ alco_opts)),
@@ -68,17 +82,14 @@ module CmdlineOptions = struct
 
 end
 
-
-
-let tester_validation_run file alco_opts =
-  Printf.printf "command: validate run\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
-
-let tester_validation_gen file alco_opts =
-  Printf.printf "command: validate gen\nFile: %s\nAlcoTest: %s\n" file (String.concat ", " alco_opts)
+let tester_suite_std files = Printf.printf "command: suite\nsubcommand: std\nFile: %s\n" (String.concat ", " files)
+let tester_suite_stream files = Printf.printf "command: suite\nsubcommand: stream\nFile: %s\n" (String.concat ", " files)
+let tester_suite_monad files = Printf.printf "command: suite\nsubcommand: monad\nFile: %s\n" (String.concat ", " files)
 
 
 let cmds = [
     CmdlineOptions.compliance_cmd ComplianceTests.run_tests
   ; CmdlineOptions.validation_cmd ValidationTests.gen_config ValidationTests.run_tests
+  ; CmdlineOptions.suite_cmd tester_suite_std tester_suite_stream tester_suite_monad
   ]
 let () = Cmdliner.Term.(exit @@ eval_choice CmdlineOptions.default_cmd cmds)
