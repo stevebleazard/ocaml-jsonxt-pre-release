@@ -112,6 +112,25 @@ let string_parse_test jsons sexps () =
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
 
+let file_write_test jsons sexps tmpfile () =
+  let jsonsexp = 
+    match Jsonxt.Extended.json_of_string jsons with
+    | Ok json -> begin
+      match Jsonxt.Extended.json_to_file tmpfile json with
+      | Ok () -> begin
+          match Jsonxt.Extended.json_of_file tmpfile with
+          | Ok json -> JsonSexp.sexp_of_json json
+          | Error err ->
+            let str = Utils.load_file tmpfile in
+            Core_kernel.Sexp.Atom (Printf.sprintf "Failed to re-parse written json '%s': %s" str err)
+        end
+      | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to write parsed json '%s': %s" jsons err)
+      end
+    | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to parse '%s': %s" jsons err)
+  in
+  let sexpv = Core_kernel.Sexp.of_string sexps in
+  Alcotest.(check sexp) jsons sexpv jsonsexp 
+
 let string_write_test jsons sexps () =
   let jsonsexp = 
     match Jsonxt.Extended.json_of_string jsons with
@@ -192,29 +211,31 @@ let monad_write_test jsons sexps () =
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
 
-let gen_tests filename =
+let gen_tests filename tmpfile =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
-  let rec loop std stream stdwrite strwrite monad mwrite =
+  let rec loop std stream stdwrite filewrite strwrite monad mwrite =
     match read_json_sexp inc with
     | bits, jsons, sexps, sexps_json_stream -> begin
       let msg = jsons in
       match bits with
-      | "64" when Utils.int_bits = 32 -> loop std stream stdwrite strwrite monad mwrite
-      | "32" when Utils.int_bits = 64 -> loop std stream stdwrite strwrite monad mwrite
+      | "64" when Utils.int_bits = 32 -> loop std stream stdwrite filewrite strwrite monad mwrite
+      | "32" when Utils.int_bits = 64 -> loop std stream stdwrite filewrite strwrite monad mwrite
       | _ ->
         loop ((Alcotest.test_case msg `Quick (string_parse_test jsons sexps))::std)
              ((Alcotest.test_case msg `Quick (stream_parse_test jsons sexps_json_stream))::stream)
              ((Alcotest.test_case msg `Quick (string_write_test jsons sexps))::stdwrite)
+             ((Alcotest.test_case msg `Quick (file_write_test jsons sexps tmpfile))::filewrite)
              ((Alcotest.test_case msg `Quick (stream_write_test jsons sexps))::strwrite)
              ((Alcotest.test_case msg `Quick (monad_parse_test jsons sexps))::monad)
              ((Alcotest.test_case msg `Quick (monad_write_test jsons sexps))::mwrite)
       end
-    | exception End_of_file -> (std, stream, stdwrite, strwrite, monad, mwrite)
+    | exception End_of_file -> (std, stream, stdwrite, filewrite, strwrite, monad, mwrite)
   in
-  let std_t, stream_t, stdwrite_t, strwrite_t, monad_t, mwrite_t  = loop [] [] [] [] [] [] in
+  let std_t, stream_t, stdwrite_t, filewrite_t, strwrite_t, monad_t, mwrite_t  = loop [] [] [] [] [] [] [] in
   [
     "standard", (List.rev std_t);
-    "standard-write", (List.rev stdwrite_t);
+    "standard-write-string", (List.rev stdwrite_t);
+    "standard-write-file", (List.rev filewrite_t);
     "stream", (List.rev stream_t);
     "stream-write", (List.rev strwrite_t);
     "monad", (List.rev monad_t);
@@ -223,4 +244,6 @@ let gen_tests filename =
 
 let run_tests filename alco_opts =
   let argv = Array.of_list ("compliance"::alco_opts) in
-  Alcotest.run ~argv "Validation" (gen_tests filename)
+  let tmpfile = Filename.temp_file "jxtester" ".json" in
+  Alcotest.run ~and_exit:false ~argv "Validation" (gen_tests filename tmpfile);
+  try Sys.remove tmpfile with Sys_error _ -> ()
