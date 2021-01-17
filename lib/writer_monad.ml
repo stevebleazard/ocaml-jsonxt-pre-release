@@ -89,7 +89,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
       | `Stringlit s -> write_quote_string s
       | `Tuple t ->
         let ldr = String.make off ' ' in
-        write_string ("[" ^ eol)
+        write_string ("(" ^ eol)
         >>= fun () -> json_list (off + incr) t
         >>= fun () -> write_string (eol ^ ldr ^ ")")
       | `Variant v ->

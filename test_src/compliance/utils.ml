@@ -36,6 +36,8 @@ module StringIO = struct
     end
 
   let write t s = Buffer.add_string t.buf s
+
+  let contents t = Buffer.sub t.buf !(t.off) (Buffer.length t.buf - !(t.off))
 end
 
 (* Determine the size of an integer, handles 31bit, 63bit and Jsoo using 32bit ints *)
