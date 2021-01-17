@@ -155,29 +155,44 @@ let stream_parse_test jsons sexp_streams () =
   let sexp_stream = Core_kernel.Sexp.of_string sexp_streams in
   Alcotest.(check sexp) jsons sexp_stream json_stream_sexp 
   
+let monad_parse_test jsons sexps () =
+  let open Utils.IO in
+  let iobuf = Utils.StringIO.create jsons in
+  let reader buf len = Utils.StringIO.read iobuf buf len |> Utils.IO.return in
+  let module JsonIO = Jsonxt.Extended_monad.Make(Utils.IO) in
+  let res = result (JsonIO.read_json ~reader) in
+  let jsonsexp = match res with
+    | Ok json -> JsonSexp.sexp_of_json json
+    | Error err -> Core_kernel.Sexp.Atom (Printf.sprintf "Failed to parse '%s': %s" jsons err)
+  in
+  let sexpv = Core_kernel.Sexp.of_string sexps in
+  Alcotest.(check sexp) jsons sexpv jsonsexp 
+
 let gen_tests filename =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
-  let rec loop std stream stdwrite strwrite =
+  let rec loop std stream stdwrite strwrite monad =
     match read_json_sexp inc with
     | bits, jsons, sexps, sexps_json_stream -> begin
       let msg = jsons in
       match bits with
-      | "64" when Utils.int_bits = 32 -> loop std stream stdwrite strwrite
-      | "32" when Utils.int_bits = 64 -> loop std stream stdwrite strwrite
+      | "64" when Utils.int_bits = 32 -> loop std stream stdwrite strwrite monad
+      | "32" when Utils.int_bits = 64 -> loop std stream stdwrite strwrite monad
       | _ ->
         loop ((Alcotest.test_case msg `Quick (string_parse_test jsons sexps))::std)
              ((Alcotest.test_case msg `Quick (stream_parse_test jsons sexps_json_stream))::stream)
              ((Alcotest.test_case msg `Quick (string_write_test jsons sexps))::stdwrite)
              ((Alcotest.test_case msg `Quick (stream_write_test jsons sexps))::strwrite)
+             ((Alcotest.test_case msg `Quick (monad_parse_test jsons sexps))::monad)
       end
-    | exception End_of_file -> (std, stream, stdwrite, strwrite)
+    | exception End_of_file -> (std, stream, stdwrite, strwrite, monad)
   in
-  let std_t, stream_t, stdwrite_t, strwrite_t  = loop [] [] [] [] in
+  let std_t, stream_t, stdwrite_t, strwrite_t, monad_t  = loop [] [] [] [] [] in
   [
     "standard", (List.rev std_t);
     "standard-write", (List.rev stdwrite_t);
     "stream", (List.rev stream_t);
-    "stream-write", (List.rev strwrite_t)
+    "stream-write", (List.rev strwrite_t);
+    "monad", (List.rev monad_t);
   ]
 
 let run_tests filename alco_opts =
