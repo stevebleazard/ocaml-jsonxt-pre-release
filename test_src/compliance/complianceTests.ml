@@ -31,7 +31,7 @@ let level_to_string = function
   | `Yojson_safe -> "yjsafe"
   | `Yojson_basic -> "yjbasic"
 
-let string_parse_test level filename =
+let string_parse_test level filename _passfail =
   let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
   let string_parser = match level with
     | `Strict       -> of_error Jsonxt.Strict.json_of_string
@@ -42,7 +42,7 @@ let string_parse_test level filename =
   in 
   string_parser txt
 
-let file_parse_test level filename =
+let file_parse_test level filename _passfail =
   let file_parser = match level with
     | `Strict       -> of_error Jsonxt.Strict.json_of_file
     | `Basic        -> of_error Jsonxt.Basic.json_of_file
@@ -52,45 +52,50 @@ let file_parse_test level filename =
   in 
   file_parser (filename ^ ".json")
 
-let monad_parser_test level filename =
+let monad_parser_test level filename passfail =
   let open Utils.IO in
   let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
   let iobuf = Utils.StringIO.create txt in
   let reader buf len = Utils.StringIO.read iobuf buf len |> Utils.IO.return in
   let of_error res = match res with Ok _ -> return "pass" | Error _ -> return "fail" in
-  let module JsonIOStrict = Jsonxt.Strict_monad.Make(Utils.IO) in
-  let module JsonIOBasic = Jsonxt.Basic_monad.Make(Utils.IO) in
-  let module JsonIOExtended = Jsonxt.Extended_monad.Make(Utils.IO) in
   let result = match level with
-    | `Strict       -> JsonIOStrict.read_json ~reader >>= of_error
-    | `Basic        -> JsonIOBasic.read_json ~reader >>= of_error
-    | `Extended     -> JsonIOExtended.read_json ~reader >>= of_error
-    | `Yojson_basic -> return "pass"
-    | `Yojson_safe  -> return "pass"
+    | `Strict       ->
+      let module JsonIO = Jsonxt.Strict_monad.Make(Utils.IO) in
+      JsonIO.read_json ~reader >>= of_error
+    | `Basic        ->
+      let module JsonIO = Jsonxt.Basic_monad.Make(Utils.IO) in
+      JsonIO.read_json ~reader >>= of_error
+    | `Extended     ->
+      let module JsonIO = Jsonxt.Extended_monad.Make(Utils.IO) in
+      JsonIO.read_json ~reader >>= of_error
+    | `Yojson_basic -> return passfail (* monad isn't supported by Yojson *)
+    | `Yojson_safe  -> return passfail
   in
   Utils.IO.result result
 
 let tester f level filename passfail () =
   let slevel = level_to_string level in
   let msg = slevel ^ " " ^ filename in
-  Alcotest.(check string) msg passfail (f level filename) 
+  Alcotest.(check string) msg passfail (f level filename passfail) 
 
 let gen_tests filename =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
-  let rec loop str file =
+  let rec loop str file monad =
     match read_test_data inc with
     | level, passfail, filename, bits -> begin
       let msg = filename ^ " " ^ (level_to_string level) in
       let stest = Alcotest.test_case msg `Quick (tester string_parse_test level filename passfail) in
       let ftest = Alcotest.test_case msg `Quick (tester file_parse_test level filename passfail) in
+      let mtest = Alcotest.test_case msg `Quick (tester monad_parser_test level filename passfail) in
       match bits with
-      | "64" when Utils.int_bits = 32 -> loop str file
-      | "32" when Utils.int_bits = 64 -> loop str file
-      | _ -> loop (stest::str) (ftest::file)
+      | "64" when Utils.int_bits = 32 -> loop str file monad
+      | "32" when Utils.int_bits = 64 -> loop str file monad
+      | _ -> loop (stest::str) (ftest::file) (mtest::monad)
       end
-    | exception End_of_file -> (str, file)
+    | exception End_of_file -> (str, file, monad)
   in
-  let str_t, file_t = loop [] [] in [ "string", (List.rev str_t); "file", (List.rev file_t) ]
+  let str_t, file_t, monad_t = loop [] [] [] in
+  [ "string", (List.rev str_t); "file", (List.rev file_t); "monad", (List.rev monad_t) ]
 
 let run_tests filename alco_opts =
   let argv = Array.of_list ("compliance"::alco_opts) in
