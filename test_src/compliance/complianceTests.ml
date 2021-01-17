@@ -52,6 +52,24 @@ let file_parse_test level filename =
   in 
   file_parser (filename ^ ".json")
 
+let monad_parser_test level filename =
+  let open Utils.IO in
+  let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
+  let iobuf = Utils.StringIO.create txt in
+  let reader buf len = Utils.StringIO.read iobuf buf len |> Utils.IO.return in
+  let of_error res = match res with Ok _ -> return "pass" | Error _ -> return "fail" in
+  let module JsonIOStrict = Jsonxt.Strict_monad.Make(Utils.IO) in
+  let module JsonIOBasic = Jsonxt.Basic_monad.Make(Utils.IO) in
+  let module JsonIOExtended = Jsonxt.Extended_monad.Make(Utils.IO) in
+  let result = match level with
+    | `Strict       -> JsonIOStrict.read_json ~reader >>= of_error
+    | `Basic        -> JsonIOBasic.read_json ~reader >>= of_error
+    | `Extended     -> JsonIOExtended.read_json ~reader >>= of_error
+    | `Yojson_basic -> return "pass"
+    | `Yojson_safe  -> return "pass"
+  in
+  Utils.IO.result result
+
 let tester f level filename passfail () =
   let slevel = level_to_string level in
   let msg = slevel ^ " " ^ filename in

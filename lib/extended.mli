@@ -1,7 +1,10 @@
 (** [Extended] supports parsing and writing JSON data that conforms to the
     {!type:Json.Extended.json} json type.  This supports non-standard
     JSON types including integer as well as tuples and variants introduced
-    by [Yojson] *)
+    by [Yojson].
+
+    The muximim/minimum size of an integer is architecture specific,
+    typically 31 or 63 bits depending on the platform *)
 
 type json = Json.Extended.json
 type t = json
