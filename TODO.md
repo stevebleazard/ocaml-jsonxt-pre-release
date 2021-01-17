@@ -1,24 +1,25 @@
 # TODO
 ## General
 * Coding
-  * Stream encode / decode
-  * Streaming json with recovery
+  * Yojson
+    * Review functionality
+    * Add functions and missing paramters
+    * Test including replacing existing use of yojson library
+    * Test derivers
+    * Dccument use in existing projects (create yojson.ml with include) 
+  * Stream.t json recovery (version 1.1?)
 * Review
   * Compliance with RFCs
-  * Test for compliance (https://github.com/nst/JSONTestSuite)
-    * Create a test suite runner: test_compliance [succeed|fail|either] [file...]
+  * Test for compliance
+    * https://github.com/nst/JSONTestSuite
   * Test extensions
-    * Integer handling in each compliance level
-    * Tuples and Variants
     * Floatlit etc?
 * Documentation
-  * General
-  * Function
-  * Examples
-  * CODING-NOTES.md
-* Monad version
-  * once rest of coding complete
-  * Create compliant_lexxer_monad
-  * Merge parser.ml into parser_monad
-  * Create json_write_monad
-  * Create suitable interface
+  * General - README.md with quick-start and examples including Deferred
+    * performance
+  * Function - review
+  * Examples - add more
+  * Yojson
+* Testing
+  * performance compared to Yojson
+  * Yojson compatibility
