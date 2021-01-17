@@ -1,14 +1,18 @@
 (executables
- (names compliance_tester jxtester)
+ (names jxtester)
  (preprocess (pps ppx_sexp_conv))
  (libraries jsonxt core_kernel alcotest cmdliner fmt))
 
 (rule
  (alias compliance_tests)
- (deps compliance_tester.exe (glob_files ../data/*))
- (action (chdir ../data (run ../compliance/compliance_tester.exe internal run tests.list))))
+ (deps jxtester.exe (glob_files ../data/*))
+ (action (chdir ../data (run ../compliance/jxtester.exe compliance -t ./compliance_tests.list))))
 
 (rule
- (alias compliance_tests)
- (deps compliance_tester.exe (glob_files ../data/json_tests.list))
- (action (run ./compliance_tester.exe suite run ../data/json_tests.list)))
+ (alias validation_tests)
+ (deps jxtester.exe (glob_files ../data/json_tests.list))
+ (action (run ./jxtester.exe validation run -t ../data/json_tests.list)))
+
+(alias
+ (name runtests)
+ (deps (alias compliance_tests) (alias validation_tests)))
