@@ -135,13 +135,17 @@ module Make (Compliance : Compliance.S) : Parser
       match t.reader () with
       | exception (Parse_error `Eof) -> None
       | exception exn_ -> raise exn_
-      | tok -> Some (token_value tok)
+      | tok -> begin
+          match tok with
+          | EOF -> None
+          | tok -> Some (token_value tok)
+        end
     end
     else Some ((Stack.pop t.continuation) ())
 
   let decode t = 
     match json_stream t with
-    | exception (Parse_error (`Eof)) -> Ok None
+    | exception (Parse_error `Eof) -> Ok None
     | exception (Parse_error (`Syntax_error err)) -> Error err
     | exception (Lexxer_utils.Lex_error err) -> Error err
     | res -> Ok res
