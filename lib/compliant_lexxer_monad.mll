@@ -136,7 +136,11 @@ rule read =
   | double_quote double_quote
     { return (STRING "") }
   | double_quote (characters as s) double_quote
-    { return (STRING (Lexxer_utils.unescape_string s)) }
+    {
+      match Lexxer_utils.unescape_string s with
+      | exception (Lexxer_utils.Lex_error err) -> fail err
+      | us -> return (STRING us)
+    }
   | eof
     { return EOF }
   | whitespace
