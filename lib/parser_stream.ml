@@ -17,12 +17,14 @@ module Make (Compliance : Compliance.S) : Parser
   type t = {
     reader : unit -> Tokens.token
   ; continuation : (unit -> Compliance.json_stream) Stack.t
+  ; state : [`Start | `Process | `End] ref
   }
 
   let create ~reader = 
     { 
       reader
     ; continuation = Stack.create ()
+    ; state = ref `Start
     }
 
   let json_stream t =
@@ -145,9 +147,21 @@ module Make (Compliance : Compliance.S) : Parser
 
   let decode t = 
     match json_stream t with
-    | exception (Parse_error `Eof) -> Ok None
     | exception (Parse_error (`Syntax_error err)) -> Error err
     | exception (Lexxer_utils.Lex_error err) -> Error err
-    | res -> Ok res
+    | None
+    | exception (Parse_error `Eof) ->
+      if Stack.length t.continuation > 0 then Error "unexpected end-of-input"
+      else begin
+        match !(t.state) with
+        | `Start -> Error "empty input"
+        | `Process
+        | `End -> Ok None
+      end
+    | res ->
+      match !(t.state) with
+      | `Start -> t.state := `Process; Ok res
+      | `Process -> if Stack.length t.continuation = 0 then t.state := `End; Ok res
+      | `End -> Error "Junk following JSON value"
 
 end
