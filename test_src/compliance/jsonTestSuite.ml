@@ -23,10 +23,17 @@ let string_parse_monad jsons =
   | Error _ -> `Fail
 
 let filename_to_success filename =
-  match String.get filename 0 with
+  let name = Filename.basename filename in
+  match String.get name 0 with
   | 'y' | 'Y' -> `Pass
   | 'n' | 'N' -> `Fail
   | 'i' | 'I' -> `Undefined
+  | _         -> `Undefined
+
+let result_to_string = function
+  | `Pass -> "pass"
+  | `Fail -> "fail"
+  | `Undefined -> "undef"
 
 let result_to_report expected actual =
   match expected, actual with
@@ -34,7 +41,6 @@ let result_to_report expected actual =
   | `Fail, `Fail -> "pass"
   | `Pass, `Fail
   | `Fail, `Pass -> "fail"
-  | `Pass, `Fail
   | `Undefined, `Pass -> "OKpass"
   | `Undefined, `Fail -> "OKfail"
 
@@ -47,16 +53,16 @@ let charfill text tolen chr =
   end
 
 let report filename actual =
-  let expected = filename_to_success file in
+  let expected = filename_to_success filename in
   let report = result_to_report expected actual in
-  let report = charfill report 15 '.' in
-    Printf.printf "  %s%s\n" report file
+  let report = charfill report 8 ' ' in
+    Printf.printf "  %s  %s\n" report filename
 
-let test_suite_std_file file =
+let test_suite_std_file filename =
   let jsons = try Utils.load_file filename with Sys_error err -> Utils.die err in
   let actual = string_parse_std jsons in
-  report file actual
+  report filename actual
 
 let test_suite_std files =
-  Printf.printf "Standard parser";
+  Printf.printf "Standard parser\n";
   List.iter test_suite_std_file files

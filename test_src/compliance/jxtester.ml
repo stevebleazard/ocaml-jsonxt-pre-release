@@ -90,6 +90,6 @@ let tester_suite_monad files = Printf.printf "command: suite\nsubcommand: monad\
 let cmds = [
     CmdlineOptions.compliance_cmd ComplianceTests.run_tests
   ; CmdlineOptions.validation_cmd ValidationTests.gen_config ValidationTests.run_tests
-  ; CmdlineOptions.suite_cmd tester_suite_std tester_suite_stream tester_suite_monad
+  ; CmdlineOptions.suite_cmd JsonTestSuite.test_suite_std tester_suite_stream tester_suite_monad
   ]
 let () = Cmdliner.Term.(exit @@ eval_choice CmdlineOptions.default_cmd cmds)
