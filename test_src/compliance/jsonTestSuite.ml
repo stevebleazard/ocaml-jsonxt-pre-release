@@ -75,3 +75,12 @@ let test_suite_stream_file filename =
 let test_suite_stream files =
   Printf.printf "Steam parser\n";
   List.iter test_suite_stream_file files
+
+let test_suite_monad_file filename =
+  let jsons = try Utils.load_file filename with Sys_error err -> Utils.die err in
+  let actual = string_parse_monad jsons in
+  report filename actual
+
+let test_suite_monad files =
+  Printf.printf "Steam parser\n";
+  List.iter test_suite_monad_file files
