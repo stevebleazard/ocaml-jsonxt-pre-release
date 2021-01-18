@@ -22,6 +22,16 @@ let read_test_data inc =
   in
   (level, passfail, filename, bits)
 
+let get_json_stream of_string decode jsons =
+  let stream = of_string jsons in
+  let rec loop res =
+    match decode stream with
+    | Error err -> Error err
+    | Ok None -> Ok (List.rev res)
+    | Ok Some tok -> loop (tok::res)
+  in
+  loop []
+
 let of_error f a = match f a with Ok _ -> "pass" | Error _ -> "fail"
 
 let level_to_string = function
@@ -52,7 +62,21 @@ let file_parse_test level filename _passfail =
   in 
   file_parser (filename ^ ".json")
 
-let monad_parser_test level filename passfail =
+let stream_parse_test level filename passfail =
+  let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
+  let stream_parser = match level with
+    | `Strict       ->
+      of_error (get_json_stream Jsonxt.Strict_stream.json_stream_of_string Jsonxt.Strict_stream.decode_stream)
+    | `Basic        ->
+      of_error (get_json_stream Jsonxt.Basic_stream.json_stream_of_string Jsonxt.Basic_stream.decode_stream)
+    | `Extended     ->
+      of_error (get_json_stream Jsonxt.Extended_stream.json_stream_of_string Jsonxt.Extended_stream.decode_stream)
+    | `Yojson_basic -> fun _ -> passfail
+    | `Yojson_safe  -> fun _ -> passfail
+  in 
+  stream_parser txt
+
+let monad_parse_test level filename passfail =
   let open Utils.IO in
   let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
   let iobuf = Utils.StringIO.create txt in
@@ -80,22 +104,27 @@ let tester f level filename passfail () =
 
 let gen_tests filename =
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
-  let rec loop str file monad =
+  let rec loop str file monad stream =
     match read_test_data inc with
     | level, passfail, filename, bits -> begin
       let msg = filename ^ " " ^ (level_to_string level) in
       let stest = Alcotest.test_case msg `Quick (tester string_parse_test level filename passfail) in
       let ftest = Alcotest.test_case msg `Quick (tester file_parse_test level filename passfail) in
-      let mtest = Alcotest.test_case msg `Quick (tester monad_parser_test level filename passfail) in
+      let mtest = Alcotest.test_case msg `Quick (tester monad_parse_test level filename passfail) in
+      let ttest = Alcotest.test_case msg `Quick (tester stream_parse_test level filename passfail) in
       match bits with
-      | "64" when Utils.int_bits = 32 -> loop str file monad
-      | "32" when Utils.int_bits = 64 -> loop str file monad
-      | _ -> loop (stest::str) (ftest::file) (mtest::monad)
+      | "64" when Utils.int_bits = 32 -> loop str file monad stream
+      | "32" when Utils.int_bits = 64 -> loop str file monad stream
+      | _ -> loop (stest::str) (ftest::file) (mtest::monad) (ttest::stream)
       end
-    | exception End_of_file -> (str, file, monad)
+    | exception End_of_file -> (str, file, monad, stream)
   in
-  let str_t, file_t, monad_t = loop [] [] [] in
-  [ "string", (List.rev str_t); "file", (List.rev file_t); "monad", (List.rev monad_t) ]
+  let str_t, file_t, monad_t, stream_t = loop [] [] [] [] in
+  [
+    "string", (List.rev str_t);
+    "file", (List.rev file_t);
+    "monad", (List.rev monad_t);
+    "stream", (List.rev stream_t) ]
 
 let run_tests filename alco_opts =
   let argv = Array.of_list ("compliance"::alco_opts) in
