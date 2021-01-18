@@ -112,3 +112,7 @@ basic    fail junkatend
 extended fail junkatend
 yjbasic  fail junkatend
 yjsafe   fail junkatend
+basic    pass space
+extended pass space
+yjbasic  pass space
+yjsafe   pass space
