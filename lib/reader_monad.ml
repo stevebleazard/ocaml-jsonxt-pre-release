@@ -35,7 +35,12 @@ module Make
     Parser.decode ~reader
     >>= function
     | Ok None -> return (Error "empty string")
-    | Ok (Some res) -> return (Ok res)
+    | Ok (Some res) -> begin
+      reader ()
+      >>= function
+      | EOF -> return (Ok res)
+      | tok -> return (Error (("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))))
+      end
     | Error s ->
       let loc = Lexxer_utils.error_pos_msg lexbuf in
         return (Error (Printf.sprintf "%s at %s" s loc))
