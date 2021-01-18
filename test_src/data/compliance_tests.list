@@ -107,3 +107,8 @@ basic    pass min_int31
 extended pass min_int31
 yjbasic  pass min_int31
 yjsafe   pass min_int31
+strict   fail junkatend
+basic    fail junkatend
+extended fail junkatend
+yjbasic  fail junkatend
+yjsafe   fail junkatend

@@ -27,7 +27,12 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
     let reader () = Lexxer.read lexbuf in
     match Parser.decode ~reader with
     | Ok None -> Error "empty string"
-    | Ok (Some res) -> Ok res
+    | Ok (Some res) -> begin
+      match reader () with
+      | EOF -> Ok res
+      | exception Lexxer_utils.Lex_error err -> Error err
+      | tok -> Error ("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))
+      end
     | Error s ->
       let loc = Lexxer_utils.error_pos_msg lexbuf in
         Error (Printf.sprintf "%s at %s" s loc)
