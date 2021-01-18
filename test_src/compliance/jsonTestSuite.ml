@@ -1,12 +1,12 @@
 let string_parse_std jsons =
-  match Jsonxt.Extended.json_of_string jsons with
+  match Jsonxt.Strict.json_of_string jsons with
   | Ok _ -> `Pass
   | Error _ -> `Fail
 
 let string_parse_stream jsons =
-  let stream = Jsonxt.Extended_stream.json_stream_of_string jsons in
+  let stream = Jsonxt.Strict_stream.json_stream_of_string jsons in
   let rec loop () =
-    match Jsonxt.Extended_stream.decode_stream stream with
+    match Jsonxt.Strict_stream.decode_stream stream with
     | Error _ -> `Fail
     | Ok None -> `Pass
     | Ok Some _ -> loop ()
@@ -17,7 +17,7 @@ let string_parse_monad jsons =
   let open Utils.IO in
   let iobuf = Utils.StringIO.create jsons in
   let reader buf len = Utils.StringIO.read iobuf buf len |> Utils.IO.return in
-  let module JsonIO = Jsonxt.Extended_monad.Make(Utils.IO) in
+  let module JsonIO = Jsonxt.Strict_monad.Make(Utils.IO) in
   match result (JsonIO.read_json ~reader) with
   | Ok _ -> `Pass
   | Error _ -> `Fail
