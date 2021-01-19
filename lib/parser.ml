@@ -135,6 +135,7 @@ module Make (Compliance : Compliance.S) : Parser
     match reader () with
     | exception (Parse_error `Eof) -> None
     | exception exn_ -> raise exn_
+    | EOF -> None
     | tok -> Some (token_value tok)
 
   let decode ~reader = 
