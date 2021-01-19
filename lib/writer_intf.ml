@@ -19,8 +19,10 @@ module type Intf = sig
   val to_file_hum : string -> json -> unit
   val to_channel :  out_channel -> json -> unit
   val to_channel_hum :  out_channel -> json -> unit
-  val json_to_buffer : Buffer.t -> json -> unit
-  val json_to_buffer_hum : Buffer.t -> json -> unit
+  val json_to_buffer : Buffer.t -> json -> (unit, string) result
+  val json_to_buffer_exn : Buffer.t -> json -> unit
+  val json_to_buffer_hum : Buffer.t -> json -> (unit, string) result
+  val json_to_buffer_hum_exn : Buffer.t -> json -> unit
   val to_buffer : Buffer.t -> json -> unit
   val to_buffer_hum : Buffer.t -> json -> unit
 end

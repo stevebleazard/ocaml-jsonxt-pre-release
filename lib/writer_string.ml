@@ -5,8 +5,10 @@ module type Intf = sig
   val json_to_string_hum : 'a Json_internal.constrained -> (string, string) result
   val json_to_string_hum_exn : 'a Json_internal.constrained -> string
   val to_string_hum : 'a Json_internal.constrained -> string
-  val json_to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
-  val json_to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
+  val json_to_buffer : Buffer.t -> 'a Json_internal.constrained -> (unit, string) result
+  val json_to_buffer_exn : Buffer.t -> 'a Json_internal.constrained -> unit
+  val json_to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> (unit, string) result
+  val json_to_buffer_hum_exn : Buffer.t -> 'a Json_internal.constrained -> unit
   val to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
   val to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
 end
@@ -125,9 +127,13 @@ module Make (Compliance : Compliance.S) : Intf = struct
     try Ok (json_to_string' json) with
     | Failure err -> Error err
 
+  let json_to_buffer buf json =
+    try Ok (json_to_buffer' buf json) with
+    | Failure err -> Error err
+
   let json_to_string_exn = json_to_string'
   let to_string = json_to_string'
-  let json_to_buffer = json_to_buffer'
+  let json_to_buffer_exn = json_to_buffer'
   let to_buffer = json_to_buffer'
 
   let json_to_string_hum' json =
@@ -139,8 +145,12 @@ module Make (Compliance : Compliance.S) : Intf = struct
     try Ok (json_to_string_hum' json) with
     | Failure err -> Error err
 
+  let json_to_buffer_hum buf json =
+    try Ok (json_to_buffer' buf json) with
+    | Failure err -> Error err
+
   let json_to_string_hum_exn = json_to_string_hum'
   let to_string_hum = json_to_string_hum'
-  let json_to_buffer_hum = json_to_buffer_hum'
+  let json_to_buffer_hum_exn = json_to_buffer_hum'
   let to_buffer_hum = json_to_buffer_hum'
 end
