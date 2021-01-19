@@ -11,6 +11,7 @@ module type Intf = sig
   val json_to_buffer_hum_exn : Buffer.t -> 'a Json_internal.constrained -> unit
   val to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
   val to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
+  val stream_to_string : 'a Json_internal.constrained Stream.t -> string
 end
 
 module Make (Compliance : Compliance.S) : Intf

@@ -25,5 +25,6 @@ module type Intf = sig
   val json_to_buffer_hum_exn : Buffer.t -> json -> unit
   val to_buffer : Buffer.t -> json -> unit
   val to_buffer_hum : Buffer.t -> json -> unit
+  val stream_to_string : json Stream.t -> string
 end
 

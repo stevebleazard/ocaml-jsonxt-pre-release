@@ -11,6 +11,7 @@ module type Intf = sig
   val json_to_buffer_hum_exn : Buffer.t -> 'a Json_internal.constrained -> unit
   val to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
   val to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
+  val stream_to_string : 'a Json_internal.constrained Stream.t -> string
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct
@@ -153,4 +154,10 @@ module Make (Compliance : Compliance.S) : Intf = struct
   let to_string_hum = json_to_string_hum'
   let json_to_buffer_hum_exn = json_to_buffer_hum'
   let to_buffer_hum = json_to_buffer_hum'
+
+  let stream_to_string stream =
+    let buf = Buffer.create 100 in
+    let () = Stream.iter (fun json -> to_buffer buf json; Buffer.add_char buf '\n') stream in
+    Buffer.contents buf
+
 end

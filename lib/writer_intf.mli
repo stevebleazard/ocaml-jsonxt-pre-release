@@ -99,5 +99,7 @@ module type Intf = sig
   (** [to_buffer_hum] is an alias for json_to_buffer_hum_exn *)
   val to_buffer_hum : Buffer.t -> json -> unit
 
+  (* Convert a [Stream.t] of [json] values to a string, separating the enties with newlines *)
+  val stream_to_string : json Stream.t -> string
 end
 
