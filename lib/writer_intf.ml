@@ -26,5 +26,7 @@ module type Intf = sig
   val to_buffer : Buffer.t -> json -> unit
   val to_buffer_hum : Buffer.t -> json -> unit
   val stream_to_string : json Stream.t -> string
+  val stream_to_channel : out_channel -> json Stream.t -> unit
+  val stream_to_file : string -> json Stream.t -> unit
 end
 
