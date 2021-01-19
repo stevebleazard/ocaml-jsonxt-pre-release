@@ -110,5 +110,9 @@ module type Intf = sig
   (* [stream_to_file stream file] converts a [Stream.t] of [json] values to a newline separated list of compact json strings and
      outputs them to [file]  *)
   val stream_to_file : string -> json Stream.t -> unit
+
+  (* [stream_to_buffer buf stream] converts a [Stream.t] of [json] values to compact strings and outputs them,
+     separating by newlines, to [buf] *)
+  val stream_to_buffer : Buffer.t -> json Stream.t -> unit
 end
 
