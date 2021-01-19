@@ -1,6 +1,8 @@
 module type Reader_string_file = sig
   type json
 
+  exception Finally of exn * exn
+
   (** [Reader_string_file] supports functions to parse JSON data from various sources.
       The interface includes two type of parser
       - Single value parsers that return a single Json tree
@@ -75,13 +77,20 @@ module type Reader_string_file = sig
 
   (** [stream_from_channel in_channel] converts the text from [in_channel], containing
       zero or more json objects, to a [json Stream.t] value raising a [Failure] exception
+      if the file has syntax, grammar or compliance errors. The optional parameter
+      [fin] specifies a function to call when all json objects have been returned or a
+      failure occurs *)
+  val stream_from_channel : ?fin:(unit -> unit) -> in_channel -> json Stream.t
+
+  (** [stream_from_file filename] converts the text from file [filename], containing
+      zero or more json objects, to a [json Stream.t] value raising a [Failure] exception
       if the file has syntax, grammar or compliance errors *)
-  val stream_from_channel : in_channel -> json Stream.t
+  val stream_from_file : string -> json Stream.t
 
   (** [stream_from_function f] converts text provided by [f], containing zero
       of more JSON objects, to a [json Stream.t] value raising a [Failure] exception
       if the file has syntax, grammar or compliance errors.  The function [f buf len]
-      takes a [bytes] [buf] buffer, the maximum number of bytes to read [len] and
+      takes a [buf] buffer to fill, the maximum number of bytes to read [len] and
       returns the number of bytes read.  Returning 0 indicates end-of-file *)
   val stream_from_function : (bytes -> int -> int) -> json Stream.t
 end
