@@ -74,5 +74,20 @@ module type Intf = sig
 
   (** [to_channel_hum] is an alias for json_to_channel_hum_exn *)
   val to_channel_hum :  out_channel -> json -> unit
+
+  (** [json_to_buffer buf json] converts and outputs [json] to the supplied [buf], raising
+       a [Failure] exception  if the json value contains data that fails compliance checks.  *)
+  val json_to_buffer : Buffer.t -> json -> unit
+
+  (** [json_to_buffer buf json] converts and outputs [json] in a human readable format to
+      the supplied [buf], raising a [Failure] exception  if the json value contains data
+      that fails compliance checks.  *)
+  val json_to_buffer_hum : Buffer.t -> json -> unit
+
+  (** [to_buffer] is an alias for json_to_buffer *)
+  val to_buffer : Buffer.t -> json -> unit
+
+  (** [to_buffer_hum] is an alias for json_to_buffer_hum *)
+  val to_buffer_hum : Buffer.t -> json -> unit
 end
 

@@ -5,6 +5,10 @@ module type Intf = sig
   val json_to_string_hum : 'a Json_internal.constrained -> (string, string) result
   val json_to_string_hum_exn : 'a Json_internal.constrained -> string
   val to_string_hum : 'a Json_internal.constrained -> string
+  val json_to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
+  val json_to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
+  val to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
+  val to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct
@@ -34,8 +38,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  let json_to_string' json = 
-    let buf = Buffer.create 100 in
+  let json_to_buffer' buf json =
     let add_char = Buffer.add_char buf in
     let add_string = Buffer.add_string buf in
     let add_quote_string s = add_char '"'; escape buf s; add_char '"' in
@@ -66,11 +69,9 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | Some j -> add_char ':'; fmt j
       | None -> ()
     in
-    fmt json;
-    Buffer.contents buf
+    fmt json
 
-  let json_to_string_hum' json = 
-    let buf = Buffer.create 100 in
+  let json_to_buffer_hum' buf json =
     let add_char = Buffer.add_char buf in
     let add_string = Buffer.add_string buf in
     let add_quote_string s = add_char '"'; escape buf s; add_char '"' in
@@ -113,7 +114,11 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | Some j -> add_string ": "; fmt (ldr ^ "  ") j
       | None -> ()
     in
-    fmt "" json;
+    fmt "" json
+
+  let json_to_string' json =
+    let buf = Buffer.create 100 in
+    json_to_buffer' buf json;
     Buffer.contents buf
 
   let json_to_string json =
@@ -122,6 +127,13 @@ module Make (Compliance : Compliance.S) : Intf = struct
 
   let json_to_string_exn = json_to_string'
   let to_string = json_to_string'
+  let json_to_buffer = json_to_buffer'
+  let to_buffer = json_to_buffer'
+
+  let json_to_string_hum' json =
+    let buf = Buffer.create 100 in
+    json_to_buffer_hum' buf json;
+    Buffer.contents buf
 
   let json_to_string_hum json =
     try Ok (json_to_string_hum' json) with
@@ -129,4 +141,6 @@ module Make (Compliance : Compliance.S) : Intf = struct
 
   let json_to_string_hum_exn = json_to_string_hum'
   let to_string_hum = json_to_string_hum'
+  let json_to_buffer_hum = json_to_buffer_hum'
+  let to_buffer_hum = json_to_buffer_hum'
 end
