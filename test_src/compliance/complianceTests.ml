@@ -42,24 +42,40 @@ let level_to_string = function
   | `Yojson_basic -> "yjbasic"
 
 let string_parse_test level filename _passfail =
+  let yojson_basic_json_of_string s =
+    try Ok (Jsonxt.Yojson.Basic.from_string s) with
+    | Failure err -> Error err
+  in
+  let yojson_safe_json_of_string s =
+    try Ok (Jsonxt.Yojson.Safe.from_string s) with
+    | Failure err -> Error err
+  in
   let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
   let string_parser = match level with
     | `Strict       -> of_error Jsonxt.Strict.json_of_string
     | `Basic        -> of_error Jsonxt.Basic.json_of_string
     | `Extended     -> of_error Jsonxt.Extended.json_of_string
-    | `Yojson_basic -> of_error Jsonxt.Yojson.Basic.json_of_string
-    | `Yojson_safe  -> of_error Jsonxt.Yojson.Safe.json_of_string
-  in 
+    | `Yojson_basic -> of_error yojson_basic_json_of_string
+    | `Yojson_safe  -> of_error yojson_safe_json_of_string
+  in
   string_parser txt
 
 let file_parse_test level filename _passfail =
+  let yojson_basic_json_of_file filename =
+    try Ok (Jsonxt.Yojson.Basic.from_file filename) with
+    | Failure err -> Error err
+  in
+  let yojson_safe_json_of_file filename =
+    try Ok (Jsonxt.Yojson.Safe.from_file filename) with
+    | Failure err -> Error err
+  in
   let file_parser = match level with
     | `Strict       -> of_error Jsonxt.Strict.json_of_file
     | `Basic        -> of_error Jsonxt.Basic.json_of_file
     | `Extended     -> of_error Jsonxt.Extended.json_of_file
-    | `Yojson_basic -> of_error Jsonxt.Yojson.Basic.json_of_file
-    | `Yojson_safe  -> of_error Jsonxt.Yojson.Safe.json_of_file
-  in 
+    | `Yojson_basic -> of_error yojson_basic_json_of_file
+    | `Yojson_safe  -> of_error yojson_safe_json_of_file
+  in
   file_parser (filename ^ ".json")
 
 let stream_parse_test level filename passfail =

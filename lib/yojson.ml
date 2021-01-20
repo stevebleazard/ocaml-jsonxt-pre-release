@@ -1,3 +1,57 @@
+module Common (Compliance : Compliance.S) = struct
+  module Internal = struct
+    module Lexxer = Compliant_lexxer.Make(Compliance)
+    module Parser = Parser.Make(Compliance)
+    include Reader_string_file.Make (Lexxer) (Parser)
+
+    include Writer_string.Make(Compliance)
+    include Writer_file.Make(Compliance)
+  end
+
+  type json = Internal.json
+  type t = json
+  type json_line = [ `Json of t | `Exn of exn ]
+
+  (* Readers *)
+  let from_string ?buf:_ ?fname:_ ?lnum:_ s = Internal.json_of_string_exn s
+  let from_channel ?buf:_ ?fname:_ ?lnum:_ in_channel = Internal.json_of_channel_exn in_channel
+  let from_file ?buf:_ ?fname:_ ?lnum:_ filename = Internal.json_of_file_exn filename
+
+  let stream_from_string ?buf:_ ?fname:_ ?lnum:_ s = Internal.stream_from_string s
+
+  let stream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname:_ ?lnum:_ in_channel =
+    Internal.stream_from_channel ~fin in_channel
+
+  let stream_from_file ?buf:_ ?fname:_ ?lnum:_ filename =
+    Internal.stream_from_file filename
+
+  let linestream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname:_ ?lnum:_ ic =
+    let f _i =
+      try
+        let line = input_line ic in Some (`Json (from_string line))
+      with
+        | End_of_file -> fin (); None
+        | exn_ -> fin (); Some (`Exn exn_)
+    in
+    Stream.from f
+
+  let linestream_from_file ?buf:_ ?fname:_ ?lnum:_ filename =
+    let ic = open_in filename in
+    linestream_from_channel ~fin:(fun () -> close_in ic) ic
+
+  (* Writers *)
+  let to_string ?buf:_ ?len:_ ?std:_ json = Internal.to_string json
+  let to_channel ?buf:_ ?len:_ ?std:_ out_channel json = Internal.to_channel out_channel json
+  let to_file ?len:_ ?std:_ filename json = Internal.to_file filename json
+  let to_buffer ?std:_ buf json = Internal.to_buffer buf json
+  let stream_to_string ?buf:_ ?len:_ ?std:_ stream = Internal.stream_to_string stream
+  let stream_to_channel ?buf:_ ?len:_ ?std:_ out_channel stream = Internal.stream_to_channel out_channel stream
+  let stream_to_file ?len:_ ?std:_ filename stream = Internal.stream_to_file filename stream
+  let stream_to_buffer ?std:_ buf stream = Internal.stream_to_buffer buf stream
+  let write_t buf json = to_buffer buf json
+
+end
+
 module Basic = struct
   module Compliance = struct
     type json = Json.Basic.json
@@ -59,13 +113,7 @@ module Basic = struct
     end
   end
 
-  module Lexxer = Compliant_lexxer.Make(Compliance)
-  module Parser = Parser.Make(Compliance)
-  include Reader_string_file.Make (Lexxer) (Parser)
-  type t = json
-
-  include Writer_string.Make(Compliance)
-  include Writer_file.Make(Compliance)
+  include Common(Compliance)
 end
 
 module Safe = struct
@@ -105,7 +153,7 @@ module Safe = struct
     | `Infinity ->    `Float (1.0 /. 0.0)
     | `Neginfinity -> `Float (-1.0 /. 0.0)
     | `Nan ->         `Float (0.0 /. 0.0)
-    | `Floatlit _ ->  raise (Failure "floatlit not supported in basic mode")
+    | `Floatlit _ ->  raise (Failure "floatlit not supported in safe mode")
 
     module Stream = struct
       let number = number
@@ -127,13 +175,7 @@ module Safe = struct
     end
   end
 
-  module Lexxer = Compliant_lexxer.Make(Compliance)
-  module Parser = Parser.Make(Compliance)
-  include Reader_string_file.Make (Lexxer) (Parser)
-  type t = json
-
-  include Writer_string.Make(Compliance)
-  include Writer_file.Make(Compliance)
+  include Common(Compliance)
 end
 
 module Raw = struct
@@ -195,11 +237,5 @@ module Raw = struct
     end
   end
 
-  module Lexxer = Compliant_lexxer.Make(Compliance)
-  module Parser = Parser.Make(Compliance)
-  include Reader_string_file.Make (Lexxer) (Parser)
-  type t = json
-
-  include Writer_string.Make(Compliance)
-  include Writer_file.Make(Compliance)
+  include Common(Compliance)
 end
