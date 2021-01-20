@@ -15,9 +15,13 @@ build: [
 ]
 
 depends: [
-  "dune"        {build}
-  "yojson"      {with-test}
-  "core"        {with-test}
-  "core_bench"  {with-test}
+  "dune"                {build}
+  "alcotest"            {with-test}
+  "cmdliner"            {with-test}
+  "core_kernel"         {with-test}
+  "fmt"                 {with-test}
 ]
-  #"ocaml"       {>= "4.05.0"}
+  #"ocaml"               {>= "4.05.0"}
+  #"core"                {with-test}
+  #"core_bench"          {with-test}
+  #"ppx_yojson_conv_lib" {with-test}
