@@ -9,6 +9,8 @@ module type S = sig
   val lex_tuple : Tokens.token -> bool
   val lex_variant : Tokens.token -> bool
 
+  val comment_check : unit -> (unit, string) result
+
   val number_to_string : float -> string
 
   val number : [`Float of float | `Infinity | `Neginfinity | `Nan | `Floatlit of string ] -> json

@@ -67,6 +67,8 @@ module Basic = struct
     let lex_variant _ = false
     let lex_tuple _ = false
 
+    let comment_check () = Ok ()
+
     let number_to_string f =
       match classify_float f with
       | FP_normal | FP_subnormal | FP_zero ->
@@ -129,6 +131,8 @@ module Safe = struct
     let lex_variant _ = true
     let lex_tuple _ = true
 
+    let comment_check () = Ok ()
+
     let number_to_string f =
       match classify_float f with
       | FP_normal | FP_subnormal | FP_zero ->
@@ -190,6 +194,8 @@ module Raw = struct
 
     let lex_variant _ = true
     let lex_tuple _ = true
+
+    let comment_check () = Ok ()
 
     let number_to_string f =
       match classify_float f with

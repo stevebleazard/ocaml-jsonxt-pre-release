@@ -15,6 +15,8 @@ module Compliance = struct
   let lex_variant _ = true
   let lex_tuple _ = true
 
+  let comment_check () = Error "comments are not supported in basic mode"
+
   let number_to_string f =
     match classify_float f with
     | FP_normal | FP_subnormal | FP_zero -> Json_float.string_of_float_json f
