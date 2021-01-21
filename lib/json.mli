@@ -48,7 +48,7 @@ module Basic : sig
       - `Null: JSON null
       - `Bool of bool: JSON boolean
       - `Int of int: JSON number without decimal point or exponent.
-      - `Float of float: JSON number, inf, -inf, Infinity, -Infinity, nan, -nan, NaN or -NaN
+      - `Float of float: JSON number. Infinity, NaN etc are not supported
       - `String of string: JSON string. Bytes in the range 128-255 are preserved when reading and writing.
       - `Assoc of (string * json) list: JSON object.
       - `List of json list: JSON array.
@@ -73,7 +73,7 @@ module Strict : sig
   (** The following polymorphic variants supported
       - `Null: JSON null
       - `Bool of bool: JSON boolean
-      - `Float of float: JSON number, inf, -inf, Infinity, -Infinity, nan, -nan, NaN or -NaN
+      - `Float of float: JSON number. Infinity, NaN etc are not supported
       - `String of string: JSON string. Bytes in the range 128-255 are preserved when reading and writing.
       - `Assoc of (string * json) list: JSON object.
       - `List of json list: JSON array.

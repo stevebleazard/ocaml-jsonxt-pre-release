@@ -5,7 +5,7 @@
     - `Bool of bool: JSON boolean
     - `Int of int: JSON number without decimal point or exponent
     - `Intlit of string: JSON number without decimal point or exponent preserved as a string
-    - `Float of float: JSON number
+    - `Float of float: JSON number, inf, -inf, Infinity, -Infinity, nan, -nan, NaN or -NaN
     - `Floatlit of string: JSON number preserved as a string
     - `String of string: JSON string with characters in the range 128-255 preserved
     - `Stringlit of string: JSON string including the double quotes
