@@ -50,6 +50,12 @@ module Common (Compliance : Compliance.S) = struct
   let stream_to_buffer ?std:_ buf stream = Internal.stream_to_buffer buf stream
   let write_t buf json = to_buffer buf json
 
+  (* Pretty printers *)
+  let pretty_to_string ?std:_ json = Internal.to_string_hum json
+  let pretty_to_channel ?std:_ oc json = Internal.to_channel_hum oc json
+
+  (* Utilities *)
+  let show json = Tools.json_to_string_repr json
 end
 
 module Basic = struct
@@ -116,6 +122,9 @@ module Basic = struct
   end
 
   include Common(Compliance)
+
+  let prettify ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string_hum
+  let compact ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string
 end
 
 module Safe = struct
@@ -193,6 +202,29 @@ module Safe = struct
   end
 
   include Common(Compliance)
+
+  let prettify ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string_hum
+  let compact ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string
+
+  let to_basic json : Basic.json =
+    let rec map node =
+      match node with
+      | `Null -> `Null
+      | `Bool _ as v -> v
+      | `Int _ as v -> v
+      | `Intlit v -> `String v
+      | `Float _ as v -> v
+      | `String _ as v -> v
+      | `List l -> `List (List.map map l)
+      | `Assoc a -> `Assoc (List.map (fun (id, v) -> (id, map v)) a)
+      | `Tuple tpl -> `List (List.map map tpl)
+      | `Variant (name, jopt) ->
+         match jopt with
+         | None -> `String name
+         | Some v -> `List [ `String name; (map v) ]
+    in
+    map json
+
 end
 
 module Raw = struct
@@ -270,4 +302,7 @@ module Raw = struct
   end
 
   include Common(Compliance)
+
+  let prettify ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string_hum
+  let compact ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string
 end

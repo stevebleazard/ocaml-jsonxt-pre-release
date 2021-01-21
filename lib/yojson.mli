@@ -29,6 +29,15 @@ module Basic : sig
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
   val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
   val write_t : Buffer.t -> t -> unit
+
+  (* Pretty printers *)
+  val pretty_to_string : ?std:bool -> t -> string
+  val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
+  val prettify : ?std:bool -> string -> string
+  val compact : ?std:bool -> string -> string
+
+  (* Tools *)
+  val show : t -> string
 end
 
 module Safe : sig
@@ -76,6 +85,15 @@ module Safe : sig
   val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
   val write_t : Buffer.t -> t -> unit
 
+  (* Pretty printers *)
+  val pretty_to_string : ?std:bool -> t -> string
+  val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
+  val prettify : ?std:bool -> string -> string
+  val compact : ?std:bool -> string -> string
+
+  (* Tools *)
+  val show : t -> string
+  val to_basic : t -> Basic.json
 end
 
 module Raw : sig
@@ -122,4 +140,12 @@ module Raw : sig
   val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
   val write_t : Buffer.t -> t -> unit
 
+  (* Pretty printers *)
+  val pretty_to_string : ?std:bool -> t -> string
+  val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
+  val prettify : ?std:bool -> string -> string
+  val compact : ?std:bool -> string -> string
+
+  (* Tools *)
+  val show : t -> string
 end
