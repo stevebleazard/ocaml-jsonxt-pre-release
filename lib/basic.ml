@@ -13,7 +13,7 @@ module Compliance = struct
   | FLOAT _ as token -> token
   | token -> token
 
-  let lex_integer token = token (* CR sbleazard: fix bounds *)
+  let lex_integer token = token
 
   let lex_largeint = function
   | LARGEINT s -> FLOAT (float_of_string s)
