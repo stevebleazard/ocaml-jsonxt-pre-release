@@ -1,4 +1,4 @@
-(** json tree utility functions
+(** General json tree utility functions
 
     Support converstion of the json tree into strings
 *)
@@ -6,9 +6,11 @@
 (** [json_to_string_repr json] converts [json] into a string representation
     of the tree. This is not JSON but a textual represenation of the json
     tree. eg
+    {[
       `Assoc [
         "Boo1": `List []
       ]
+    ]}
 *)
 val json_to_string_repr : 'a Json_internal.constrained -> string
 
