@@ -44,4 +44,5 @@ module Strict = Strict
 module Strict_stream = Strict_stream
 module Strict_monad = Strict_monad
 module Tools = Tools
+module Utilities = Utilities
 module Yojson = Yojson
