@@ -32,7 +32,20 @@ module Basic : sig
 end
 
 module Safe : sig
-  type json = Json.Extended.json
+  type json =
+    [
+    | `Null
+    | `Bool of bool
+    | `Int of int
+    | `Intlit of string
+    | `Float of float
+    | `String of string
+    | `Assoc of (string * json) list
+    | `List of json list
+    | `Tuple of json list
+    | `Variant of (string * json option)
+    ]
+
   type t = json
   type json_line = [ `Json of t | `Exn of exn ]
 
@@ -66,7 +79,19 @@ module Safe : sig
 end
 
 module Raw : sig
-  type json = Json.Extended.json
+  type json =
+    [
+    | `Null
+    | `Bool of bool
+    | `Intlit of string
+    | `Floatlit of string
+    | `Stringlit of string
+    | `Assoc of (string * json) list
+    | `List of json list
+    | `Tuple of json list
+    | `Variant of (string * json option)
+    ]
+
   type t = json
   type json_line = [ `Json of t | `Exn of exn ]
 

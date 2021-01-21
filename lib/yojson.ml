@@ -93,7 +93,7 @@ module Basic = struct
     | `Infinity ->    `Float (1.0 /. 0.0)
     | `Neginfinity -> `Float (-1.0 /. 0.0)
     | `Nan ->         `Float (0.0 /. 0.0)
-    | `Floatlit _ ->  raise (Failure "floatlit not supported in basic mode")
+    | `Floatlit _ ->  raise (Failure "floatlit not supported in yojson basic mode")
 
     module Stream = struct
       let number = number
@@ -120,8 +120,21 @@ end
 
 module Safe = struct
   module Compliance = struct
-    type json = Json.Extended.json
-    type json_stream = Json_stream.Extended.json
+    type json =
+      [
+      | `Null
+      | `Bool of bool
+      | `Int of int
+      | `Intlit of string
+      | `Float of float
+      | `String of string
+      | `Assoc of (string * json) list
+      | `List of json list
+      | `Tuple of json list
+      | `Variant of (string * json option)
+      ]
+
+    type json_stream = Json_stream.Extended.json  (* yojson interface does not support streaming *)
 
     let lex_string s = Lexxer_utils.unescape_string s
     let lex_number token = token
@@ -157,7 +170,7 @@ module Safe = struct
     | `Infinity ->    `Float (1.0 /. 0.0)
     | `Neginfinity -> `Float (-1.0 /. 0.0)
     | `Nan ->         `Float (0.0 /. 0.0)
-    | `Floatlit _ ->  raise (Failure "floatlit not supported in safe mode")
+    | `Floatlit _ ->  raise (Failure "floatlit not supported in yojson safe mode")
 
     module Stream = struct
       let number = number
@@ -184,8 +197,21 @@ end
 
 module Raw = struct
   module Compliance = struct
-    type json = Json.Extended.json
-    type json_stream = Json_stream.Extended.json
+
+  type json =
+    [
+    | `Null
+    | `Bool of bool
+    | `Intlit of string
+    | `Floatlit of string
+    | `Stringlit of string
+    | `Assoc of (string * json) list
+    | `List of json list
+    | `Tuple of json list
+    | `Variant of (string * json option)
+    ]
+
+    type json_stream = Json_stream.Extended.json (* yojson interface does not support streaming *)
 
     let lex_string s = "\"" ^ s ^ "\""
     let lex_number token = token
@@ -207,7 +233,7 @@ module Raw = struct
         "NaN"
 
     let largeint s = `Intlit s
-    let integer i = `Int i
+    let integer i = `Intlit (string_of_int i)
     let null = `Null
     let string s = `Stringlit s
     let bool b = `Bool b
