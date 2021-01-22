@@ -28,7 +28,7 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
 
   exception Finally of exn * exn
 
-  let read_json ~lexbuf =
+  let read_json' ~lexbuf =
     let reader () = Lexxer.read lexbuf in
     match Parser.decode ~reader with
     | Ok None -> Error "empty input"
@@ -38,9 +38,14 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
       | exception Lexxer_utils.Lex_error err -> Error err
       | tok -> Error ("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))
       end
+    | Error s -> Error s
+
+  let read_json ~lexbuf =
+    match read_json' ~lexbuf with
+    | Ok _ as res -> res
     | Error s ->
-      let loc = Lexxer_utils.error_pos_msg lexbuf in
-        Error (Printf.sprintf "%s at %s" s loc)
+      let err_info = Error_info.create_from_lexbuf lexbuf s in
+      Error (Error_info.to_string err_info)
 
   let json_of_string s =
     let lexbuf = Lexing.from_string s in
@@ -98,8 +103,8 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
       | Ok (Some res) -> Some res
       | Error err ->
         let fexn_ = match fin () with exception exn_ -> Some exn_ | () -> None in
-        let loc = Lexxer_utils.error_pos_msg lexbuf in
-        let msg = Printf.sprintf "%s at %s" err loc in
+        let err_info = Error_info.create_from_lexbuf lexbuf err in
+        let msg = Error_info.to_string err_info in
         match fexn_ with
         | None -> raise (Failure msg)
         | Some fexn_ -> raise (Finally ((Failure msg), fexn_))
