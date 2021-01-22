@@ -15,11 +15,14 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser_stream.Parser) : R
   with type json_stream = Parser.Compliance.json_stream
 = struct
   type json_stream = Parser.Compliance.json_stream
-  type stream = Parser.t
+  type stream = {
+    parser_t : Parser.t
+  ; lexbuf : Lexing.lexbuf
+  }
 
   let create_parser ~lexbuf =
     let reader () = Lexxer.read lexbuf in
-      Parser.create ~reader
+      { parser_t = Parser.create ~reader; lexbuf = lexbuf }
 
   let json_stream_of_string s =
     let lexbuf = Lexing.from_string s in
@@ -33,7 +36,12 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser_stream.Parser) : R
     let lexbuf = Lexing.from_function f in
       create_parser ~lexbuf
 
-  let decode_stream t = Parser.decode t
+  let decode_stream t =
+    match Parser.decode t.parser_t with
+    | Error err ->
+      let err_info = Error_info.create_from_lexbuf t.lexbuf err in
+      Error (Error_info.to_string err_info)
+    | v -> v
 
   let stream_from_lexbuf lexbuf =
     let decoder = create_parser ~lexbuf in
