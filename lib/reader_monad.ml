@@ -33,7 +33,7 @@ module Make
       | Error err -> return (Tokens.LEX_ERROR err)
     in
     Parser.decode ~reader
-    >>= function
+    >>= (function
     | Ok None -> return (Error "empty string")
     | Ok (Some res) -> begin
       reader ()
@@ -41,7 +41,10 @@ module Make
       | EOF -> return (Ok res)
       | tok -> return (Error (("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))))
       end
-    | Error s ->
-      let loc = Lexxer_utils.error_pos_msg lexbuf in
-        return (Error (Printf.sprintf "%s at %s" s loc))
+    | Error s -> return (Error s))
+    >>= function
+    | Ok _ as res -> return res
+    | Error err ->
+      let err_info = Error_info.create_from_lexbuf lexbuf err in
+      return (Error (Error_info.to_string err_info))
 end
