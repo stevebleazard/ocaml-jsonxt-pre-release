@@ -1,11 +1,15 @@
 # TODO
 ## General
 * Coding
+  * Test input syntax errors - array, object, tuple, variant (extended only)
   * Yojson
     * Review functionality
     * Test including replacing existing use of yojson library
     * Test derivers
-    * Dccument use in existing projects (create yojson.ml with include) 
+    * lexer_state - accept but ignore
+    * Document
+      * use in existing projects (create yojson.ml with include)
+      * differences esp. missing functions
   * Stream.t json recovery (version 1.1?)
   * monad
     * support streaming option to allow multiple values to be read (not Stream.t)
