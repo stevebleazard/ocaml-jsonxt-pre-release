@@ -42,13 +42,26 @@ module Common (Compliance : Compliance.S) = struct
   let from_file ?buf:_ ?fname ?lnum filename =
     apply_and_handle_errors Internal.json_of_file_error_info filename fname lnum
 
-  let stream_from_string ?buf:_ ?fname:_ ?lnum:_ s = Internal.stream_from_string s
+  let stream_apply_and_handle_errors stream_f a fname lnum =
+    let stream = stream_f a in
+    let f _i =
+      match Stream.next stream with
+      | v -> Some v
+      | exception Stream.Failure -> None
+      | exception Error_info.Json_error_info err_info ->
+        json_error (error_to_string err_info fname lnum)
+    in
+    Stream.from f
 
-  let stream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname:_ ?lnum:_ in_channel =
-    Internal.stream_from_channel ~fin in_channel
+  let stream_from_string ?buf:_ ?fname ?lnum s =
+    stream_apply_and_handle_errors Internal.stream_from_string_error_info s fname lnum
 
-  let stream_from_file ?buf:_ ?fname:_ ?lnum:_ filename =
-    Internal.stream_from_file filename
+  let stream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname ?lnum in_channel =
+    stream_apply_and_handle_errors (Internal.stream_from_channel_error_info ~fin) in_channel fname lnum
+
+  let stream_from_file ?buf:_ ?fname ?lnum filename =
+    stream_apply_and_handle_errors Internal.stream_from_file_error_info filename fname lnum
+
 
   let linestream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname:_ ?lnum:_ ic =
     let f _i =
