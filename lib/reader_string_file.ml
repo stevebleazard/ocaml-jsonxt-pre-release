@@ -11,6 +11,8 @@ module type Reader_string_file = sig
   val json_of_channel_exn : in_channel -> json
   val json_of_function : (bytes -> int -> int) -> (json, string) result
   val json_of_function_exn : (bytes -> int -> int) -> json
+  val json_of_lexbuf : Lexing.lexbuf -> (json, string) result
+  val json_of_lexbuf_exn : Lexing.lexbuf -> json
   val of_string : string -> json
   val of_file : string -> json
   val of_channel : in_channel -> json
@@ -19,6 +21,7 @@ module type Reader_string_file = sig
   val stream_from_channel : ?fin:(unit -> unit) -> in_channel -> json Stream.t
   val stream_from_file : string -> json Stream.t
   val stream_from_function : (bytes -> int -> int) -> json Stream.t
+  val stream_from_lexbuf : Lexing.lexbuf -> json Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
@@ -86,6 +89,14 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
     let lexbuf = Lexing.from_function f in
     read_json ~lexbuf
 
+  let json_of_lexbuf lexbuf =
+    read_json ~lexbuf
+
+  let json_of_lexbuf_exn lexbuf =
+    match json_of_lexbuf lexbuf with
+    | Ok res -> res
+    | Error s -> raise (Failure s)
+
   let json_of_function_exn f =
     match json_of_function f with
     | Ok res -> res
@@ -126,5 +137,8 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   let stream_from_file filename =
     let inc = open_in filename in
     stream_from_channel ~fin:(fun () -> close_in inc) inc
+
+  let stream_from_lexbuf lexbuf =
+    read_json_stream ~fin:(fun () -> ()) ~lexbuf
 
 end

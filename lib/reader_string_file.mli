@@ -49,6 +49,18 @@ module type Reader_string_file = sig
       compliance errors.  See [json_of_function] for detail of function [f] *)
   val json_of_function_exn : (bytes -> int -> int) -> json
 
+  (** [json_of_lexbuf lexbuf] converts text in the supplied [lexbuf] to a [json]
+      value returning an error if the supplied text has syntax, grammar or compliance
+      errors.  This is a low level function and json_of_function should be used
+      in preference *)
+  val json_of_lexbuf : Lexing.lexbuf -> (json, string) result
+
+  (** [json_of_lexbuf_exn lexbuf] converts text in the supplied [lexbuf] to a [json]
+      value raising a [Failure] exception if the supplied text has syntax, grammar or
+      compliance errors.  This is a low level function and json_of_function_exn should
+      be used in preference *)
+  val json_of_lexbuf_exn : Lexing.lexbuf -> json
+
   (** [of_string] is an alias for json_of_string_exn *)
   val of_string : string -> json
 
@@ -93,6 +105,12 @@ module type Reader_string_file = sig
       takes a [buf] buffer to fill, the maximum number of bytes to read [len] and
       returns the number of bytes read.  Returning 0 indicates end-of-file *)
   val stream_from_function : (bytes -> int -> int) -> json Stream.t
+
+  (** [stream_from_file lexbuf] converts the text from [lexbuf], containing
+      zero or more json objects, to a [json Stream.t] value raising a [Failure] exception
+      if the file has syntax, grammar or compliance errors. This is a low level function
+      and stream_from_function should be used in preference *)
+  val stream_from_lexbuf : Lexing.lexbuf -> json Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
