@@ -101,13 +101,13 @@ let monad_parse_test level filename passfail =
   let result = match level with
     | `Strict       ->
       let module JsonIO = Jsonxt.Strict_monad.Make(Utils.IO) in
-      JsonIO.read_json ~reader >>= of_error
+      JsonIO.read_json ~reader () >>= of_error
     | `Basic        ->
       let module JsonIO = Jsonxt.Basic_monad.Make(Utils.IO) in
-      JsonIO.read_json ~reader >>= of_error
+      JsonIO.read_json ~reader () >>= of_error
     | `Extended     ->
       let module JsonIO = Jsonxt.Extended_monad.Make(Utils.IO) in
-      JsonIO.read_json ~reader >>= of_error
+      JsonIO.read_json ~reader () >>= of_error
     | `Yojson_basic -> return passfail (* monad isn't supported by Yojson *)
     | `Yojson_safe  -> return passfail
   in

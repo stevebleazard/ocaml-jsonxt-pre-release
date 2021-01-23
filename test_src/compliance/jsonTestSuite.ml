@@ -18,7 +18,7 @@ let string_parse_monad jsons =
   let iobuf = Utils.StringIO.create jsons in
   let reader buf len = Utils.StringIO.read iobuf buf len |> Utils.IO.return in
   let module JsonIO = Jsonxt.Strict_monad.Make(Utils.IO) in
-  match result (JsonIO.read_json ~reader) with
+  match result (JsonIO.read_json ~reader ()) with
   | Ok _ -> `Pass
   | Error _ -> `Fail
 

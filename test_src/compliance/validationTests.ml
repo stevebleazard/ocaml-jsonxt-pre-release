@@ -192,7 +192,7 @@ let monad_read jsons =
   let iobuf = Utils.StringIO.create jsons in
   let reader buf len = Utils.StringIO.read iobuf buf len |> Utils.IO.return in
   let module JsonIO = Jsonxt.Extended_monad.Make(Utils.IO) in
-    result (JsonIO.read_json ~reader)
+    result (JsonIO.read_json ~reader ())
 
 let monad_write json =
   let open Utils.IO in

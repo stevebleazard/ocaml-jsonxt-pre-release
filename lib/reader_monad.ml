@@ -2,7 +2,7 @@ module type Reader_monad = sig
   module IO : Io.IO
   type json
 
-  val read_json : reader:(Bytes.t -> int -> int IO.t) -> (json, string) result IO.t
+  val read_json : ?stream:bool -> reader:(Bytes.t -> int -> int IO.t) -> unit -> (json, string) result IO.t
 end
 
 module Make
@@ -23,7 +23,7 @@ module Make
     in
     fun lexbuf -> Lexxer.read lexbuf
 
-  let read_json ~reader =
+  let read_json ?(stream = false) ~reader () =
     let lexbuf = Lexutils.create_lexbuf () in
     let lex_reader = create_lex_reader reader in
     let reader () = 
@@ -36,10 +36,13 @@ module Make
     >>= (function
     | Ok None -> return (Error "empty string")
     | Ok (Some res) -> begin
-      reader ()
-      >>= function
-      | EOF -> return (Ok res)
-      | tok -> return (Error (("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))))
+      match stream with
+      | true -> return (Ok res)
+      | false ->
+        reader ()
+        >>= function
+        | EOF -> return (Ok res)
+        | tok -> return (Error (("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))))
       end
     | Error s -> return (Error s))
     >>= function
