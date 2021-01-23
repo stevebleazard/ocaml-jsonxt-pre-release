@@ -45,4 +45,5 @@ module Strict_stream = Strict_stream
 module Strict_monad = Strict_monad
 module Tools = Tools
 module Utilities = Utilities
+module Error_info = Error_info
 module Yojson = Yojson
