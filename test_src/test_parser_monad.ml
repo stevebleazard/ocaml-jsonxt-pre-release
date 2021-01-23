@@ -22,7 +22,7 @@ open IO
 let parsit () =
   let reader buf len = return (input stdin buf 0 len) in
   let writer s = return (output_string stdout s) in
-  JsonIO.read_json ~reader
+  JsonIO.read_json ~reader ()
   >>= function
     | Error err -> printf "ERROR %s\n" err; return ()
     | Ok json -> JsonIO.write_json_hum ~writer json
