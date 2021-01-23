@@ -73,6 +73,19 @@ module type Reader_string_file = sig
   (** [of_function] is an alias for json_of_function_exn *)
   val of_function : (bytes -> int -> int) -> json
 
+  (** {2 Error_info.t returning functions}
+
+      The following functions are identical to the functions without
+      the _error_info extension except they return an [(json, Error_info.t) result]
+      instead of a [(json, string) result]
+   *)
+
+  val json_of_string_error_info : string -> (json, Error_info.t) result
+  val json_of_file_error_info : string -> (json, Error_info.t) result
+  val json_of_channel_error_info : in_channel -> (json, Error_info.t) result
+  val json_of_function_error_info : (bytes -> int -> int) -> (json, Error_info.t) result
+  val json_of_lexbuf_error_info : Lexing.lexbuf -> (json, Error_info.t) result
+
   (** {2 [Stream.t] readers}
 
       [Stream.t] readers provide a mechanism to read a stream of JSON values. eg

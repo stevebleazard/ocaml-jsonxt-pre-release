@@ -11,7 +11,6 @@
       * use in existing projects (create yojson.ml with include)
       * differences esp. missing functions
   * Stream.t json recovery (version 1.1?)
-  * error_info return
 * Review
   * Compliance with RFCs
   * Test for compliance

@@ -17,6 +17,13 @@ module type Reader_string_file = sig
   val of_file : string -> json
   val of_channel : in_channel -> json
   val of_function : (bytes -> int -> int) -> json
+
+  val json_of_string_error_info : string -> (json, Error_info.t) result
+  val json_of_file_error_info : string -> (json, Error_info.t) result
+  val json_of_channel_error_info : in_channel -> (json, Error_info.t) result
+  val json_of_function_error_info : (bytes -> int -> int) -> (json, Error_info.t) result
+  val json_of_lexbuf_error_info : Lexing.lexbuf -> (json, Error_info.t) result
+
   val stream_from_string : string -> json Stream.t
   val stream_from_channel : ?fin:(unit -> unit) -> in_channel -> json Stream.t
   val stream_from_file : string -> json Stream.t
@@ -105,6 +112,41 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   let of_file = json_of_file_exn
   let of_channel = json_of_channel_exn
   let of_function = json_of_function_exn
+
+  let read_json_error_info ~lexbuf =
+    match read_json' ~lexbuf with
+    | Ok _ as res -> res
+    | Error err ->
+      let err_info = Error_info.create_from_lexbuf lexbuf err in
+      Error err_info
+
+  (* Error_info.t returning functions *)
+
+  let json_of_string_error_info s =
+    let lexbuf = Lexing.from_string s in
+    read_json_error_info ~lexbuf
+
+  let json_of_channel_error_info inc =
+    let lexbuf = Lexing.from_channel inc in
+    read_json_error_info ~lexbuf
+
+  let json_of_file_error_info filename =
+    try begin
+      let inc = open_in filename in
+      let res = json_of_channel_error_info inc in
+        close_in inc;
+        res
+    end
+    with Sys_error err -> Error { Error_info.line = 0; start_char = 0; end_char = 0; msg = err }
+
+  let json_of_function_error_info f =
+    let lexbuf = Lexing.from_function f in
+    read_json_error_info ~lexbuf
+
+  let json_of_lexbuf_error_info lexbuf =
+    read_json_error_info ~lexbuf
+
+  (* Stream.t returning functions *)
 
   let read_json_stream ~fin ~lexbuf =
     let reader () = Lexxer.read lexbuf in
