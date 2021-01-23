@@ -84,6 +84,10 @@ module type Reader_string_file = sig
   val json_of_function_error_info : (bytes -> int -> int) -> (json, Error_info.t) result
   val json_of_lexbuf_error_info : Lexing.lexbuf -> (json, Error_info.t) result
 
+  (** {3 compatablity functions for internal use} *)
+
+  val json_of_lexbuf_error_info_compat : ?stream:bool -> Lexing.lexbuf -> (json, Error_info.t) result
+
   (** {2 [Stream.t] readers}
 
       [Stream.t] readers provide a mechanism to read a stream of JSON values. eg
@@ -135,6 +139,7 @@ module type Reader_string_file = sig
   val stream_from_file_error_info : string -> json Stream.t
   val stream_from_function_error_info : (bytes -> int -> int) -> json Stream.t
   val stream_from_lexbuf_error_info : Lexing.lexbuf -> json Stream.t
+
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
