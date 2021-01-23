@@ -91,7 +91,8 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | Some j -> add_string ": "; fmt (off + incr) j
       | None -> ()
     in
-    fmt 0 json
+    fmt 0 json;
+    add_string eol
 
   let json_to_channel' = json_to_channel_fmt ~eol:"" ~incr:0
   let json_to_channel_hum' = json_to_channel_fmt ~eol:"\n" ~incr:2

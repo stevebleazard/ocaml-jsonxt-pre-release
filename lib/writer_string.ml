@@ -118,7 +118,8 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | Some j -> add_string ": "; fmt (ldr ^ "  ") j
       | None -> ()
     in
-    fmt "" json
+    fmt "" json;
+    add_char '\n'
 
   let json_to_string' json =
     let buf = Buffer.create 100 in
