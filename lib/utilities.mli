@@ -1,7 +1,11 @@
 (** json tree conversion functions
 
-    Support converstion of a json tree to strict and basic types
+    Support various converstions of a json tree
+    - To strict and basic types 
+    - To strings, intended mostly for debugging
 *)
+
+(** {2 Tree type conversion} *)
 
 (** [to_basic json] converts [json] into the [Basic.json] type
     transforming variants that do not comply to that type.
@@ -13,3 +17,22 @@ val to_basic : 'a Json_internal.constrained -> Basic.json
     In particular ints are converted to floats. All json types can
     be converted *)
 val to_strict : 'a Json_internal.constrained -> Strict.json
+
+(** {2 Tree conversion to strings} *)
+
+(** [json_to_string_repr json] converts [json] into a string representation
+    of the tree. This is not JSON but a textual represenation of the json
+    tree. eg
+    {[
+      `Assoc [
+        "Boo1": `List []
+      ]
+    ]}
+*)
+val json_to_string_repr : 'a Json_internal.constrained -> string
+
+(** [json_to_string json] converts the json tree to standard JSON
+    in compact format. The function does not apply any type
+    constraints to the json tree
+*)
+val json_to_string : 'a Json_internal.constrained -> string

@@ -55,7 +55,7 @@ module Common (Compliance : Compliance.S) = struct
   let pretty_to_channel ?std:_ oc json = Internal.to_channel_hum oc json
 
   (* Utilities *)
-  let show json = Tools.json_to_string_repr json
+  let show json = Utilities.json_to_string_repr json
 end
 
 module Basic = struct

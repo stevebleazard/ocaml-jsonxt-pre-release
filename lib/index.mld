@@ -14,7 +14,7 @@ The following covers various use cases
 {[
 let () =
   let json = Jsonxt.Basic.of_string "[1,2,3]" in
-  print_endline (Jsonxt.Tools.json_to_string_repr json);;
+  print_endline (Jsonxt.Utilities.json_to_string_repr json);;
 ]}
 
 {3 Reading a file and printing to stdout}
