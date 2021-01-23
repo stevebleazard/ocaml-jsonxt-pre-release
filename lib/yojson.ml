@@ -1,3 +1,7 @@
+exception Json_error of string
+
+let json_error msg = raise (Json_error msg)
+
 module Common (Compliance : Compliance.S) = struct
   module Internal = struct
     module Lexxer = Compliant_lexxer.Make(Compliance)
@@ -12,10 +16,31 @@ module Common (Compliance : Compliance.S) = struct
   type t = json
   type json_line = [ `Json of t | `Exn of exn ]
 
+  (* Helper functions *)
+  let error_to_string (error_info:Error_info.t) fname lnum =
+    let lnum = Option.value lnum ~default:1 in
+    let info = { error_info with line = lnum + error_info.line - 1 } in
+    let fname = match fname with
+      | None -> "Line"
+      | Some name -> "File" ^ name ^ ", line"
+    in
+    let loc = Printf.sprintf "%s %d chars %d-%d: " fname info.line info.start_char info.end_char in
+    loc ^ info.msg
+
+  let apply_and_handle_errors f a fname lnum =
+    match f a with
+    | Ok json -> json
+    | Error error_info -> json_error (error_to_string error_info fname lnum)
+
   (* Readers *)
-  let from_string ?buf:_ ?fname:_ ?lnum:_ s = Internal.json_of_string_exn s
-  let from_channel ?buf:_ ?fname:_ ?lnum:_ in_channel = Internal.json_of_channel_exn in_channel
-  let from_file ?buf:_ ?fname:_ ?lnum:_ filename = Internal.json_of_file_exn filename
+  let from_string ?buf:_ ?fname ?lnum s =
+    apply_and_handle_errors Internal.json_of_string_error_info s fname lnum
+
+  let from_channel ?buf:_ ?fname ?lnum in_channel =
+    apply_and_handle_errors Internal.json_of_channel_error_info in_channel fname lnum
+
+  let from_file ?buf:_ ?fname ?lnum filename =
+    apply_and_handle_errors Internal.json_of_file_error filename fname lnum
 
   let stream_from_string ?buf:_ ?fname:_ ?lnum:_ s = Internal.stream_from_string s
 

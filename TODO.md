@@ -6,7 +6,7 @@
     * Review functionality
     * Test including replacing existing use of yojson library
     * Test derivers
-    * lexer_state - accept but ignore
+    * lexer_state - handle best effort using _error_info functions
     * Document
       * use in existing projects (create yojson.ml with include)
       * differences esp. missing functions
