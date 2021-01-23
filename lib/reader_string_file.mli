@@ -1,8 +1,6 @@
 module type Reader_string_file = sig
   type json
 
-  exception Finally of exn * exn
-
   (** [Reader_string_file] supports functions to parse JSON data from various sources.
       The interface includes two type of parser
       - Single value parsers that return a single Json tree

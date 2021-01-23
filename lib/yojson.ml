@@ -40,7 +40,7 @@ module Common (Compliance : Compliance.S) = struct
     apply_and_handle_errors Internal.json_of_channel_error_info in_channel fname lnum
 
   let from_file ?buf:_ ?fname ?lnum filename =
-    apply_and_handle_errors Internal.json_of_file_error filename fname lnum
+    apply_and_handle_errors Internal.json_of_file_error_info filename fname lnum
 
   let stream_from_string ?buf:_ ?fname:_ ?lnum:_ s = Internal.stream_from_string s
 

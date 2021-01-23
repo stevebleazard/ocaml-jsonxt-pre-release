@@ -1,8 +1,6 @@
 module type Reader_string_file = sig
   type json
 
-  exception Finally of exn * exn
-
   val json_of_string : string -> (json, string) result
   val json_of_string_exn : string -> json
   val json_of_file : string -> (json, string) result
@@ -35,8 +33,6 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   with type json = Parser.Compliance.json
 = struct
   type json = Parser.Compliance.json
-
-  exception Finally of exn * exn
 
   let read_json' ~lexbuf =
     let reader () = Lexxer.read lexbuf in
@@ -155,12 +151,10 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
       | Ok None -> fin (); None
       | Ok (Some res) -> Some res
       | Error err ->
-        let fexn_ = match fin () with exception exn_ -> Some exn_ | () -> None in
+        let () = fin () in
         let err_info = Error_info.create_from_lexbuf lexbuf err in
         let msg = Error_info.to_string err_info in
-        match fexn_ with
-        | None -> raise (Failure msg)
-        | Some fexn_ -> raise (Finally ((Failure msg), fexn_))
+        raise (Failure msg)
     in
     Stream.from f
 
