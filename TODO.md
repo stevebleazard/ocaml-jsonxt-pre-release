@@ -11,8 +11,8 @@
       * use in existing projects (create yojson.ml with include)
       * differences esp. missing functions
   * Stream.t json recovery (version 1.1?)
-  * monad
-    * support streaming option to allow multiple values to be read (not Stream.t)
+  * lexbuf readers
+  * error_info return
 * Review
   * Compliance with RFCs
   * Test for compliance
