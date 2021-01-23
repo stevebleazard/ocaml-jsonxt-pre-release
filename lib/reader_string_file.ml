@@ -27,6 +27,12 @@ module type Reader_string_file = sig
   val stream_from_file : string -> json Stream.t
   val stream_from_function : (bytes -> int -> int) -> json Stream.t
   val stream_from_lexbuf : Lexing.lexbuf -> json Stream.t
+
+  val stream_from_string_error_info : string -> json Stream.t
+  val stream_from_channel_error_info : ?fin:(unit -> unit) -> in_channel -> json Stream.t
+  val stream_from_file_error_info : string -> json Stream.t
+  val stream_from_function_error_info : (bytes -> int -> int) -> json Stream.t
+  val stream_from_lexbuf_error_info : Lexing.lexbuf -> json Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
@@ -109,14 +115,14 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   let of_channel = json_of_channel_exn
   let of_function = json_of_function_exn
 
+  (* Error_info.t returning functions *)
+
   let read_json_error_info ~lexbuf =
     match read_json' ~lexbuf with
     | Ok _ as res -> res
     | Error err ->
       let err_info = Error_info.create_from_lexbuf lexbuf err in
       Error err_info
-
-  (* Error_info.t returning functions *)
 
   let json_of_string_error_info s =
     let lexbuf = Lexing.from_string s in
@@ -176,5 +182,39 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
 
   let stream_from_lexbuf lexbuf =
     read_json_stream ~fin:(fun () -> ()) ~lexbuf
+
+  (* Stream.t Json_error_info raising functions *)
+
+  let read_json_stream_error_info ~fin ~lexbuf =
+    let reader () = Lexxer.read lexbuf in
+    let f _i =
+      match Parser.decode ~reader with
+      | Ok None -> fin (); None
+      | Ok (Some res) -> Some res
+      | Error err ->
+        let () = fin () in
+        let err_info = Error_info.create_from_lexbuf lexbuf err in
+        raise (Error_info.Json_error_info err_info)
+    in
+    Stream.from f
+
+  let stream_from_string_error_info s =
+    let lexbuf = Lexing.from_string s in
+    read_json_stream_error_info ~fin:(fun () -> ()) ~lexbuf
+
+  let stream_from_channel_error_info ?(fin = fun () -> ()) inc =
+    let lexbuf = Lexing.from_channel inc in
+    read_json_stream_error_info ~fin ~lexbuf
+
+  let stream_from_function_error_info f =
+    let lexbuf = Lexing.from_function f in
+    read_json_stream_error_info ~fin:(fun () -> ()) ~lexbuf
+
+  let stream_from_file_error_info filename =
+    let inc = open_in filename in
+    stream_from_channel_error_info ~fin:(fun () -> close_in inc) inc
+
+  let stream_from_lexbuf_error_info lexbuf =
+    read_json_stream_error_info ~fin:(fun () -> ()) ~lexbuf
 
 end

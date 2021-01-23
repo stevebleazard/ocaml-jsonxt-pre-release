@@ -13,5 +13,7 @@ type t = {
 ; msg : string
 }
 
+exception Json_error_info of t
+
 val create_from_lexbuf : Lexing.lexbuf -> string -> t
 val to_string : t -> string

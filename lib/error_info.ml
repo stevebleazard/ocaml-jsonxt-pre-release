@@ -7,6 +7,8 @@ type t = {
 ; msg : string
 }
 
+exception Json_error_info of t
+
 let create_from_lexbuf lexbuf emsg =
   let (eline, schar, echar) = Lexxer_utils.error_pos lexbuf in
   { line = eline; start_char = schar; end_char = echar; msg = emsg }

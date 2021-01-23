@@ -122,6 +122,19 @@ module type Reader_string_file = sig
       if the file has syntax, grammar or compliance errors. This is a low level function
       and stream_from_function should be used in preference *)
   val stream_from_lexbuf : Lexing.lexbuf -> json Stream.t
+
+  (** {2 Json_error_info Error_info.t raising Stream.t functions}
+
+      The following functions are identical to the functions without
+      the _error_info extension except they raise an [Error_info.Json_error_info Error_info.t]
+      instead of a [Failure string]
+   *)
+
+  val stream_from_string_error_info : string -> json Stream.t
+  val stream_from_channel_error_info : ?fin:(unit -> unit) -> in_channel -> json Stream.t
+  val stream_from_file_error_info : string -> json Stream.t
+  val stream_from_function_error_info : (bytes -> int -> int) -> json Stream.t
+  val stream_from_lexbuf_error_info : Lexing.lexbuf -> json Stream.t
 end
 
 module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_string_file
