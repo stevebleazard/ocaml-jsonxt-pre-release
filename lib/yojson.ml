@@ -156,18 +156,34 @@ module Common_writer (Compliance : Compliance.S) = struct
     if std then Internal.to_string (to_standard json) else Internal.to_string json
 
   let to_channel ?buf:_ ?len:_ ?(std = false) out_channel json =
-    if std then Internal.to_channel out_channel (to_standard json) else Internal.to_channel out_channel json
+    if std then Internal.to_channel out_channel (to_standard json)
+    else Internal.to_channel out_channel json
 
   let to_file ?len:_ ?(std = false) filename json =
-    if std then Internal.to_file filename (to_standard json) else Internal.to_file filename json
+    if std then Internal.to_file filename (to_standard json)
+    else Internal.to_file filename json
 
   let to_buffer ?(std = false) buf json =
     if std then Internal.to_buffer buf (to_standard json) else Internal.to_buffer buf json
 
-  let stream_to_string ?buf:_ ?len:_ ?std:_ stream = Internal.stream_to_string stream
-  let stream_to_channel ?buf:_ ?len:_ ?std:_ out_channel stream = Internal.stream_to_channel out_channel stream
-  let stream_to_file ?len:_ ?std:_ filename stream = Internal.stream_to_file filename stream
-  let stream_to_buffer ?std:_ buf stream = Internal.stream_to_buffer buf stream
+  let stream_to_string ?buf:_ ?len:_ ?std stream =
+    let buf = Buffer.create 100 in
+    let () = Stream.iter
+      (fun json -> to_buffer ?std buf json;  Buffer.add_char buf '\n') stream
+    in
+    Buffer.contents buf
+
+  let stream_to_channel ?buf:_ ?len:_ ?std oc stream =
+    Stream.iter (fun json -> to_channel ?std oc json; output_char oc '\n') stream
+
+  let stream_to_file ?len:_ ?std filename stream =
+    let oc = open_out filename in
+    try (stream_to_channel ?std oc stream; close_out oc) with
+    | exn -> close_out oc; raise exn
+
+  let stream_to_buffer ?std buf stream =
+    Stream.iter (fun json -> to_buffer ?std buf json; Buffer.add_char buf '\n') stream
+
   let write_t buf json = to_buffer buf json
 
   (* Pretty printers *)
