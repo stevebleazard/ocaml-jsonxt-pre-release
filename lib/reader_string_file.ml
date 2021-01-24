@@ -21,7 +21,7 @@ module type Reader_string_file = sig
   val json_of_channel_error_info : in_channel -> (json, Error_info.t) result
   val json_of_function_error_info : (bytes -> int -> int) -> (json, Error_info.t) result
   val json_of_lexbuf_error_info : Lexing.lexbuf -> (json, Error_info.t) result
-  val json_of_lexbuf_error_info_compat : ?stream:bool -> Lexing.lexbuf -> (json, Error_info.t) result
+  val json_of_lexbuf_error_info_compat : ?stream:bool -> Lexing.lexbuf -> (json option, Error_info.t) result
 
   val stream_from_string : string -> json Stream.t
   val stream_from_channel : ?fin:(unit -> unit) -> in_channel -> json Stream.t
@@ -154,13 +154,13 @@ module Make (Lexxer : Compliant_lexxer.Lex ) (Parser : Parser.Parser) : Reader_s
   let json_of_lexbuf_error_info_compat ?(stream = false) lexbuf =
     let reader () = Lexxer.read lexbuf in
     let res = match Parser.decode ~reader with
-    | Ok None -> Error "empty input"
+    | Ok None -> if stream then Ok None else Error "empty input"
     | Ok (Some res) -> begin
       match stream with
-      | true -> Ok res
+      | true -> Ok (Some res)
       | false -> begin
         match reader () with
-        | EOF -> Ok res
+        | EOF -> Ok (Some res)
         | exception Lexxer_utils.Lex_error err -> Error err
         | tok -> Error ("junk after end of JSON value: " ^ (Token_utils.token_to_string tok))
         end

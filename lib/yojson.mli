@@ -1,4 +1,14 @@
 exception Json_error of string
+exception End_of_input
+
+type lexer_state = {
+  buf : Buffer.t;
+  mutable lnum : int;
+  mutable bol : int;
+  mutable fname : string option;
+}
+
+val init_lexer : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> unit -> lexer_state
 
 module Basic : sig
   type json = Json.Basic.json
@@ -10,6 +20,7 @@ module Basic : sig
   val from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
   val from_channel : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> in_channel -> t
   val from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
+  val from_lexbuf : lexer_state -> ?stream:bool -> Lexing.lexbuf -> t
   val stream_from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
   val stream_from_channel : ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> t Stream.t
   val stream_from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
@@ -30,6 +41,7 @@ module Basic : sig
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
   val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
+  val stream_from_lexbuf : lexer_state -> ?fin:(unit -> unit) -> Lexing.lexbuf -> t Stream.t
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
@@ -65,9 +77,11 @@ module Safe : sig
   val from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
   val from_channel : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> in_channel -> t
   val from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
+  val from_lexbuf : lexer_state -> ?stream:bool -> Lexing.lexbuf -> t
   val stream_from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
   val stream_from_channel : ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> t Stream.t
   val stream_from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
+  val stream_from_lexbuf : lexer_state -> ?fin:(unit -> unit) -> Lexing.lexbuf -> t Stream.t
 
   val linestream_from_channel :
     ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> json_line Stream.t
@@ -120,9 +134,11 @@ module Raw : sig
   val from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
   val from_channel : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> in_channel -> t
   val from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
+  val from_lexbuf : lexer_state -> ?stream:bool -> Lexing.lexbuf -> t
   val stream_from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
   val stream_from_channel : ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> t Stream.t
   val stream_from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
+  val stream_from_lexbuf : lexer_state -> ?fin:(unit -> unit) -> Lexing.lexbuf -> t Stream.t
 
   val linestream_from_channel :
     ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> json_line Stream.t

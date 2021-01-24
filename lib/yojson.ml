@@ -1,6 +1,22 @@
 exception Json_error of string
+exception End_of_input
 
 let json_error msg = raise (Json_error msg)
+
+type lexer_state = {
+  buf : Buffer.t;
+  mutable lnum : int;
+  mutable bol : int;
+  mutable fname : string option;
+}
+
+let init_lexer ?buf:_ ?fname ?(lnum = 1) () =
+  {
+    buf = Buffer.create 16  (* unused *)
+  ; lnum = lnum
+  ; bol = 0
+  ; fname = fname
+  }
 
 module Common (Compliance : Compliance.S) = struct
   module Internal = struct
@@ -22,7 +38,7 @@ module Common (Compliance : Compliance.S) = struct
     let info = { error_info with line = lnum + error_info.line - 1 } in
     let fname = match fname with
       | None -> "Line"
-      | Some name -> "File" ^ name ^ ", line"
+      | Some name -> "File " ^ name ^ ", line"
     in
     let loc = Printf.sprintf "%s %d chars %d-%d: " fname info.line info.start_char info.end_char in
     loc ^ info.msg
@@ -41,6 +57,14 @@ module Common (Compliance : Compliance.S) = struct
 
   let from_file ?buf:_ ?fname ?lnum filename =
     apply_and_handle_errors Internal.json_of_file_error_info filename fname lnum
+
+  let from_lexbuf lexstate ?stream lexbuf =
+    let fname = lexstate.fname in
+    let lnum = Some lexstate.lnum in
+    match Internal.json_of_lexbuf_error_info_compat ?stream lexbuf with
+    | Ok (Some json) -> json
+    | Ok None -> raise End_of_input
+    | Error error_info -> json_error (error_to_string error_info fname lnum)
 
   let stream_apply_and_handle_errors stream_f a fname lnum =
     let stream = stream_f a in
@@ -62,11 +86,23 @@ module Common (Compliance : Compliance.S) = struct
   let stream_from_file ?buf:_ ?fname ?lnum filename =
     stream_apply_and_handle_errors Internal.stream_from_file_error_info filename fname lnum
 
-
-  let linestream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname:_ ?lnum:_ ic =
+  let stream_from_lexbuf lexstate ?(fin = fun () -> ()) lexbuf =
+    let stream = Internal.stream_from_lexbuf_error_info lexbuf in
     let f _i =
+      match Stream.next stream with
+      | v -> Some v
+      | exception Stream.Failure -> fin (); None
+      | exception Error_info.Json_error_info err_info ->
+        fin (); json_error (error_to_string err_info lexstate.fname (Some lexstate.lnum))
+    in
+    Stream.from f
+
+
+  let linestream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname ?(lnum = 1) ic =
+    let f i =
       try
-        let line = input_line ic in Some (`Json (from_string line))
+        let lnum = lnum + i in
+        let line = input_line ic in Some (`Json (from_string ?fname ~lnum line))
       with
         | End_of_file -> fin (); None
         | exn_ -> fin (); Some (`Exn exn_)

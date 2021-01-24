@@ -86,7 +86,7 @@ module type Reader_string_file = sig
 
   (** {3 compatablity functions for internal use} *)
 
-  val json_of_lexbuf_error_info_compat : ?stream:bool -> Lexing.lexbuf -> (json, Error_info.t) result
+  val json_of_lexbuf_error_info_compat : ?stream:bool -> Lexing.lexbuf -> (json option, Error_info.t) result
 
   (** {2 [Stream.t] readers}
 
