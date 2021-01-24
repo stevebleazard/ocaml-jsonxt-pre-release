@@ -43,6 +43,7 @@ module Basic : sig
   val to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t -> unit
   val to_file : ?len:int -> ?std:bool -> string -> t -> unit
   val to_buffer : ?std:bool -> Buffer.t -> t -> unit
+  val to_output : ?buf:Buffer.t -> ?len:int -> ?std:bool -> < output : string -> int -> int -> 'a; .. > -> t -> 'a
   val stream_to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t Stream.t -> string
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
@@ -100,6 +101,7 @@ module Safe : sig
   val to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t -> unit
   val to_file : ?len:int -> ?std:bool -> string -> t -> unit
   val to_buffer : ?std:bool -> Buffer.t -> t -> unit
+  val to_output : ?buf:Buffer.t -> ?len:int -> ?std:bool -> < output : string -> int -> int -> 'a; .. > -> t -> 'a
   val stream_to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t Stream.t -> string
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
@@ -157,6 +159,7 @@ module Raw : sig
   val to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t -> unit
   val to_file : ?len:int -> ?std:bool -> string -> t -> unit
   val to_buffer : ?std:bool -> Buffer.t -> t -> unit
+  val to_output : ?buf:Buffer.t -> ?len:int -> ?std:bool -> < output : string -> int -> int -> 'a; .. > -> t -> 'a
   val stream_to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t Stream.t -> string
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit

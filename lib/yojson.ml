@@ -166,6 +166,10 @@ module Common_writer (Compliance : Compliance.S) = struct
   let to_buffer ?(std = false) buf json =
     if std then Internal.to_buffer buf (to_standard json) else Internal.to_buffer buf json
 
+  let to_output ?buf:_ ?len:_ ?std out json =
+    let str = to_string ?std json in
+    out#output str 0 (String.length str)
+
   let stream_to_string ?buf:_ ?len:_ ?std stream =
     let buf = Buffer.create 100 in
     let () = Stream.iter
