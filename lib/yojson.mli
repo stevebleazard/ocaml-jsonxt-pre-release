@@ -1,6 +1,11 @@
 exception Json_error of string
 exception End_of_input
 
+(* These are for compatibility and never raise *)
+exception End_of_array
+exception End_of_object
+exception End_of_tuple
+
 type lexer_state = {
   buf : Buffer.t;
   mutable lnum : int;

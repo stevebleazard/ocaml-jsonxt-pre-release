@@ -1,6 +1,11 @@
 exception Json_error of string
 exception End_of_input
 
+(* These are for compatibility and never raise *)
+exception End_of_array
+exception End_of_object
+exception End_of_tuple
+
 let json_error msg = raise (Json_error msg)
 
 type lexer_state = {
