@@ -1,3 +1,5 @@
+exception Json_error of string
+
 module Basic : sig
   type json = Json.Basic.json
   type t = json

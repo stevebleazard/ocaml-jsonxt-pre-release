@@ -45,10 +45,12 @@ let string_parse_test level filename _passfail =
   let yojson_basic_json_of_string s =
     try Ok (Jsonxt.Yojson.Basic.from_string s) with
     | Failure err -> Error err
+    | Jsonxt.Yojson.Json_error err -> Error err
   in
   let yojson_safe_json_of_string s =
     try Ok (Jsonxt.Yojson.Safe.from_string s) with
     | Failure err -> Error err
+    | Jsonxt.Yojson.Json_error err -> Error err
   in
   let txt = try Utils.load_file (filename ^ ".json") with Sys_error err -> Utils.die err in
   let string_parser = match level with
@@ -64,10 +66,12 @@ let file_parse_test level filename _passfail =
   let yojson_basic_json_of_file filename =
     try Ok (Jsonxt.Yojson.Basic.from_file filename) with
     | Failure err -> Error err
+    | Jsonxt.Yojson.Json_error err -> Error err
   in
   let yojson_safe_json_of_file filename =
     try Ok (Jsonxt.Yojson.Safe.from_file filename) with
     | Failure err -> Error err
+    | Jsonxt.Yojson.Json_error err -> Error err
   in
   let file_parser = match level with
     | `Strict       -> of_error Jsonxt.Strict.json_of_file
