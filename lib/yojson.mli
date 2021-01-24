@@ -29,6 +29,7 @@ module Basic : sig
   val stream_from_string : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
   val stream_from_channel : ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> t Stream.t
   val stream_from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t Stream.t
+  val stream_from_lexbuf : lexer_state -> ?fin:(unit -> unit) -> Lexing.lexbuf -> t Stream.t
 
   val linestream_from_channel :
     ?buf:Buffer.t -> ?fin:(unit -> unit) -> ?fname:string -> ?lnum:int -> in_channel -> json_line Stream.t
@@ -46,7 +47,6 @@ module Basic : sig
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
   val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
-  val stream_from_lexbuf : lexer_state -> ?fin:(unit -> unit) -> Lexing.lexbuf -> t Stream.t
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
