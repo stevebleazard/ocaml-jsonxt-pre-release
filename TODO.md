@@ -6,10 +6,13 @@
     * Review functionality
     * Test including replacing existing use of yojson library
     * Test derivers
-    * lexer_state - handle best effort using _error_info functions
     * Document
       * use in existing projects (create yojson.ml with include)
       * differences esp. missing functions
+    * to_output
+    * sort
+    * pretty_print
+    * utils
   * Stream.t json recovery (version 1.1?)
 * Review
   * Compliance with RFCs
