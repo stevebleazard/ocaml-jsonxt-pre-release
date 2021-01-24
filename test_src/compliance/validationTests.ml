@@ -144,11 +144,11 @@ let file_write_test jsons sexps tmpfile () =
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
 
-let string_write_test jsons sexps () =
+let string_write_test' f jsons sexps () =
   let jsonsexp = 
     match Jsonxt.Extended.json_of_string jsons with
     | Ok json -> begin
-      match Jsonxt.Extended.json_to_string json with
+      match f json with
       | Ok str -> begin
           match Jsonxt.Extended.json_of_string str with
           | Ok json -> JsonSexp.sexp_of_json json
@@ -160,6 +160,9 @@ let string_write_test jsons sexps () =
   in
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
+
+let string_write_test jsons sexp = string_write_test' Jsonxt.Extended.json_to_string jsons sexp
+let string_write_hum_test jsons sexp = string_write_test' Jsonxt.Extended.json_to_string_hum jsons sexp
 
 let stream_write_test jsons sexp_streams () =
   let json_stream_sexp = 
@@ -224,38 +227,43 @@ let monad_write_test jsons sexps () =
   let sexpv = Core_kernel.Sexp.of_string sexps in
   Alcotest.(check sexp) jsons sexpv jsonsexp 
 
-let gen_tests filename tmpfile =
+let gen_tests filename tmpfile = 
+  let filter a l = List.filter (fun (k, _) -> k = a) l |> List.map (fun (_, v) -> v) in
   let inc = try open_in filename with | Sys_error err -> Utils.die err in
-  let rec loop std stream stdwrite filewrite strwrite monad mwrite streamt =
+  let rec loop tests =
     match read_json_sexp inc with
     | bits, jsons, sexps, sexps_json_stream -> begin
       let msg = jsons in
       match bits with
-      | "64" when Utils.int_bits = 32 -> loop std stream stdwrite filewrite strwrite monad mwrite streamt
-      | "32" when Utils.int_bits = 64 -> loop std stream stdwrite filewrite strwrite monad mwrite streamt
+      | "64" when Utils.int_bits = 32 -> loop tests
+      | "32" when Utils.int_bits = 64 -> loop tests
       | _ ->
-        loop ((Alcotest.test_case msg `Quick (string_parse_test jsons sexps))::std)
-             ((Alcotest.test_case msg `Quick (stream_parse_test jsons sexps_json_stream))::stream)
-             ((Alcotest.test_case msg `Quick (string_write_test jsons sexps))::stdwrite)
-             ((Alcotest.test_case msg `Quick (file_write_test jsons sexps tmpfile))::filewrite)
-             ((Alcotest.test_case msg `Quick (stream_write_test jsons sexps))::strwrite)
-             ((Alcotest.test_case msg `Quick (monad_parse_test jsons sexps))::monad)
-             ((Alcotest.test_case msg `Quick (monad_write_test jsons sexps))::mwrite)
-             ((Alcotest.test_case msg `Quick (stream_t_parse_test jsons sexps))::streamt)
+        let tests = (`Std, (Alcotest.test_case msg `Quick (string_parse_test jsons sexps)))::tests in
+        let tests = (`Stream, (Alcotest.test_case msg `Quick (stream_parse_test jsons sexps_json_stream)))::tests in
+        let tests = (`Std_write, (Alcotest.test_case msg `Quick (string_write_test jsons sexps)))::tests in
+        let tests = (`Std_write_hum, (Alcotest.test_case msg `Quick (string_write_hum_test jsons sexps)))::tests in
+        let tests = (`File_write, (Alcotest.test_case msg `Quick (file_write_test jsons sexps tmpfile)))::tests in
+        let tests = (`Stream_write, (Alcotest.test_case msg `Quick (stream_write_test jsons sexps)))::tests in
+        let tests = (`Monad, (Alcotest.test_case msg `Quick (monad_parse_test jsons sexps)))::tests in
+        let tests = (`Monad_write, (Alcotest.test_case msg `Quick (monad_write_test jsons sexps)))::tests in
+        let tests = (`Stream_t, (Alcotest.test_case msg `Quick (stream_t_parse_test jsons sexps)))::tests in
+        loop tests
       end
-    | exception End_of_file -> (std, stream, stdwrite, filewrite, strwrite, monad, mwrite, streamt)
+    | exception End_of_file -> List.rev tests
   in
-  let std_t, stream_t, stdwrite_t, filewrite_t, strwrite_t, monad_t, mwrite_t, streamt_t  = loop [] [] [] [] [] [] [] [] in
+  let tests = loop [] in
   [
-    "standard", (List.rev std_t);
-    "standard-write-string", (List.rev stdwrite_t);
-    "standard-write-file", (List.rev filewrite_t);
-    "standard-streamt", (List.rev streamt_t);
-    "stream", (List.rev stream_t);
-    "stream-write", (List.rev strwrite_t);
-    "monad", (List.rev monad_t);
-    "monad-write", (List.rev mwrite_t);
+    "standard", filter `Std tests;
+    "standard-write-string", filter `Std_write tests;
+    "standard-write-string-hum", filter `Std_write_hum tests;
+    "standard-write-file", filter `File_write tests;
+    "standard-streamt", filter `Stream_t tests;
+    "stream", filter `Stream tests;
+    "stream-write", filter ` Stream_write tests;
+    "monad", filter `Monad tests;
+    "monad-write", filter `Monad_write tests
   ]
+
 
 let run_tests filename alco_opts =
   let argv = Array.of_list ("compliance"::alco_opts) in
