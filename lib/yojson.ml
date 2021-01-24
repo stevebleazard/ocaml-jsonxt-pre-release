@@ -23,14 +23,11 @@ let init_lexer ?buf:_ ?fname ?(lnum = 1) () =
   ; fname = fname
   }
 
-module Common (Compliance : Compliance.S) = struct
+module Common_reader (Compliance : Compliance.S) = struct
   module Internal = struct
     module Lexxer = Compliant_lexxer.Make(Compliance)
     module Parser = Parser.Make(Compliance)
     include Reader_string_file.Make (Lexxer) (Parser)
-
-    include Writer_string.Make(Compliance)
-    include Writer_file.Make(Compliance)
   end
 
   type json = Internal.json
@@ -117,12 +114,56 @@ module Common (Compliance : Compliance.S) = struct
   let linestream_from_file ?buf:_ ?fname:_ ?lnum:_ filename =
     let ic = open_in filename in
     linestream_from_channel ~fin:(fun () -> close_in ic) ic
+end
+
+module Common_writer (Compliance : Compliance.S) = struct
+  module Internal = struct
+    include Writer_string.Make(Compliance)
+    include Writer_file.Make(Compliance)
+  end
+  type json = Compliance.json
+  type t = json
+
+  let to_standard json =
+    let rec map node =
+      match node with
+      | `Null -> `Null
+      | `Bool _ as v -> v
+      | `Int _ as v -> v  (* int is ok on output *)
+      | `Intlit v -> `String v
+      | `Float _ as v -> v
+      | `Floatlit v -> `Float (float_of_string v)
+      | `String _ as v -> v
+      | `Stringlit s -> begin
+        match String.length s with
+        | 0 | 1 -> `String s         (* malformed, should have double-quotes at start and end *)
+        | _ -> `String (String.sub s 1 (String.length s - 2))
+        end
+      | `List l -> `List (List.map map l)
+      | `Assoc a -> `Assoc (List.map (fun (id, v) -> (id, map v)) a)
+      | `Tuple tpl -> `List (List.map map tpl)
+      | `Variant (name, jopt) -> begin
+         match jopt with
+         | None -> `String name
+         | Some v -> `List [ `String name; (map v) ]
+        end
+    in
+    map json
 
   (* Writers *)
-  let to_string ?buf:_ ?len:_ ?std:_ json = Internal.to_string json
-  let to_channel ?buf:_ ?len:_ ?std:_ out_channel json = Internal.to_channel out_channel json
-  let to_file ?len:_ ?std:_ filename json = Internal.to_file filename json
-  let to_buffer ?std:_ buf json = Internal.to_buffer buf json
+    
+  let to_string ?buf:_ ?len:_ ?(std = false) json =
+    if std then Internal.to_string (to_standard json) else Internal.to_string json
+
+  let to_channel ?buf:_ ?len:_ ?(std = false) out_channel json =
+    if std then Internal.to_channel out_channel (to_standard json) else Internal.to_channel out_channel json
+
+  let to_file ?len:_ ?(std = false) filename json =
+    if std then Internal.to_file filename (to_standard json) else Internal.to_file filename json
+
+  let to_buffer ?(std = false) buf json =
+    if std then Internal.to_buffer buf (to_standard json) else Internal.to_buffer buf json
+
   let stream_to_string ?buf:_ ?len:_ ?std:_ stream = Internal.stream_to_string stream
   let stream_to_channel ?buf:_ ?len:_ ?std:_ out_channel stream = Internal.stream_to_channel out_channel stream
   let stream_to_file ?len:_ ?std:_ filename stream = Internal.stream_to_file filename stream
@@ -130,8 +171,11 @@ module Common (Compliance : Compliance.S) = struct
   let write_t buf json = to_buffer buf json
 
   (* Pretty printers *)
-  let pretty_to_string ?std:_ json = Internal.to_string_hum json
-  let pretty_to_channel ?std:_ oc json = Internal.to_channel_hum oc json
+  let pretty_to_string ?(std = false) json =
+    if std then Internal.to_string_hum (to_standard json) else Internal.to_string_hum json
+
+  let pretty_to_channel ?(std = false) oc json =
+    if std then Internal.to_channel_hum oc (to_standard json) else Internal.to_channel_hum oc json
 
   (* Utilities *)
   let show json = Utilities.json_to_string_repr json
@@ -200,10 +244,11 @@ module Basic = struct
     end
   end
 
-  include Common(Compliance)
+  include Common_reader(Compliance)
+  include Common_writer(Compliance)
 
-  let prettify ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string_hum
-  let compact ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string
+  let prettify ?std instr = from_string instr |> pretty_to_string ?std
+  let compact ?std instr = from_string instr |> to_string ?std
 end
 
 module Safe = struct
@@ -280,10 +325,11 @@ module Safe = struct
     end
   end
 
-  include Common(Compliance)
+  include Common_reader(Compliance)
+  include Common_writer(Compliance)
 
-  let prettify ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string_hum
-  let compact ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string
+  let prettify ?std instr = from_string instr |> pretty_to_string ?std
+  let compact ?std instr = from_string instr |> to_string ?std
 
   let to_basic json : Basic.json =
     let rec map node =
@@ -380,8 +426,9 @@ module Raw = struct
     end
   end
 
-  include Common(Compliance)
+  include Common_reader(Compliance)
+  include Common_writer(Compliance)
 
-  let prettify ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string_hum
-  let compact ?std:_ instr = Internal.json_of_string_exn instr |> Internal.to_string
+  let prettify ?std instr = from_string instr |> pretty_to_string ?std
+  let compact ?std instr = from_string instr |> to_string ?std
 end
