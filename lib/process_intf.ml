@@ -89,12 +89,6 @@ end
 module type Basic = sig
   type json
 
-  (** [to_string json] converts [`String s] to [s] *)
-  val to_string : [> `String of string ] -> string
-
-  (** [to_string_option json] converts [`String s] to [Some s] and [`Null] to [None] *)
-  val to_string_option : [> `String of string | `Null ] -> string option
-
   (** [to_number json] converts [`Float f] to [f] and [Int i] to [float i] *)
   val to_number : [> `Int of int | `Float of float ] -> float
 
@@ -115,13 +109,17 @@ end
 module type Extended = sig
   type json
 
-  val to_string :
-    [> `String of string | `Intlit of string | `Floatlit of string | `Stringlit of string ] -> string
-  val to_string_option :
-    [> `String of string | `Intlit of string | `Floatlit of string | `Stringlit of string | `Null ] -> string option
+  (** [to_number json] converts [`Float f] to [f] and [Int i] to [float i] *)
   val to_number : [> `Int of int | `Float of float ] -> float
+
+  (** [to_number_option json] converts [`Float f] to [Some f], [`Int i] to [Some (float i)]
+      and [`Null] to [None] *)
   val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option
+
+  (** [to_int json] converts [`Int i] to [i] *)
   val to_int : [> `Int of int ] -> int
+
+  (** [to_int_option json] converts [`Int i] to [Some i] and [`Null] to [None] *)
   val to_int_option : [> `Int of int | `Null ] -> int option
   val filter_int : [> `Int of int ] list -> int list
   val filter_number : [> `Int of int | `Float of float ] list -> float list
@@ -130,11 +128,17 @@ end
 module type Yojson_safe = sig
   type json
 
-  val to_string : [> `String of string] -> string
-  val to_string_option : [> `String of string | `Null] -> string option
+  (** [to_number json] converts [`Float f] to [f] and [Int i] to [float i] *)
   val to_number : [> `Int of int | `Float of float ] -> float
+
+  (** [to_number_option json] converts [`Float f] to [Some f], [`Int i] to [Some (float i)]
+      and [`Null] to [None] *)
   val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option
+
+  (** [to_int json] converts [`Int i] to [i] *)
   val to_int : [> `Int of int ] -> int
+
+  (** [to_int_option json] converts [`Int i] to [Some i] and [`Null] to [None] *)
   val to_int_option : [> `Int of int | `Null ] -> int option
   val filter_int : [> `Int of int ] list -> int list
   val filter_number : [> `Int of int | `Float of float ] list -> float list

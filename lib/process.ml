@@ -239,68 +239,6 @@ module Internal = struct
       ) l
   end
 
-  module type Internal_extended_intf = sig
-    type json
-
-    val to_string :
-      [> `String of string | `Intlit of string | `Floatlit of string | `Stringlit of string ] -> string
-    val to_string_option :
-      [> `String of string | `Intlit of string | `Floatlit of string | `Stringlit of string | `Null ] -> string option
-  end
-
-  module Extended(M : S) : Internal_extended_intf
-    with type json = M.json
-  = struct
-    type json = M.json
-
-    let to_string = function
-      | `String s -> s
-      | `Intlit s -> s
-      | `Floatlit s -> s
-      | `Stringlit s ->
-        if String.length s > 1 && s.[0] = '"' && s.[String.length s - 1] = '"' then
-          String.sub s 1 (String.length s - 1)
-        else
-          s
-      | json -> error "Expected `String" json
-
-    let to_string_option = function
-      | `String s -> Some s
-      | `Intlit s -> Some s
-      | `Floatlit s -> Some s
-      | `Stringlit s ->
-        if String.length s > 1 && s.[0] = '"' && s.[String.length s - 1] = '"' then
-          Some (String.sub s 1 (String.length s - 1))
-        else
-          Some s
-      | `Null -> None
-      | json -> error "Expected `String or `Null" json
-
-  end
-
-  module type Internal_yojson_safe_intf = sig
-    type json
-
-    val to_string : [> `String of string] -> string
-    val to_string_option : [> `String of string | `Null] -> string option
-  end
-
-  module Yojson_safe(M : S) : Internal_yojson_safe_intf
-    with type json = M.json
-  = struct
-    type json = M.json
-
-    let to_string = function
-      | `String s -> s
-      | json -> error "Expected `String" json
-
-    let to_string_option = function
-      | `String s -> Some s
-      | `Null -> None
-      | json -> error "Expected `String or `Null" json
-
-  end
-
 end
 
 module Strict = struct
@@ -327,7 +265,6 @@ module Extended = struct
   end
   include Internal.Strict(M)
   include Internal.Basic(M)
-  include Internal.Extended(M)
 end
 
 module Yojson_safe = struct
@@ -350,5 +287,4 @@ module Yojson_safe = struct
   end
   include Internal.Strict(M)
   include Internal.Basic(M)
-  include Internal.Yojson_safe(M)
 end
