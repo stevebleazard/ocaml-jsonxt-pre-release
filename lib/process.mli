@@ -14,6 +14,9 @@ module Strict : sig
   val to_float_option : [> `Float of float | `Null ] -> float option
   val to_number : [> `Float of float ] -> float
   val to_number_option : [> `Float of float | `Null ] -> float option
+  val convert_each : (json -> json) -> [> `List of json list ] -> json list
+  val rev_filter_map : (json -> json option) -> json list -> json list -> json list
+  val filter_map : (json -> json option) -> json list -> json list
 end
 
 module Basic : sig
@@ -33,4 +36,8 @@ module Basic : sig
   val to_number : [> `Int of int | `Float of float ] -> float
   val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option
   val to_int : [> `Int of int ] -> int
+  val to_int_option : [> `Int of int | `Null ] -> int option
+  val convert_each : (json -> json) -> [> `List of json list ] -> json list
+  val rev_filter_map : (json -> json option) -> json list -> json list -> json list
+  val filter_map : (json -> json option) -> json list -> json list
 end

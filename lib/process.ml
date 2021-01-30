@@ -44,6 +44,9 @@ module Internal = struct
     val to_float_option : [> `Float of float | `Null ] -> float option
     val to_number : [> `Float of float ] -> float
     val to_number_option : [> `Float of float | `Null ] -> float option
+    val convert_each : (json -> json) -> [> `List of json list ] -> json list
+    val rev_filter_map : (json -> json option) -> json list -> json list -> json list
+    val filter_map : (json -> json option) -> json list -> json list
   end
 
   module Strict(M : S) : Internal_strict_intf
@@ -105,6 +108,20 @@ module Internal = struct
       | `Null -> None
       | json -> error "Expected `Float or `Null" json
 
+    let convert_each f = function
+      | `List l -> List.map f l
+      | json -> error "Expected `List" json
+
+    let rec rev_filter_map f acc l =
+      match l with
+      | [] -> acc
+      | hd::tl ->
+        match f hd with
+        | None -> rev_filter_map f acc tl
+        | Some v -> rev_filter_map f (v::acc) tl
+
+    let filter_map f l = List.rev (rev_filter_map f [] l)
+
   end
 
   module type Internal_basic_intf = sig
@@ -113,6 +130,7 @@ module Internal = struct
     val to_number : [> `Int of int | `Float of float ] -> float
     val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option
     val to_int : [> `Int of int ] -> int
+    val to_int_option : [> `Int of int | `Null ] -> int option
   end
 
   module Basic(M : S) : Internal_basic_intf
@@ -132,6 +150,11 @@ module Internal = struct
       | json -> error "Expected `Int, `Float or `Null" json
 
     let to_int = function | `Int i -> i | json -> error "Expected `Int" json
+
+    let to_int_option = function
+      | `Int i -> Some i
+      | `Null -> None
+      | json -> error "Expected `Int or `Null" json
   end
 end
 
@@ -153,13 +176,6 @@ module Basic = struct
 end
 
 (*
-let to_int = function | `Int i -> i | json -> error "Expected `Int" json
-
-let to_int_option = function
-  | `Int i -> Some i
-  | `Null -> None
-  | json -> error "Expected `Int or `Null" json
-
 let to_string = function
   | `String s -> s
   | `Intlit s -> s
@@ -182,10 +198,6 @@ let to_string_option = function
       Some s
   | `Null -> None
   | json -> error "Expected `String or `Null" json
-
-let convert_each f = function
-  | `List l -> List.map f l
-  | json -> error "Expected `List" json
 
 let rec rev_filter_map f acc l =
   match l with
