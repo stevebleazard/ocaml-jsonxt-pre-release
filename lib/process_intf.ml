@@ -46,6 +46,12 @@ module type Shared = sig
   (** [to_number_option json] converts [`Float f] to [Some f] and [`Null] to [None] *)
   val to_number_option : [> `Float of float | `Null ] -> float option
 
+  (** [to_string json] converts [`String s] to [s] *)
+  val to_string : [> `String of string ] -> string
+
+  (** [to_string_option json] converts [`String s] to [Some s] and [`Null] to [None] *)
+  val to_string_option : [> `String of string | `Null ] -> string option
+
   (** [convert_each f json] applies the function [f] to each element of the
       JSON array [json], which must be an [`List] element, and returns a
       list of the returned values. *)
@@ -114,16 +120,6 @@ module type Shared = sig
   (** combine assoc1 assoc2] appends the associative lists of two [`Assoc] elements returning
       an [`Assoc] element *)
   val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
-end
-
-module type Strict = sig
-  type json
-
-  (** [to_string json] converts [`String s] to [s] *)
-  val to_string : [> `String of string ] -> string
-
-  (** [to_string_option json] converts [`String s] to [Some s] and [`Null] to [None] *)
-  val to_string_option : [> `String of string | `Null ] -> string option
 end
 
 module type Basic = sig

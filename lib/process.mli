@@ -5,7 +5,6 @@
     {!type:Json.Strict.json} json type.  *)
 module Strict : sig
   include (Process_intf.Shared with type json := Json.Strict.json)
-  include (Process_intf.Strict with type json := Json.Strict.json)
 end
 
 (** [Basic] supports processing JSON data that conforms to the
