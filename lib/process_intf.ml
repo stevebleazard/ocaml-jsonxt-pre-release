@@ -105,8 +105,14 @@ module type Shared = sig
   (**[filter_number l] returns a list of all the values of [`Float value] elements in l *)
   val filter_number : [> `Float of float ] list -> float list
 
+  (** [keys assoc] returns all the keys from the [`Assoc] element *)
   val keys : [> `Assoc of (string * 'a) list ] -> string list
+
+  (** [values assoc] returns all the values from the [`Assoc] element *)
   val values : [> `Assoc of (string * 'a) list ] -> 'a list
+
+  (** combine assoc1 assoc2] appends the associative lists of two [`Assoc] elements returning
+      an [`Assoc] element *)
   val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
 end
 
