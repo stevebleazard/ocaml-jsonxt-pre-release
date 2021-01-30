@@ -20,6 +20,7 @@ let _type_to_string = function
 
 (* let error msg json = raise (Type_error (msg ^ type_to_string json, json))
 let error msg json = raise (Failure (msg ^ type_to_string (json:>Json.json)))
+let error msg json = raise (Failure (msg ^ (Utilities.json_to_string_repr json)))
 *)
 let error msg _json = raise (Failure msg)
 
@@ -304,29 +305,3 @@ module Extended = struct
   include Internal.Basic(M)
   include Internal.Extended(M)
 end
-
-(*
-let to_string = function
-  | `String s -> s
-  | `Intlit s -> s
-  | `Floatlit s -> s
-  | `Stringlit s ->
-    if String.length s > 1 && s.[0] = '"' && s.[String.length s - 1] = '"' then
-      String.sub s 1 (String.length s - 1)
-    else
-      s
-  | json -> error "Expected `String" json
-
-let to_string_option = function
-  | `String s -> Some s
-  | `Intlit s -> Some s
-  | `Floatlit s -> Some s
-  | `Stringlit s ->
-    if String.length s > 1 && s.[0] = '"' && s.[String.length s - 1] = '"' then
-      Some (String.sub s 1 (String.length s - 1))
-    else
-      Some s
-  | `Null -> None
-  | json -> error "Expected `String or `Null" json
-
-*)
