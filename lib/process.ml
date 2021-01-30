@@ -281,8 +281,8 @@ module Internal = struct
   module type Internal_yojson_safe_intf = sig
     type json
 
-    val to_string : [> `String of string | `Intlit of string ] -> string
-    val to_string_option : [> `String of string | `Intlit of string | `Null ] -> string option
+    val to_string : [> `String of string] -> string
+    val to_string_option : [> `String of string | `Null] -> string option
   end
 
   module Yojson_safe(M : S) : Internal_yojson_safe_intf
@@ -292,12 +292,10 @@ module Internal = struct
 
     let to_string = function
       | `String s -> s
-      | `Intlit s -> s
       | json -> error "Expected `String" json
 
     let to_string_option = function
       | `String s -> Some s
-      | `Intlit s -> Some s
       | `Null -> None
       | json -> error "Expected `String or `Null" json
 
