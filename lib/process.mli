@@ -1,18 +1,29 @@
+(** [Process] provides functions for processing Jsonxt json trees.
+    This includes functions to map, flatten and extract data *)
+
+(** [Strict] supports processing JSON data that conforms to the
+    {!type:Json.Strict.json} json type.  *)
 module Strict : sig
   include (Process_intf.Shared with type json := Json.Strict.json)
   include (Process_intf.Strict with type json := Json.Strict.json)
 end
 
+(** [Basic] supports processing JSON data that conforms to the
+    {!type:Json.Basic.json} json type.  *)
 module Basic : sig
   include (Process_intf.Shared with type json := Json.Basic.json)
   include (Process_intf.Basic with type json := Json.Basic.json)
 end
 
+(** [Strict] supports processing JSON data that conforms to the
+    {!type:Json.Extended.json} json type.  *)
 module Extended : sig
   include (Process_intf.Shared with type json := Json.Extended.json)
   include (Process_intf.Extended with type json := Json.Extended.json)
 end
 
+(** [Yojson_safe] supports processing JSON data that conforms to
+    Yojson's Safe json type. *)
 module Yojson_safe : sig
   type json =
     [
