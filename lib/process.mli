@@ -27,6 +27,9 @@ module Strict : sig
   val filter_string  : [> `String of string ] list -> string list
   val filter_member : string -> [> `Assoc of (string * json) list ] list -> json list
   val filter_number : [> `Float of float ] list -> float list
+  val keys : [> `Assoc of (string * 'a) list ] -> string list
+  val values : [> `Assoc of (string * 'a) list ] -> 'a list
+  val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
 end
 
 module Basic : sig
@@ -55,6 +58,9 @@ module Basic : sig
   val filter_float : [> `Float of float ] list -> float list
   val filter_string  : [> `String of string ] list -> string list
   val filter_member : string -> [> `Assoc of (string * json) list ] list -> json list
+  val keys : [> `Assoc of (string * 'a) list ] -> string list
+  val values : [> `Assoc of (string * 'a) list ] -> 'a list
+  val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
 
   val to_number : [> `Int of int | `Float of float ] -> float
   val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option

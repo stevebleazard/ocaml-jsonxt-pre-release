@@ -57,6 +57,9 @@ module Internal = struct
     val filter_string  : [> `String of string ] list -> string list
     val filter_member : string -> [> `Assoc of (string * json) list ] list -> json list
     val filter_number : [> `Float of float ] list -> float list
+    val keys : [> `Assoc of (string * 'a) list ] -> string list
+    val values : [> `Assoc of (string * 'a) list ] -> 'a list
+    val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
   end
 
   module Shared = struct
@@ -169,6 +172,15 @@ module Internal = struct
         | `Float f -> Some f
         | _ -> None
       ) l
+
+    let keys o = to_assoc o |> List.map (fun (key, _) -> key)
+
+    let values o = to_assoc o |> List.map (fun (_, value) -> value)
+
+    let combine first second =
+      match (first, second) with
+      | (`Assoc a, `Assoc b) -> `Assoc (a @ b)
+      | (_, _) -> raise (Invalid_argument "Expected two objects")
   end
 
   module type Internal_basic_intf = sig
