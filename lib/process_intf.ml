@@ -57,20 +57,54 @@ module type Shared = sig
 
   (** [rev_filter_map f acc l] applies [f] to each element of the list [l] and
       prepends the values for which [f] returned [Some v] to list [acc]. [acc]
-      is retuned as the result.  This is a tail call optimised version of
-      [filter_map] *)
+      is returned as the result and is in reverse order to the imput.  This is
+      a tail call optimised version of [filter_map] *)
   val rev_filter_map : ('a -> 'a option) -> 'a list -> 'a list -> 'a list
 
-  val rev_flatten : 'a list -> [> `List of 'a list ] list -> 'a list
+  (** [flatten l] given a list of [json] elements filters the [`List] elements
+      and flattens them into a single list. This is the same as
+      [filter_list |> List.flatten] *)
   val flatten : [> `List of 'a list ] list -> 'a list
+
+  (** [rev_flatten acc l] is the tail recursive version of [flatten] with
+      the result accumulated in [acc]. The result is in reverse order.  *)
+  val rev_flatten : 'a list -> [> `List of 'a list ] list -> 'a list
+
+  (** [filter_index i l] retuns the [i]'th element from each [`List l1] in [l].
+      Thus,
+      {[
+        [[`List [`Int 2; `Int 3]; `List [`Int 4; `Int 5]] |> filter_index 1]
+      ]}
+      returns [[`Int 3; `Int 5]]
+      *)
   val filter_index : int -> [> `List of json list ] list -> json list
+
+  (** [filter_list l] returns a list of all the values of [`List value] elements in l *)
   val filter_list : [> `List of 'a ] list -> 'a list
+
+  (** [filter_assoc l] returns a list of all the values of [`Assoc value] elements in l *)
   val filter_assoc : [> `Assoc of 'a ] list -> 'a list 
+
+  (** [filter_bool l] returns a list of all the values of [`Bool value] elements in l *)
   val filter_bool : [> `Bool of bool ] list -> bool list
+
+  (** [filter_float l] returns a list of all the values of [`Float value] elements in l *)
   val filter_float : [> `Float of float ] list -> float list
+
+  (** [filter_string l] returns a list of all the values of [`String value] elements in l *)
   val filter_string  : [> `String of string ] list -> string list
+
+  (** [filter_member key js] given a [key] and a list of json [`Assoc]-s, [js], returns
+      the list of values extracted from each of the [`Assoc]-s. Thus,
+      {[
+        [[`Assoc [("id", `Int 1)]; `Assoc [("id", `Int 2)]]] |> filter_member "id"]
+      ]}
+      returns [[`Int 1; `Int 2]] *)
   val filter_member : string -> [> `Assoc of (string * json) list ] list -> json list
+
+  (**[filter_number l] returns a list of all the values of [`Float value] elements in l *)
   val filter_number : [> `Float of float ] list -> float list
+
   val keys : [> `Assoc of (string * 'a) list ] -> string list
   val values : [> `Assoc of (string * 'a) list ] -> 'a list
   val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
@@ -102,7 +136,9 @@ module type Basic = sig
   (** [to_int_option json] converts [`Int i] to [Some i] and [`Null] to [None] *)
   val to_int_option : [> `Int of int | `Null ] -> int option
 
+  (** [filter_int l] returns a list of all the values of [`Int value] elements in l *)
   val filter_int : [> `Int of int ] list -> int list
+
   val filter_number : [> `Int of int | `Float of float ] list -> float list
 end
 
@@ -121,7 +157,12 @@ module type Extended = sig
 
   (** [to_int_option json] converts [`Int i] to [Some i] and [`Null] to [None] *)
   val to_int_option : [> `Int of int | `Null ] -> int option
+
+  (** [filter_int l] returns a list of all the values of [`Int value] elements in l *)
   val filter_int : [> `Int of int ] list -> int list
+
+  (**[filter_number l] returns a list of all the values of [`Float value] or [`Int value]
+     elements in l, integers are converted to floats *)
   val filter_number : [> `Int of int | `Float of float ] list -> float list
 end
 
@@ -140,6 +181,11 @@ module type Yojson_safe = sig
 
   (** [to_int_option json] converts [`Int i] to [Some i] and [`Null] to [None] *)
   val to_int_option : [> `Int of int | `Null ] -> int option
+
+  (** [filter_int l] returns a list of all the values of [`Int value] elements in l *)
   val filter_int : [> `Int of int ] list -> int list
+
+  (**[filter_number l] returns a list of all the values of [`Float value] or [`Int value]
+     elements in l, integers are converted to floats *)
   val filter_number : [> `Int of int | `Float of float ] list -> float list
 end
