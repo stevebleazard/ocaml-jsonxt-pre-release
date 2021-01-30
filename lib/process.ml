@@ -38,8 +38,10 @@ module Internal = struct
     val to_assoc : [> `Assoc of (string * json) list ] -> (string * json) list
     val to_bool : [> `Bool of bool ] -> bool
     val to_float : [> `Float of float ] -> float
-    val to_list : [> `List of json list ] -> json list
+    val to_string : [> `String of string ] -> string
+    val to_string_option : [> `String of string | `Null ] -> string option
     val to_option : (([> `Null ] as 'a) -> json) -> 'a -> json option
+    val to_list : [> `List of json list ] -> json list
     val to_bool_option : [> `Bool of bool | `Null ] -> bool option
     val to_float_option : [> `Float of float | `Null ] -> float option
     val to_number : [> `Float of float ] -> float
@@ -114,6 +116,15 @@ module Internal = struct
     let to_assoc = function | `Assoc obj -> obj | json -> error "Expected `Assoc" json
     let to_bool = function | `Bool b -> b | json -> error "Expected `Bool" json
     let to_float = function | `Float f -> f | json -> error "Expected `Float" json
+
+    let to_string = function
+      | `String s -> s
+      | json -> error "Expected `String" json
+
+    let to_string_option = function
+      | `String s -> Some s
+      | `Null -> None
+      | json -> error "Expected `String or `Null" json
 
     let to_option f v : json option =
       match v with
@@ -225,6 +236,44 @@ module Internal = struct
         | `Float f -> Some f
         | _ -> None
       ) l
+  end
+
+  module type Internal_extended_intf = sig
+    type json
+
+    val to_string :
+      [> `String of string | `Intlit of string | `Floatlit of string | `Stringlit of string ] -> string
+    val to_string_option :
+      [> `String of string | `Intlit of string | `Floatlit of string | `Stringlit of string | `Null ] -> string option
+  end
+
+  module Extended(M : S) : Internal_extended_intf
+    with type json = M.json
+  = struct
+    type json = M.json
+
+    let to_string = function
+      | `String s -> s
+      | `Intlit s -> s
+      | `Floatlit s -> s
+      | `Stringlit s ->
+        if String.length s > 1 && s.[0] = '"' && s.[String.length s - 1] = '"' then
+          String.sub s 1 (String.length s - 1)
+        else
+          s
+      | json -> error "Expected `String" json
+
+    let to_string_option = function
+      | `String s -> Some s
+      | `Intlit s -> Some s
+      | `Floatlit s -> Some s
+      | `Stringlit s ->
+        if String.length s > 1 && s.[0] = '"' && s.[String.length s - 1] = '"' then
+          Some (String.sub s 1 (String.length s - 1))
+        else
+          Some s
+      | `Null -> None
+      | json -> error "Expected `String or `Null" json
 
   end
 end
@@ -244,6 +293,16 @@ module Basic = struct
   end
   include Internal.Strict(M)
   include Internal.Basic(M)
+end
+
+module Extended = struct
+  module M = struct
+    type json = Json.Extended.json
+    let null () = `Null
+  end
+  include Internal.Strict(M)
+  include Internal.Basic(M)
+  include Internal.Extended(M)
 end
 
 (*
@@ -270,11 +329,4 @@ let to_string_option = function
   | `Null -> None
   | json -> error "Expected `String or `Null" json
 
-let keys o = to_assoc o |> List.map (fun (key, _) -> key)
-let values o = to_assoc o |> List.map (fun (_, value) -> value)
-
-let combine (first : Json.json) (second : Json.json) =
-  match (first, second) with
-  | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  Json.json)
-  | (_, _) -> raise (Invalid_argument "Expected two objects")
 *)
