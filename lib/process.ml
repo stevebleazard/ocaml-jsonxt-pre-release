@@ -1,7 +1,25 @@
-exception Type_error of string * Json.json
-exception Undefined of string * Json.json
+module type Internal_strict_intf = sig
+  type json
 
-let type_to_string = function
+  val member : string -> [> `Assoc of (string * json) list ] -> json
+  val index : int -> [> `List of json list ] -> json
+  val map : (json -> json) -> [> `List of json list ] -> [> `List of json list ]
+  val to_assoc : [> `Assoc of (string * json) list ] -> (string * json) list
+  val to_bool : [> `Bool of bool ] -> bool
+  val to_float : [> `Float of float ] -> float
+  val to_list : [> `List of json list ] -> json list
+  val to_option : (([> `Null ] as 'a) -> json) -> 'a -> json option
+  val to_bool_option : [> `Bool of bool | `Null ] -> bool option
+  val to_float_option : [> `Float of float | `Null ] -> float option
+end
+
+(* type json = Json.json
+
+exception Type_error of string * json
+exception Undefined of string * json
+*)
+
+let _type_to_string = function
   | `Assoc _ -> "`Assoc"
   | `Bool _ -> "`Bool"
   | `Float _ -> "`Float"
@@ -15,37 +33,87 @@ let type_to_string = function
   | `Floatlit _ -> "`Floatlit"
   | `Stringlit _ -> "`Stringlit"
 
-let error msg json = raise (Type_error (msg ^ type_to_string json, json))
-let assoc name obj = try List.assoc name obj with Not_found -> `Null
+(* let error msg json = raise (Type_error (msg ^ type_to_string json, json))
+let error msg json = raise (Failure (msg ^ type_to_string (json:>Json.json)))
+*)
+let error msg _json = raise (Failure msg)
 
-let member name = function
-  | `Assoc obj -> assoc name obj
-  | json -> error ("Expected `Assoc to find name '" ^ name ^ "' in, got ") json
+module Internal = struct
+  module type S = sig
+    type json
+    val null : unit -> json
+  end
 
-let index i = function
-  | `List l as json ->
-      let len = List.length l in
-      let i' = if i < 0 then len + i else i in
-      if i' < 0 || i' >= len then raise (Undefined (string_of_int i ^ " out of bounds", json))
-      else List.nth l i'
-  | json -> error "Can't index none `List type " json
+  module Strict(M : S) : Internal_strict_intf
+    with type json = M.json
+  = struct
+    type json = M.json
 
-let map f = function
-  | `List l -> `List (List.map f l)
-  | json -> error "Can't map over none `List type " json
+    let assoc name obj : json = try List.assoc name obj with Not_found -> M.null ()
 
-let to_assoc = function | `Assoc obj -> obj | json -> error "Expected `Assoc, got " json
-let to_bool = function | `Bool b -> b | json -> error "Expected `Bool, got " json
-let to_float = function | `Float f -> f | json -> error "Expected `Float, got " json
-let to_int = function | `Int i -> i | json -> error "Expected `Int, got " json
-let to_list = function | `List l -> l | json -> error "Expected `List, got " json
-let to_option f = function | `Null -> None | v -> Some (f v)
+    let member name v : json =
+      match v with
+      | `Assoc obj -> assoc name obj
+      | json -> error ("Expected `Assoc to find name '" ^ name ^ "' in, got ") json
 
-let to_bool_option = function
-  | `Bool b -> Some b
-  | `Null -> None
-  | json -> error "Expected `Bool or `Null, got " json
+    let index i v : json =
+      match v with
+      | `List l ->
+          let len = List.length l in
+          let i' = if i < 0 then len + i else i in
+          if i' < 0 || i' >= len then raise (Failure (string_of_int i ^ " out of bounds"))
+          else List.nth l i'
+      | json -> error "Can't index none `List type " json
 
+    let map f v =
+      match v with
+      | `List l -> `List (List.map f l)
+      | json -> error "Can't map over none `List type " json
+
+    let to_assoc = function | `Assoc obj -> obj | json -> error "Expected `Assoc, got " json
+    let to_bool = function | `Bool b -> b | json -> error "Expected `Bool, got " json
+    let to_float = function | `Float f -> f | json -> error "Expected `Float, got " json
+
+    let to_option f v : json option =
+      match v with
+      | `Null -> None
+      | v -> Some (f v)
+
+    let to_list v : json list =
+      match v with
+      | `List l -> l
+      | json -> error "Expected `List, got " json
+
+    let to_float_option = function
+      | `Float f -> Some f
+      | `Null -> None
+      | json -> error "Expected `Float or `Null, got " json
+
+    let to_bool_option = function
+      | `Bool b -> Some b
+      | `Null -> None
+      | json -> error "Expected `Bool or `Null, got " json
+
+  end
+end
+
+module Strict = struct
+  module M = struct
+    type json = Json.Strict.json
+    let null () = `Null
+  end
+  include Internal.Strict(M) 
+end
+
+module Basic = struct
+  module M = struct
+    type json = Json.Basic.json
+    let null () = `Null
+  end
+  include Internal.Strict(M) 
+end
+
+(*
 let to_number = function
   | `Int i -> float i
   | `Float f -> f
@@ -57,10 +125,7 @@ let to_number_option = function
   | `Null -> None
   | json -> error "Expected `Int, `Float or `Null, got " json
 
-let to_float_option = function
-  | `Float f -> Some f
-  | `Null -> None
-  | json -> error "Expected `Float or `Null, got " json
+let to_int = function | `Int i -> i | json -> error "Expected `Int, got " json
 
 let to_int_option = function
   | `Int i -> Some i
@@ -142,3 +207,4 @@ let combine (first : Json.json) (second : Json.json) =
   match (first, second) with
   | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  Json.json)
   | (_, _) -> raise (Invalid_argument "Expected two objects")
+*)
