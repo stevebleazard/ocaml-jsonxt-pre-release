@@ -12,6 +12,8 @@ module Strict : sig
   val to_option : (([> `Null ] as 'a) -> json) -> 'a -> json option
   val to_bool_option : [> `Bool of bool | `Null ] -> bool option
   val to_float_option : [> `Float of float | `Null ] -> float option
+  val to_number : [> `Float of float ] -> float
+  val to_number_option : [> `Float of float | `Null ] -> float option
 end
 
 module Basic : sig
@@ -28,4 +30,7 @@ module Basic : sig
   val to_option : (([> `Null ] as 'a) -> json) -> 'a -> json option
   val to_bool_option : [> `Bool of bool | `Null ] -> bool option
   val to_float_option : [> `Float of float | `Null ] -> float option
+  val to_number : [> `Int of int | `Float of float ] -> float
+  val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option
+  val to_int : [> `Int of int ] -> int
 end
