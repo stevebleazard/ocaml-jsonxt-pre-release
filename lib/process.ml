@@ -277,6 +277,32 @@ module Internal = struct
       | json -> error "Expected `String or `Null" json
 
   end
+
+  module type Internal_yojson_safe_intf = sig
+    type json
+
+    val to_string : [> `String of string | `Intlit of string ] -> string
+    val to_string_option : [> `String of string | `Intlit of string | `Null ] -> string option
+  end
+
+  module Yojson_safe(M : S) : Internal_yojson_safe_intf
+    with type json = M.json
+  = struct
+    type json = M.json
+
+    let to_string = function
+      | `String s -> s
+      | `Intlit s -> s
+      | json -> error "Expected `String" json
+
+    let to_string_option = function
+      | `String s -> Some s
+      | `Intlit s -> Some s
+      | `Null -> None
+      | json -> error "Expected `String or `Null" json
+
+  end
+
 end
 
 module Strict = struct
@@ -304,4 +330,27 @@ module Extended = struct
   include Internal.Strict(M)
   include Internal.Basic(M)
   include Internal.Extended(M)
+end
+
+module Yojson_safe = struct
+  module M = struct
+    type json =
+      [
+      | `Null
+      | `Bool of bool
+      | `Int of int
+      | `Intlit of string
+      | `Float of float
+      | `String of string
+      | `Assoc of (string * json) list
+      | `List of json list
+      | `Tuple of json list
+      | `Variant of (string * json option)
+      ]
+
+    let null () = `Null
+  end
+  include Internal.Strict(M)
+  include Internal.Basic(M)
+  include Internal.Yojson_safe(M)
 end
