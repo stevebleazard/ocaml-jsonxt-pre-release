@@ -1,19 +1,24 @@
-# jsonxt - an OCaml streaming encoder and decoder
+# jsonxt - JSON parsers for files, strings and more
 
-*jsonxt* implements a JSON streaming encoder and decoder with the following features:
+*jsonxt* provides a number of JSON parsers and writers for various sources
+and destinations including files and strings.  Features include
 
-* Support for various standard and extended JSON tree types:
-  * Strict follows a strict interpretation of RFC 8259 and is compatible
-    with jsonm
+* RFC 8259 compliant when in strict and basic mode
+* Performance focused especially for for files and strings
+* Support for standard and extended JSON tree types:
+  * Strict follows a strict interpretation of RFC 8259 with all
+    numbers represented as floats.
   * Basic extendeds the strict type to include convience types while maintaining
     RFC compliance.  This is compatible with yojson's Basic type
   * Extended adds additional non-standard types including tuples and variants
     and is not RFC compliant. This is compatible with yojson's Safe type
-  * Stream is the raw JSON stream type before any conversions
-* Stream encoding and decoding with similar levels of compliance to the JSON tree types
-* Support for string and channel I/O as well as user defined I/O via a simple functor
-* Standard interfaces where appropriate including type `t` and `of_string` / `to_string`
-  for strings
-* RFC 8259 compliant when in strict mode
-* RFC 7464 JSON text sequences support including error recovery
-* Designed with performance in mind
+* A number of different parsers including
+  * A standard JSON tree parser
+  * A Stream parser that returns a stream of raw JSON tokens.
+  * A monad based parser compatible with async
+* Writers including
+  * File and string writers
+  * A monad based writer that is compatible with async
+  * A stream writer that converts a stream of JSON tokens
+* Support for streaming JSON via Stream.t
+* Standard interfaces including Yojson compatibility

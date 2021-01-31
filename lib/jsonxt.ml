@@ -26,7 +26,7 @@
     [Jsonxt] supports writers for each of the access methods and compliance levels
     including compact and human readable versions. This includes
     - File, string and channel output
-    - Stream writer for a json token stream such as produded by the stream parser
+    - Stream writer for a json token stream such as produced by the stream parser
     - A monadic writer
     
     {1 Modules}
