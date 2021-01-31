@@ -1,27 +1,3 @@
-(* type json = Json.json
-
-exception Type_error of string * json
-exception Undefined of string * json
-*)
-
-let _type_to_string = function
-  | `Assoc _ -> "`Assoc"
-  | `Bool _ -> "`Bool"
-  | `Float _ -> "`Float"
-  | `Int _ -> "`Int"
-  | `List _ -> "`Array"
-  | `Null -> "`Null"
-  | `String _ -> "`String"
-  | `Intlit _ -> "`Intlit"
-  | `Tuple _ -> "`Tuple"
-  | `Variant _ -> "`Variant"
-  | `Floatlit _ -> "`Floatlit"
-  | `Stringlit _ -> "`Stringlit"
-
-(* let error msg json = raise (Type_error (msg ^ type_to_string json, json))
-let error msg json = raise (Failure (msg ^ type_to_string (json:>Json.json)))
-let error msg json = raise (Failure (msg ^ (Utilities.json_to_string_repr json)))
-*)
 let error msg _json = raise (Failure msg)
 
 module Internal = struct
@@ -105,7 +81,7 @@ module Internal = struct
       | `List l ->
           let len = List.length l in
           let i' = if i < 0 then len + i else i in
-          if i' < 0 || i' >= len then raise (Failure (string_of_int i ^ " out of bounds"))
+          if i' < 0 || i' >= len then raise (Invalid_argument (string_of_int i ^ " out of bounds"))
           else List.nth l i'
       | json -> error "Can't index none `List type " json
 
