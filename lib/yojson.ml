@@ -269,6 +269,10 @@ module Basic = struct
 
   let prettify ?std instr = from_string instr |> pretty_to_string ?std
   let compact ?std instr = from_string instr |> to_string ?std
+
+  module Util = struct
+    include Process.Basic
+  end
 end
 
 module Safe = struct
@@ -370,6 +374,9 @@ module Safe = struct
     in
     map json
 
+  module Util = struct
+    include Process.Yojson_safe
+  end
 end
 
 module Raw = struct

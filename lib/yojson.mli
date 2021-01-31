@@ -58,6 +58,11 @@ module Basic : sig
 
   (* Tools *)
   val show : t -> string
+
+  module Util : sig
+    include (Process_intf.Shared with type json := json)
+    include (Process_intf.Basic with type json := json)
+  end
 end
 
 module Safe : sig
@@ -117,6 +122,11 @@ module Safe : sig
   (* Tools *)
   val show : t -> string
   val to_basic : t -> Basic.json
+
+  module Util : sig
+    include (Process_intf.Shared with type json := json)
+    include (Process_intf.Basic with type json := json)
+  end
 end
 
 module Raw : sig
