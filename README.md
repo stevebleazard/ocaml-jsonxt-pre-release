@@ -5,7 +5,7 @@ RFC 8259 compliant JSON as well as non-standard extentions
 introduced by Yojso.  Features include
 
 * RFC 8259 compliant when in strict and basic mode
-* Performance focused especially for for files and strings
+* Performance focused especially for files and strings
 * Support for standard and extended JSON tree types:
   * Strict follows a strict interpretation of RFC 8259 with all
     numbers represented as floats.

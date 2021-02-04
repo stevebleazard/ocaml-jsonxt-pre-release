@@ -15,8 +15,8 @@ module Stock = struct
 end
 
 let () =
-  let item1 = { Item.str = "Hienz Baked Beans"; cost = 1.37 } in
-  let item2 = { Item.str = "Baxtors Baked Beans"; cost = 1.47 } in
+  let item1 = { Item.str = "Store Baked Beans"; cost = 1.37 } in
+  let item2 = { Item.str = "Branded Baked Beans"; cost = 1.47 } in
   let stock = { Stock.desc = "Beans"; inventory = 2; backorder = Some 3; items = [item1; item2] } in
   let json = Stock.yojson_of_t stock in
   print_endline (Yojson.Safe.to_string json)
