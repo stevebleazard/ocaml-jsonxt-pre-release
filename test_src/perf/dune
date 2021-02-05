@@ -1,5 +1,5 @@
 (executables
- (names perf_yojson_of_string)
+ (names perf_yojson_of_string perf_float)
  (libraries jsonxt yojson core core_bench))
 
 (alias
@@ -8,4 +8,4 @@
 
 (alias
  (name perf_tests)
- (deps perf_yojson_of_string.exe))
+ (deps perf_yojson_of_string.exe perf_float.exe))
