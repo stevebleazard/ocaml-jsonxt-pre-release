@@ -13,6 +13,7 @@
     * pretty_print
     * utils
   * Stream.t json recovery (version 1.1?)
+  * review performance of json_float and add more tests
 * Review
   * Compliance with RFCs
   * Test for compliance

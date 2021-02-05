@@ -6,7 +6,7 @@
 (rule
  (alias compliance_tests)
  (deps jxtester.exe (glob_files ../data/*))
- (action (chdir ../data (run ../compliance/jxtester.exe compliance -t ./compliance_tests.list))))
+ (action (chdir ../data (run ../core/jxtester.exe compliance -t ./compliance_tests.list))))
 
 (rule
  (alias validation_tests)
