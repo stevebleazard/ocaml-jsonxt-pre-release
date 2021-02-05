@@ -10,7 +10,8 @@ let max_json_int =
 let max_json_int_as_float = float_of_int max_json_int
 
 let string_of_float_json f =
-  if Float.abs f <= max_json_int_as_float then (* IEEE max int in a float when in 64bit int mode*)
+  let is_int = (float_of_int (int_of_float f)) = f in
+  if is_int && Float.abs f <= max_json_int_as_float then (* IEEE max int in a float when in 64bit int mode*)
     (let int_value = int_of_float f in format_int "%lld" int_value)
   else
     format_float "%.17g" f
