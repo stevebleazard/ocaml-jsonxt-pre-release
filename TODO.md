@@ -13,7 +13,6 @@
     * pretty_print
     * utils
   * Stream.t json recovery (version 1.1?)
-  * review performance of json_float and add more tests
 * Review
   * Compliance with RFCs
   * Test for compliance
@@ -26,6 +25,10 @@
   * Function - review
   * Examples - add more
   * Yojson
+    * replacing Yojson with Jsonxt - quick start
 * Testing
   * performance compared to Yojson
   * Yojson compatibility
+* Release
+  * dune release process
+  * remove pkg dir?

@@ -49,3 +49,12 @@ $JXTESTER suite std $JSONTESTSUITE/test_parsing/[iny]_*
 $JXTESTER suite stream $JSONTESTSUITE/test_parsing/[iny]_*
 $JXTESTER suite monad $JSONTESTSUITE/test_parsing/[iny]_*
 ```
+
+The results are reported as follows:
+- pass: The JSON was handled correctly as defined by the test suite
+- fail: The parser either succeeded when it should have failed or vica-versa
+- OKpass: The JSON was parsed but the suite defines this case as indeterminate
+- OKfail: The parser failed to parse the JSON but the suite defines this case as indeterminate
+
+There should be no fails, OKpass and OKfail are both fine as the result is implentation
+specific
