@@ -1,6 +1,6 @@
-# Basic jsonxt usage
+# Basic Jsonxt usage
 
-Examples of using jsonxt including those from the documentation
+Examples of using Jsonxt including those from the documentation
 
 Build with
 
