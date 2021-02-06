@@ -19,8 +19,7 @@
   * General - README.md with quick-start and examples
     * performance
   * Function - review
-  * Examples - add more
-  * Async
+  * Examples - add more (stream including print internal)
 * Testing
   * performance compared to Yojson
   * Yojson compatibility

@@ -97,6 +97,29 @@ let json_to_string_repr json =
   fmt "" json;
   Buffer.contents buf
 
+let json_stream_to_string_repr = function
+  | `Null -> "`Null"
+  | `Bool b -> "`Bool:" ^ (if b then "true" else "false")
+  | `Int i -> "`Int:" ^ (string_of_int i)
+  | `Intlit is -> "`Intlit:" ^  is
+  | `Float f -> "`Float:" ^ (string_of_float f)
+  | `Floatlit fs -> "`Floatlit:" ^ fs
+  | `String s -> "`String:\"" ^ s ^ "\""
+  | `Stringlit s -> "`Stringlit:" ^ s
+  | `As -> "`As"
+  | `Ae -> "`Ae"
+  | `Os -> "`Os"
+  | `Oe -> "`Oe"
+  | `Ts -> "`Ts"
+  | `Te -> "`Te"
+  | `Vs -> "`Vs"
+  | `Ve -> "`Ve"
+  | `Name n -> "`Name:" ^ n
+  | `Infinity -> "`Infinity"
+  | `Neg_infinity -> "`Neg_infinity"
+  | `Nan -> "`Nan"
+  
+
 let json_to_string json = 
   let buf = Buffer.create 100 in
   let add_char = Buffer.add_char buf in

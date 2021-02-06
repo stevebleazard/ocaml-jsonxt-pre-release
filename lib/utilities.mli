@@ -36,3 +36,10 @@ val json_to_string_repr : 'a Json_internal.constrained -> string
     constraints to the json tree
 *)
 val json_to_string : 'a Json_internal.constrained -> string
+
+
+(** [json_to_string_repr json] converts [json] into a string representation
+    of the json_stream element. This is not JSON but a textual represenation
+    of the json_stream_type. eg `Ae
+    *)
+val json_stream_to_string_repr : 'a Json_internal.constrained_stream -> string
