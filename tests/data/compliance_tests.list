@@ -116,3 +116,11 @@ basic    pass space
 extended pass space
 yjbasic  pass space
 yjsafe   pass space
+extended fail errorarray1
+extended fail errorarray2
+extended fail errorobject1
+extended fail errorobject2
+extended fail errortuple1
+extended fail errortuple2
+extended fail errorvariant1
+extended fail errorvariant2
