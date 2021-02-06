@@ -16,7 +16,7 @@
   * Test extensions
     * Floatlit etc?
 * Documentation
-  * General - README.md with quick-start and examples including Deferred
+  * General - README.md with quick-start and examples
     * performance
   * Function - review
   * Examples - add more

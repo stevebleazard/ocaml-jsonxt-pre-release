@@ -1,12 +1,6 @@
 (executables
- (names example1 example2 example3)
- (modules example1 example2 example3)
+ (names example1 example2 example3 example_stream)
  (libraries jsonxt))
-
-;(executable
-; (name example_async)
-; (modules example_async)
-; (libraries jsonxt))
 
 (alias
  (name default)
@@ -14,4 +8,4 @@
 
 (alias
  (name examples)
- (deps example1.exe example2.exe example3.exe))
+ (deps example1.exe example2.exe example3.exe example_stream.exe))
