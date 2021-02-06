@@ -9,7 +9,7 @@ introduced by Yojson.  Features include
 * Support for standard and extended JSON tree types:
   * Strict follows a strict interpretation of RFC 8259 with all
     numbers represented as floats.
-  * Basic extendeds the strict type to include convience types while maintaining
+  * Basic extends the strict type to include convenience types while maintaining
     RFC compliance.  This is compatible with yojson's Basic type
   * Extended adds additional non-standard types including tuples and variants
     and is not RFC compliant. This is compatible with yojson's Safe type
@@ -66,7 +66,7 @@ let _ =
 ;;
 ```
 
-# Using ppx\_yojson\_conv
+# Yojson compatibility and using ppx\_yojson\_conv
 To use Jsonxt's Yojson compatibility module create a `yojson.ml` file in
 the source directory of the project with the following contents:
 

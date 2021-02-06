@@ -1,23 +1,18 @@
 # TODO
 ## General
 * Coding
-  * Test input syntax errors - array, object, tuple, variant (extended only)
-  * Async tests
+  * Async example
   * Yojson
     * Review functionality
-    * Test including replacing existing use of yojson library
-    * Test derivers
+    * Test including replacing existing use of yojson library (atdgen?)
+    * Test derivers - ppx_deriving_yojson
     * Document
-      * use in existing projects (create yojson.ml with include)
       * differences esp. missing functions
     * sort
     * pretty_print
-    * utils
   * Stream.t json recovery (version 1.1?)
 * Review
   * Compliance with RFCs
-  * Test for compliance
-    * https://github.com/nst/JSONTestSuite
   * Test extensions
     * Floatlit etc?
 * Documentation
@@ -25,12 +20,9 @@
     * performance
   * Function - review
   * Examples - add more
-  * Yojson
-    * replacing Yojson with Jsonxt - quick start
   * Async
 * Testing
   * performance compared to Yojson
   * Yojson compatibility
 * Release
   * dune release process
-  * remove pkg dir?
