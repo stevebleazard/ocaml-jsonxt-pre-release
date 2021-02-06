@@ -3,7 +3,7 @@ module type Shared = sig
 
   (** [member key json] searches the JSON object [json], which
       must be an [`Assoc] element, for [key] and returns the
-      value or [`Null] of the [key] is missing *)
+      value or [`Null] if the [key] is missing *)
   val member : string -> [> `Assoc of (string * json) list ] -> json
 
   (** [index idx json] returns the [idx]-th JSON object in the [json] array,
@@ -63,7 +63,7 @@ module type Shared = sig
 
   (** [rev_filter_map f acc l] applies [f] to each element of the list [l] and
       prepends the values for which [f] returned [Some v] to list [acc]. [acc]
-      is returned as the result and is in reverse order to the imput.  This is
+      is returned as the result and is in reverse order to the input.  This is
       a tail call optimised version of [filter_map] *)
   val rev_filter_map : ('a -> 'a option) -> 'a list -> 'a list -> 'a list
 
@@ -76,7 +76,7 @@ module type Shared = sig
       the result accumulated in [acc]. The result is in reverse order.  *)
   val rev_flatten : 'a list -> [> `List of 'a list ] list -> 'a list
 
-  (** [filter_index i l] retuns the [i]'th element from each [`List l1] in [l].
+  (** [filter_index i l] returns the [i]'th element from each [`List l1] in [l].
       Thus,
       {[
         [[`List [`Int 2; `Int 3]; `List [`Int 4; `Int 5]] |> filter_index 1]

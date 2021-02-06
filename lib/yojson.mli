@@ -1,3 +1,15 @@
+(** Yojson compatiblility module
+
+    To use Jsonxt's Yojson compatibility module create a [yojson.ml] file in
+    the projects source directory with the following contents:
+    {[
+    include Jsonxt.Yojson
+    ]}
+    Note that compatibility is mostly a thin layer on top of Jsonxt.
+    In particular the error reporting by the utils module uses
+    the [Failure] exception rather than Yojson's specialist exceptions
+ *)
+
 exception Json_error of string
 exception End_of_input
 

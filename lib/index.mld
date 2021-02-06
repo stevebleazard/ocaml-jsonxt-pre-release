@@ -53,13 +53,13 @@ the projects source directory with the following contents:
 {[
 include Jsonxt.Yojson
 ]}
-Note that the compatibility is mostly a thin layer on top of Jsonxt.
+Note that compatibility is mostly a thin layer on top of Jsonxt.
 In particular the error reporting by the utils module uses
 the [Failure] exception rather than Yojson's specialist exceptions
 
-{3 Using ppx\_yojson\_conv}
+{3 Using ppx_yojson_conv}
 
-The following is an example using ppx\_yojson\_conv:
+The following is an example using ppx_yojson_conv:
 {[
 module Item = struct
   type t = {
