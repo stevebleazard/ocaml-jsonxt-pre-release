@@ -117,7 +117,7 @@ module type Shared = sig
   (** [values assoc] returns all the values from the [`Assoc] element *)
   val values : [> `Assoc of (string * 'a) list ] -> 'a list
 
-  (** combine assoc1 assoc2] appends the associative lists of two [`Assoc] elements returning
+  (** [combine assoc1 assoc2] appends the associative lists of two [`Assoc] elements returning
       an [`Assoc] element *)
   val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
 end
