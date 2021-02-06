@@ -12,7 +12,10 @@ uninstall:
 
 reinstall: uninstall reinstall
 
+doc:
+	dune build @doc
+
 clean:
 	dune clean
 
-.PHONY: default install uninstall reinstall clean
+.PHONY: default install uninstall reinstall clean doc

@@ -1,4 +1,0 @@
-(executable
- (modes byte exe)
- (name test)
- (libraries yojson core core_bench))
