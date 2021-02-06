@@ -8,6 +8,8 @@ The tests can be run using the dune command
 ```
 dune build @runtests
 ```
+Note that this excludes the JSONTestSuite tests as these require the
+JSONTestSuite repository to have been cloned. See later for how to run these.
 
 ## Compliance tests
 Jsonxt supports multiple levels of compliance with the RFC 8259
@@ -38,23 +40,20 @@ dune build @validation_tests
 ## JSONTestSuite tests
 The suite set of tests validates the parses against the freely available
 [JSONTestSuite](https://github.com/nst/JSONTestSuite). To run the
-tests first clone [JSONTestSuite](https://github.com/nst/JSONTestSuite),
-then, assuming the current directory is the same directory as this README.md,
+tests first clone [JSONTestSuite](https://github.com/nst/JSONTestSuite)
+to a suitable location, edit the `dune` file and replace all cases
+of *path-to-JSONTestSuite* with the full path to the JSONTestSuite directory,
+then run the tests with:
 
 ```
-dune build
-JXTESTER=<path-to-jxtester.exe>
-JSONTESTSUITE=<path-to-JSONTestSuite-directory>
-$JXTESTER suite std $JSONTESTSUITE/test_parsing/[iny]_*
-$JXTESTER suite stream $JSONTESTSUITE/test_parsing/[iny]_*
-$JXTESTER suite monad $JSONTESTSUITE/test_parsing/[iny]_*
+dune build @run_test_suite
 ```
 
 The results are reported as follows:
 - pass: The JSON was handled correctly as defined by the test suite
-- fail: The parser either succeeded when it should have failed or vica-versa
+- fail: The parser either succeeded when it should have failed or vice versa
 - OKpass: The JSON was parsed but the suite defines this case as indeterminate
 - OKfail: The parser failed to parse the JSON but the suite defines this case as indeterminate
 
-There should be no fails, OKpass and OKfail are both fine as the result is implentation
-specific
+There should be no fails, OKpass and OKfail are both fine as the result is implementation.
+

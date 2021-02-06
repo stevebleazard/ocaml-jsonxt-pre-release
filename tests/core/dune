@@ -13,6 +13,25 @@
  (deps jxtester.exe (glob_files ../data/json_tests.list))
  (action (run ./jxtester.exe validation run -t ../data/json_tests.list)))
 
+(rule
+ (alias run_test_suite_std)
+ (deps jxtester.exe (glob_files path-to-JSONTestSuite/test_parsing/[iny]_*))
+ (action (run ./jxtester.exe suite std %{deps})))
+
+(rule
+ (alias run_test_suite_monad)
+ (deps jxtester.exe (glob_files path-to-JSONTestSuite/test_parsing/[iny]_*))
+ (action (run ./jxtester.exe suite monad %{deps})))
+
+(rule
+ (alias run_test_suite_stream)
+ (deps jxtester.exe (glob_files path-to-JSONTestSuite/test_parsing/[iny]_*))
+ (action (run ./jxtester.exe suite stream %{deps})))
+
+(alias
+ (name run_test_suite)
+ (deps (alias run_test_suite_std) (alias run_test_suite_monad) (alias run_test_suite_stream)))
+
 (alias
  (name runtests)
  (deps (alias compliance_tests) (alias validation_tests)))

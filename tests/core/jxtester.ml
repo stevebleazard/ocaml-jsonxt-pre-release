@@ -57,6 +57,7 @@ module CmdlineOptions = struct
 
   let suite_cmd std_f stream_f monad_f =
     let suite_run subcmd files =
+      let files = List.filter (fun n -> not (Filename.check_suffix n ".exe")) files in
       match subcmd with
       | "std" -> std_f files; `Ok ()
       | "stream" -> stream_f files; `Ok ()
