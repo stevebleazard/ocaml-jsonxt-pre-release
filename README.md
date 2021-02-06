@@ -2,7 +2,7 @@
 
 *jsonxt* provides a number of JSON parsers and writers for
 RFC 8259 compliant JSON as well as non-standard extentions
-introduced by Yojso.  Features include
+introduced by Yojson.  Features include
 
 * RFC 8259 compliant when in strict and basic mode
 * Performance focused especially for files and strings

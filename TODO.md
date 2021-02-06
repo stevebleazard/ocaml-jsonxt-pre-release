@@ -2,6 +2,7 @@
 ## General
 * Coding
   * Test input syntax errors - array, object, tuple, variant (extended only)
+  * Async tests
   * Yojson
     * Review functionality
     * Test including replacing existing use of yojson library
@@ -26,6 +27,7 @@
   * Examples - add more
   * Yojson
     * replacing Yojson with Jsonxt - quick start
+  * Async
 * Testing
   * performance compared to Yojson
   * Yojson compatibility
