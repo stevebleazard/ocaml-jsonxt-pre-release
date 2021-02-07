@@ -159,3 +159,43 @@ let json_to_string json =
   fmt json;
   Buffer.contents buf
 
+let rec equal (json1:'a Json_internal.constrained) (json2:'a) : bool =
+  match json1, json2 with
+  | `Null, `Null -> true
+  | `Bool b1, `Bool b2 -> Bool.equal b1 b2
+  | `Int i1, `Int i2 -> Int.equal i1 i2
+  | `Intlit s1, `Intlit s2 -> String.equal s1 s2
+  | `Float f1, `Float f2 -> Float.equal f1 f2
+  | `Floatlit s1, `Floatlit s2 -> String.equal s1 s2
+  | `String s1, `String s2 -> String.equal s1 s2
+  | `Stringlit s1, `Stringlit s2 -> String.equal s1 s2
+  | `Assoc o1, `Assoc o2 -> begin
+      let cmpk (k1, _) (k2, _) = String.compare k1 k2 in
+      let cmpkv (k1, v1) (k2, v2) =
+        match String.compare k1 k2 with
+        | 0 -> equal v1 v2
+        | _ -> false
+      in
+      let o1 = List.stable_sort cmpk o1 in
+      let o2 = List.stable_sort cmpk o2 in
+      match List.for_all2 cmpkv o1 o2 with
+      | res -> res
+      | exception Invalid_argument _ -> false (* different lengths *)
+    end
+  | `Tuple l1, `Tuple l2
+  | `List l1, `List l2 -> begin
+      match List.for_all2 equal l1 l2 with
+      | res -> res
+      | exception Invalid_argument _ -> false (* different lengths *)
+    end
+  | `Variant (n1, v1), `Variant (n2, v2) -> begin
+      match String.compare n1 n2 with
+      | 0 -> begin
+        match (v1:'a Json_internal.constrained option), (v2:'a option) with
+        | Some v1, Some v2 -> equal v1 v2
+        | None, None -> true
+        | _ -> false
+      end
+      | _ -> false
+    end
+  | _, _ -> false
