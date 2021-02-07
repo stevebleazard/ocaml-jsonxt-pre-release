@@ -35,27 +35,13 @@ module Make(Compliance : Compliance.S) = struct
       | `Assoc l ->
         Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l
       | `Tuple l ->
-        (*
-        if std then format std out ((`List l):>'a Json_internal.constrained)
-        else begin
-        end
-        *)
-          if l = [] then Format.pp_print_string out "()"
-          else Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format std)) l
+        if l = [] then Format.pp_print_string out "()"
+        else Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format std)) l
       | `Variant (s, None) ->
-        (*
-        if std then format std out (`String s)
-        else
-        *)
         Format.fprintf out "<%s>" s
       | `Variant (s, Some json) ->
-        (*
-        if std then format std out ((`List [ `String s; json ]):>'a Json_internal.constrained)
-        else begin
-        end
-        *)
-          let s = to_json_string s in
-          Format.fprintf out "<@[<hv2>%s: %a@]>" s (format std) json
+        let s = to_json_string s in
+        Format.fprintf out "<@[<hv2>%s: %a@]>" s (format std) json
 
   and format_field std out (name, json) =
     Format.fprintf out "@[<hv2>%s: %a@]" (to_json_string name) (format std) json
