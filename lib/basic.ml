@@ -74,3 +74,5 @@ type t = json
 
 include Writer_string.Make(Compliance)
 include Writer_file.Make(Compliance)
+
+module Pretty = Pretty.Make(Compliance)
