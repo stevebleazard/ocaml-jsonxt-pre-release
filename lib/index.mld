@@ -24,6 +24,27 @@ let () =
   Jsonxt.Basic.to_channel_hum stdout json;;
 ]}
 
+{3 Using the json_stream parser }
+The json_stream parser returns a stream of json elements
+rather than a json tree.  The following is example using
+the [Stream.t] interface to process the stream
+{[
+open Printf
+
+let parse_stream_string s =
+  let stream = Jsonxt.Basic_stream.stream_from_string s in
+  Stream.iter
+    (fun el ->
+     let s = Jsonxt.Utilities.json_stream_to_string_repr el in
+     printf "%s " s)
+    stream;
+  printf "\n"
+
+let () =
+    let json_s = {| [ { "id":10, "str":"foo" }, { "id":11, "str":"bar" } ] |} in
+    parse_stream_string json_s;;
+]}
+
 {3 Reading and writing a file using the monad functions}
 {[
 module IO = struct
@@ -49,7 +70,7 @@ let _ =
 
 {3 Yojson compatibility}
 To use Jsonxt's Yojson compatibility module create a [yojson.ml] file in
-the projects source directory with the following contents:
+the project's source directory with the following contents:
 {[
 include Jsonxt.Yojson
 ]}
@@ -84,4 +105,51 @@ let () =
   let json = Stock.yojson_of_t stock in
   print_endline (Yojson.Safe.show json);
   print_endline (Yojson.Safe.pretty_to_string json);
+]}
+
+{3 Async example}
+An example of how to use the parser monad and writer with async.  Note
+that async and core libraries need to be installed.
+{[
+open Core
+open Async
+
+module Json_async = struct
+  module Json_of_async = Jsonxt.Basic_monad.Make(struct
+      type 'a t = 'a Deferred.t
+
+      let return = Deferred.return
+      let (>>=) = Deferred.Monad_infix.(>>=)
+    end)
+
+
+  let reader inc buf size =
+    Reader.read inc ~len:size buf
+    >>= function
+    | `Eof -> return 0
+    | `Ok len -> return len
+
+  let read inc =
+    let reader = reader inc in
+    Json_of_async.read_json ~reader ()
+
+  let write outc =
+    let writer buf = Writer.write outc buf |> return in
+    Json_of_async.write_json ~writer
+
+end
+
+let run () =
+  Reader.open_file "./asyncdata.json"
+  >>= fun inc -> Json_async.read inc
+  >>= function
+      | Error err -> raise (Failure err)
+      | Ok json -> begin
+          Json_async.write (force Writer.stdout) json
+          >>= fun () -> printf "\n"; shutdown 0 |> return
+        end
+
+let () =
+  ignore (run ());
+  never_returns (Scheduler.go ())
 ]}

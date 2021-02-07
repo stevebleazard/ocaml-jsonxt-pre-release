@@ -1,6 +1,6 @@
-# jsonxt - JSON parsers for files, strings and more
+# Jsonxt - JSON parsers for files, strings and more
 
-*jsonxt* provides a number of JSON parsers and writers for
+*Jsonxt* provides a number of JSON parsers and writers for
 RFC 8259 compliant JSON as well as non-standard extentions
 introduced by Yojson.  Features include
 
@@ -41,6 +41,28 @@ let () =
 let () = 
   let json = Jsonxt.Basic.of_file "test.json" in
   Jsonxt.Basic.to_channel_hum stdout json;;
+```
+
+## Using the json\_stream parser
+The json\_stream parser returns a stream of json elements
+rather than a json tree.  The following is example using
+the [Stream.t] interface to process the stream
+
+```
+open Printf
+
+let parse_stream_string s =
+  let stream = Jsonxt.Basic_stream.stream_from_string s in
+  Stream.iter
+    (fun el ->
+     let s = Jsonxt.Utilities.json_stream_to_string_repr el in
+     printf "%s " s)
+    stream;
+  printf "\n"
+
+let () =
+    let json_s = {| [ { "id":10, "str":"foo" }, { "id":11, "str":"bar" } ] |} in
+    parse_stream_string json_s;;
 ```
 
 ## Reading and writing a file using the monad functions
