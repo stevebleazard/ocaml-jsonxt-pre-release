@@ -39,6 +39,7 @@ module Internal = struct
     val keys : [> `Assoc of (string * 'a) list ] -> string list
     val values : [> `Assoc of (string * 'a) list ] -> 'a list
     val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
+    val sort : ([> `Assoc of (string * 'a) list | `List of 'a list ] as 'a) -> 'a
   end
 
   module Shared = struct
@@ -169,6 +170,15 @@ module Internal = struct
       match (first, second) with
       | (`Assoc a, `Assoc b) -> `Assoc (a @ b)
       | (_, _) -> raise (Invalid_argument "Expected two objects")
+
+    let rec sort json =
+      match json with
+      | `Assoc o ->
+        let o = List.rev (List.rev_map (fun (k, v) -> (k, sort v)) o) in
+        `Assoc ((List.stable_sort (fun (k1, _) (k2, _) -> String.compare k1 k2)) o)
+      | `List l ->
+        `List (List.rev (List.rev_map sort l))
+      | el ->  el
   end
 
   module type Internal_basic_intf = sig
@@ -215,6 +225,31 @@ module Internal = struct
       ) l
   end
 
+  module type Internal_extended_intf = sig
+    type json
+
+    val sort : ([> `Assoc of (string * 'a) list | `List of 'a list |
+                   `Tuple of 'a list | `Variant of 'b * 'a option ] as 'a) -> 'a
+  end
+
+  module Extended(M : S) : Internal_extended_intf
+    with type json = M.json
+  = struct
+    type json = M.json
+
+    let rec sort json =
+      match json with
+      | `Assoc o ->
+        let o = List.rev (List.rev_map (fun (k, v) -> (k, sort v)) o) in
+        `Assoc ((List.stable_sort (fun (k1, _) (k2, _) -> String.compare k1 k2)) o)
+      | `Tuple l
+      | `List l ->
+        `List (List.rev (List.rev_map sort l))
+      | `Variant (k, Some v) as v1 ->
+        let v' = sort v in if v' == v then v1 else `Variant (k, Some v')
+      | el ->  el
+  end
+
 end
 
 module Strict = struct
@@ -241,6 +276,7 @@ module Extended = struct
   end
   include Internal.Strict(M)
   include Internal.Basic(M)
+  include Internal.Extended(M)
 end
 
 module Yojson_safe = struct
@@ -263,4 +299,5 @@ module Yojson_safe = struct
   end
   include Internal.Strict(M)
   include Internal.Basic(M)
+  include Internal.Extended(M)
 end

@@ -19,6 +19,7 @@ end
 module Extended : sig
   include (Process_intf.Shared with type json := Json.Extended.json)
   include (Process_intf.Basic with type json := Json.Extended.json)
+  include (Process_intf.Extended with type json := Json.Extended.json)
 end
 
 (** [Yojson_safe] supports processing JSON data that conforms to
@@ -39,4 +40,5 @@ module Yojson_safe : sig
     ]
   include (Process_intf.Shared with type json := json)
   include (Process_intf.Basic with type json := json)
+  include (Process_intf.Extended with type json := json)
 end

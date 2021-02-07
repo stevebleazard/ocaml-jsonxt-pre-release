@@ -120,6 +120,11 @@ module type Shared = sig
   (** [combine assoc1 assoc2] appends the associative lists of two [`Assoc] elements returning
       an [`Assoc] element *)
   val combine : [> `Assoc of 'a list ] -> [> `Assoc of 'a list ] -> [> `Assoc of 'a list ]
+
+  (** [sort json] sorts the [json] tree based on field names.  Objects and lists are sorted
+      recursively. Note that the function only sorts field names and not the values.
+      The sort is stable *)
+  val sort : ([> `Assoc of (string * 'a) list | `List of 'a list ] as 'a) -> 'a
 end
 
 module type Basic = sig
@@ -142,4 +147,14 @@ module type Basic = sig
   val filter_int : [> `Int of int ] list -> int list
 
   val filter_number : [> `Int of int | `Float of float ] list -> float list
+end
+
+module type Extended = sig
+  type json
+
+  (** [sort json] sorts the [json] tree based on field names.  Objects and lists are sorted
+      recursively. Note that the function only sorts field names and not the values.
+      The sort is stable *)
+  val sort : ([> `Assoc of (string * 'a) list | `List of 'a list |
+                 `Tuple of 'a list | `Variant of 'b * 'a option ] as 'a) -> 'a
 end
