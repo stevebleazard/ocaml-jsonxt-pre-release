@@ -82,6 +82,8 @@ module Basic : sig
   val compact : ?std:bool -> string -> string
 
   (* Tools *)
+  val equal : t -> t -> bool
+  val sort : t -> t
   val show : t -> string
 
   module Util : sig
@@ -147,12 +149,15 @@ module Safe : sig
   val compact : ?std:bool -> string -> string
 
   (* Tools *)
+  val sort : t -> t
+  val equal : t -> t -> bool
   val show : t -> string
   val to_basic : t -> Basic.json
 
   module Util : sig
     include (Process_intf.Shared with type json := json)
     include (Process_intf.Basic with type json := json)
+    include (Process_intf.Extended with type json := json)
   end
 end
 
@@ -212,5 +217,7 @@ module Raw : sig
   val compact : ?std:bool -> string -> string
 
   (* Tools *)
+  val sort : t -> t
+  val equal : t -> t -> bool
   val show : t -> string
 end

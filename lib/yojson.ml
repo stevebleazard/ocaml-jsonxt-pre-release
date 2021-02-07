@@ -272,6 +272,9 @@ module Basic = struct
   let prettify ?std instr = from_string instr |> pretty_to_string ?std
   let compact ?std instr = from_string instr |> to_string ?std
 
+  let equal = Utilities.equal
+  let sort = Process.Basic.sort
+
   module Util = struct
     include Process.Basic
   end
@@ -356,6 +359,9 @@ module Safe = struct
 
   let prettify ?std instr = from_string instr |> pretty_to_string ?std
   let compact ?std instr = from_string instr |> to_string ?std
+
+  let equal = Utilities.equal
+  let sort = Process.Extended.sort
 
   let to_basic json : Basic.json =
     let rec map node =
@@ -460,4 +466,7 @@ module Raw = struct
 
   let prettify ?std instr = from_string instr |> pretty_to_string ?std
   let compact ?std instr = from_string instr |> to_string ?std
+
+  let equal = Utilities.equal
+  let sort = Process.Extended.sort
 end

@@ -44,4 +44,8 @@ val json_to_string : 'a Json_internal.constrained -> string
     *)
 val json_stream_to_string_repr : 'a Json_internal.constrained_stream -> string
 
+(** [equal json1 json2] recursively compares the two trees returning true
+    if they are equal.  Object key/value pairs do not need to be in the same
+    order. Duplicate keys are equal if and only if the key/value pairs are
+    in the same order in each tree. *)
 val equal : 'a Json_internal.constrained -> 'a -> bool
