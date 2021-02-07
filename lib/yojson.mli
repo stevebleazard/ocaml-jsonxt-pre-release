@@ -1,4 +1,4 @@
-(** Yojson compatiblility module
+(** Yojson compatibility module
 
     To use Jsonxt's Yojson compatibility module create a [yojson.ml] file in
     the projects source directory with the following contents:
@@ -8,6 +8,17 @@
     Note that compatibility is mostly a thin layer on top of Jsonxt.
     In particular the error reporting by the utils module uses
     the [Failure] exception rather than Yojson's specialist exceptions
+
+    Missing functions
+        - val pretty_format : ?⁠std:bool -> t -> Easy_format.t
+        - val pp : Stdlib.Format.formatter -> t -> unit
+        - val pretty_print : ?⁠std:bool -> Stdlib.Format.formatter -> t -> unit
+
+    Behavioural differences:
+        - The [lexer_state] data structure is used to report errors but
+          not updated during the parsing of the input
+        - The optional [buf] parameter is ignored
+        - Error messages are likely to be different
  *)
 
 exception Json_error of string
@@ -49,17 +60,19 @@ module Basic : sig
   val linestream_from_file :
     ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> json_line Stream.t
 
+  val read_t : lexer_state -> Lexing.lexbuf -> t
+
   (* Writers *)
 
   val to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t -> string
   val to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t -> unit
   val to_file : ?len:int -> ?std:bool -> string -> t -> unit
-  val to_buffer : ?std:bool -> Buffer.t -> t -> unit
+  val to_outbuf : ?std:bool -> Buffer.t -> t -> unit
   val to_output : ?buf:Buffer.t -> ?len:int -> ?std:bool -> < output : string -> int -> int -> 'a; .. > -> t -> 'a
   val stream_to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t Stream.t -> string
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
-  val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
+  val stream_to_outbuf : ?std:bool -> Buffer.t -> t Stream.t -> unit
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
@@ -112,17 +125,19 @@ module Safe : sig
   val linestream_from_file :
     ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> json_line Stream.t
 
+  val read_t : lexer_state -> Lexing.lexbuf -> t
+
   (* Writers *)
 
   val to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t -> string
   val to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t -> unit
   val to_file : ?len:int -> ?std:bool -> string -> t -> unit
-  val to_buffer : ?std:bool -> Buffer.t -> t -> unit
+  val to_outbuf : ?std:bool -> Buffer.t -> t -> unit
   val to_output : ?buf:Buffer.t -> ?len:int -> ?std:bool -> < output : string -> int -> int -> 'a; .. > -> t -> 'a
   val stream_to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t Stream.t -> string
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
-  val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
+  val stream_to_outbuf : ?std:bool -> Buffer.t -> t Stream.t -> unit
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
@@ -175,17 +190,19 @@ module Raw : sig
   val linestream_from_file :
     ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> json_line Stream.t
 
+  val read_t : lexer_state -> Lexing.lexbuf -> t
+
   (* Writers *)
 
   val to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t -> string
   val to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t -> unit
   val to_file : ?len:int -> ?std:bool -> string -> t -> unit
-  val to_buffer : ?std:bool -> Buffer.t -> t -> unit
+  val to_outbuf : ?std:bool -> Buffer.t -> t -> unit
   val to_output : ?buf:Buffer.t -> ?len:int -> ?std:bool -> < output : string -> int -> int -> 'a; .. > -> t -> 'a
   val stream_to_string : ?buf:Buffer.t -> ?len:int -> ?std:bool -> t Stream.t -> string
   val stream_to_channel : ?buf:Buffer.t -> ?len:int -> ?std:bool -> out_channel -> t Stream.t -> unit
   val stream_to_file : ?len:int -> ?std:bool -> string -> t Stream.t -> unit
-  val stream_to_buffer : ?std:bool -> Buffer.t -> t Stream.t -> unit
+  val stream_to_outbuf : ?std:bool -> Buffer.t -> t Stream.t -> unit
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)

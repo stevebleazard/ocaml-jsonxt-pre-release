@@ -68,6 +68,8 @@ module Common_reader (Compliance : Compliance.S) = struct
     | Ok None -> raise End_of_input
     | Error error_info -> json_error (error_to_string error_info fname lnum)
 
+  let read_t lexstate lexbuf = from_lexbuf lexstate lexbuf
+
   let stream_apply_and_handle_errors stream_f a fname lnum =
     let stream = stream_f a in
     let f _i =
@@ -163,7 +165,7 @@ module Common_writer (Compliance : Compliance.S) = struct
     if std then Internal.to_file filename (to_standard json)
     else Internal.to_file filename json
 
-  let to_buffer ?(std = false) buf json =
+  let to_outbuf ?(std = false) buf json =
     if std then Internal.to_buffer buf (to_standard json) else Internal.to_buffer buf json
 
   let to_output ?buf:_ ?len:_ ?std out json =
@@ -173,7 +175,7 @@ module Common_writer (Compliance : Compliance.S) = struct
   let stream_to_string ?buf:_ ?len:_ ?std stream =
     let buf = Buffer.create 100 in
     let () = Stream.iter
-      (fun json -> to_buffer ?std buf json;  Buffer.add_char buf '\n') stream
+      (fun json -> to_outbuf ?std buf json;  Buffer.add_char buf '\n') stream
     in
     Buffer.contents buf
 
@@ -185,10 +187,10 @@ module Common_writer (Compliance : Compliance.S) = struct
     try (stream_to_channel ?std oc stream; close_out oc) with
     | exn -> close_out oc; raise exn
 
-  let stream_to_buffer ?std buf stream =
-    Stream.iter (fun json -> to_buffer ?std buf json; Buffer.add_char buf '\n') stream
+  let stream_to_outbuf ?std buf stream =
+    Stream.iter (fun json -> to_outbuf ?std buf json; Buffer.add_char buf '\n') stream
 
-  let write_t buf json = to_buffer buf json
+  let write_t buf json = to_outbuf buf json
 
   (* Pretty printers *)
   let pretty_to_string ?(std = false) json =
