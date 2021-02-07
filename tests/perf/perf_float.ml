@@ -19,6 +19,9 @@ let string_of_float_json f =
 let string_of_float_json_float f =
   format_float "%.17g" f
 
+let string_of_float_printf f =
+  Printf.sprintf "%.17g" f
+
 open Core
 open Core_bench
 
@@ -32,9 +35,11 @@ let () =
       "int", Bench.make_command [
           Bench.Test.create ~name:"intopt" (fun () -> string_of_float_json value_int)
         ; Bench.Test.create ~name:"float" (fun () -> string_of_float_json_float value_int)
+        ; Bench.Test.create ~name:"printf" (fun () -> string_of_float_printf value_int)
       ];
       "float", Bench.make_command [
           Bench.Test.create ~name:"intopt" (fun () -> string_of_float_json value_float)
         ; Bench.Test.create ~name:"float" (fun () -> string_of_float_json_float value_float)
+        ; Bench.Test.create ~name:"printf" (fun () -> string_of_float_printf value_float)
       ]
     ])
