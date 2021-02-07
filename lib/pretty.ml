@@ -1,7 +1,7 @@
 module type Intf = sig
-  val pp : ?std:bool -> Format.formatter -> 'a Json_internal.constrained -> unit
-  val to_string : ?std:bool -> 'a Json_internal.constrained -> string
-  val to_channel : ?std:bool -> out_channel -> 'a Json_internal.constrained -> unit
+  val pp : Format.formatter -> 'a Json_internal.constrained -> unit
+  val to_string : 'a Json_internal.constrained -> string
+  val to_channel : out_channel -> 'a Json_internal.constrained -> unit
 end
 
 module Make(Compliance : Compliance.S) = struct
@@ -17,7 +17,7 @@ module Make(Compliance : Compliance.S) = struct
     let pp_sep out () = Format.fprintf out "%s@ " sep in
     Format.pp_print_list ~pp_sep ppx out l
 
-  let rec format std (out:Format.formatter) json : unit =
+  let rec format (out:Format.formatter) json : unit =
     match json with
       | `Null -> Format.pp_print_string out "null"
       | `Bool b -> Format.pp_print_bool out b
@@ -30,30 +30,30 @@ module Make(Compliance : Compliance.S) = struct
       | `Floatlit s
       | `Stringlit s -> Format.pp_print_string out s
       | `List [] -> Format.pp_print_string out "[]"
-      | `List l -> Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format std)) l
+      | `List l -> Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," format) l
       | `Assoc [] -> Format.pp_print_string out "{}"
       | `Assoc l ->
-        Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l
+        Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," format_field) l
       | `Tuple l ->
         if l = [] then Format.pp_print_string out "()"
-        else Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format std)) l
+        else Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," format) l
       | `Variant (s, None) ->
         Format.fprintf out "<%s>" s
       | `Variant (s, Some json) ->
         let s = to_json_string s in
-        Format.fprintf out "<@[<hv2>%s: %a@]>" s (format std) json
+        Format.fprintf out "<@[<hv2>%s: %a@]>" s format json
 
-  and format_field std out (name, json) =
-    Format.fprintf out "@[<hv2>%s: %a@]" (to_json_string name) (format std) json
+  and format_field out (name, json) =
+    Format.fprintf out "@[<hv2>%s: %a@]" (to_json_string name) format json
 
-  let pp ?(std = false) out json =
-    Format.fprintf out "@[<hv2>%a@]" (format std) json
+  let pp out json =
+    Format.fprintf out "@[<hv2>%a@]" format json
 
-  let to_string ?std json =
-    Format.asprintf "%a" (pp ?std) json
+  let to_string json =
+    Format.asprintf "%a" pp json
 
-  let to_channel ?std oc json =
+  let to_channel oc json =
     let fmt = Format.formatter_of_out_channel oc in
-    Format.fprintf fmt "%a@?" (pp ?std) json
+    Format.fprintf fmt "%a@?" pp json
 
 end
