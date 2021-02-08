@@ -43,7 +43,6 @@ module Extended_monad = Extended_monad
 module Strict = Strict
 module Strict_stream = Strict_stream
 module Strict_monad = Strict_monad
-module Process = Process
 module Utilities = Utilities
 module Error_info = Error_info
 module Yojson = Yojson

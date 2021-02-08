@@ -75,3 +75,5 @@ type t = json
 include Writer_string.Make(Compliance)
 include Writer_file.Make(Compliance)
 include Pretty.Make(Compliance)
+
+module Process = Process.Basic

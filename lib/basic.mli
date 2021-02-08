@@ -14,6 +14,11 @@ include (Reader_string_file.Reader_string_file with type json := json)
 (** {1 Writer functions} *)
 include (Writer_intf.Intf with type json := Json.Basic.json)
 
+(** {1 Processing functions} *)
+module Process : sig
+  include (module type of Process.Basic)
+end
+
 module Compliance : Compliance.S with
   type json = Json.Basic.json
   and type json_stream = Json_stream.Basic.json
