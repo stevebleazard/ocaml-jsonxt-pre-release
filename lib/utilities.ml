@@ -159,7 +159,7 @@ let json_to_string json =
   fmt json;
   Buffer.contents buf
 
-let rec equal (json1:'a Json_internal.constrained) (json2:'a) : bool =
+let rec equal json1 json2 =
   match json1, json2 with
   | `Null, `Null -> true
   | `Bool b1, `Bool b2 -> Bool.equal b1 b2
@@ -191,11 +191,12 @@ let rec equal (json1:'a Json_internal.constrained) (json2:'a) : bool =
   | `Variant (n1, v1), `Variant (n2, v2) -> begin
       match String.compare n1 n2 with
       | 0 -> begin
-        match (v1:'a Json_internal.constrained option), (v2:'a option) with
+        (* match (v1:'a Json_internal.constrained option), (v2:'a option) with *)
+        match v1, v2 with
         | Some v1, Some v2 -> equal v1 v2
         | None, None -> true
         | _ -> false
       end
       | _ -> false
     end
-  | _, _ -> false
+  | (_:'a Json_internal.constrained), (_:'a Json_internal.constrained) -> false
