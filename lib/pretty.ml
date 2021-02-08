@@ -1,7 +1,7 @@
 module type Intf = sig
-  val pp : Format.formatter -> 'a Json_internal.constrained -> unit
-  val to_string : 'a Json_internal.constrained -> string
-  val to_channel : out_channel -> 'a Json_internal.constrained -> unit
+  val pretty_print : Format.formatter -> 'a Json_internal.constrained -> unit
+  val pretty_print_to_string : 'a Json_internal.constrained -> string
+  val pretty_print_to_channel : out_channel -> 'a Json_internal.constrained -> unit
 end
 
 module Make(Compliance : Compliance.S) = struct
@@ -46,14 +46,14 @@ module Make(Compliance : Compliance.S) = struct
   and format_field out (name, json) =
     Format.fprintf out "@[<hv2>%s: %a@]" (to_json_string name) format json
 
-  let pp out json =
+  let pretty_print out json =
     Format.fprintf out "@[<hv2>%a@]" format json
 
-  let to_string json =
-    Format.asprintf "%a" pp json
+  let pretty_print_to_string json =
+    Format.asprintf "%a" pretty_print json
 
-  let to_channel oc json =
+  let pretty_print_to_channel oc json =
     let fmt = Format.formatter_of_out_channel oc in
-    Format.fprintf fmt "%a@?" pp json
+    Format.fprintf fmt "%a@?" pretty_print json
 
 end

@@ -99,6 +99,18 @@ module type Intf = sig
   (** [to_buffer_hum] is an alias for json_to_buffer_hum_exn *)
   val to_buffer_hum : Buffer.t -> json -> unit
 
+  (** [pretty_print out json] pretty prints the [json] tree to the [Formater.formatter]
+      The output is more compact than the _hum versions but still readable *)
+  val pretty_print : Format.formatter -> json -> unit
+
+  (** [pretty_print_to_string json] converts the [json] tree into a pretty printed string.
+      The output is more compact than the _hum versions but still readable *)
+  val pretty_print_to_string : json -> string
+
+  (** [pretty_print oc json] pretty prints the [json] tree to the output channel [out]
+      The output is more compact than the _hum versions but still readable *)
+  val pretty_print_to_channel : out_channel -> json -> unit
+
   (* [stream_to_string stream] converts a [Stream.t] of [json] values to a string, separating the enties
      with newlines *)
   val stream_to_string : json Stream.t -> string
