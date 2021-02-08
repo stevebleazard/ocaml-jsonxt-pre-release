@@ -10,9 +10,9 @@
     the [Failure] exception rather than Yojson's specialist exceptions
 
     Missing functions
-        - val pretty_format : ?⁠std:bool -> t -> Easy_format.t
-        - val pp : Stdlib.Format.formatter -> t -> unit
-        - val pretty_print : ?⁠std:bool -> Stdlib.Format.formatter -> t -> unit
+        {ul {- [val pp : Stdlib.Format.formatter -> t -> unit].
+            {ul {- Use show as an alternative}}}}
+
 
     Behavioural differences:
         - The [lexer_state] data structure is used to report errors but
