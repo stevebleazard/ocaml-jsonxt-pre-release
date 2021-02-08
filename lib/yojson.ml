@@ -208,6 +208,7 @@ module Common_writer (Compliance : Compliance.S) = struct
 
   (* Utilities *)
   let show json = Utilities.json_to_string_repr json
+  let pp out json = Format.pp_print_string out (show json)
 end
 
 module Basic = struct

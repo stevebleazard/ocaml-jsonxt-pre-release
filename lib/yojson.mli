@@ -9,11 +9,6 @@
     In particular the error reporting by the utils module uses
     the [Failure] exception rather than Yojson's specialist exceptions
 
-    Missing functions
-        {ul {- [val pp : Stdlib.Format.formatter -> t -> unit].
-            {ul {- Use show as an alternative}}}}
-
-
     Behavioural differences:
         - The [lexer_state] data structure is used to report errors but
           not updated during the parsing of the input
@@ -86,6 +81,7 @@ module Basic : sig
   val equal : t -> t -> bool
   val sort : t -> t
   val show : t -> string
+  val pp : Format.formatter -> t -> unit
 
   module Util : sig
     include (Process_intf.Shared with type json := json)
@@ -154,6 +150,7 @@ module Safe : sig
   val sort : t -> t
   val equal : t -> t -> bool
   val show : t -> string
+  val pp : Format.formatter -> t -> unit
   val to_basic : t -> Basic.json
 
   module Util : sig
@@ -223,4 +220,5 @@ module Raw : sig
   val sort : t -> t
   val equal : t -> t -> bool
   val show : t -> string
+  val pp : Format.formatter -> t -> unit
 end
