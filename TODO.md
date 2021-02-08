@@ -7,7 +7,6 @@
     * Test derivers - ppx_deriving_yojson
     * Document
       * differences esp. missing functions
-    * pretty_print
     * run the yojson repo tests against Jsonxt
   * Stream.t json recovery (version 1.1?)
   * jsonxtool?

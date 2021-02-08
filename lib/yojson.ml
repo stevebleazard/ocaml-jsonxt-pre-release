@@ -122,6 +122,7 @@ module Common_writer (Compliance : Compliance.S) = struct
   module Internal = struct
     include Writer_string.Make(Compliance)
     include Writer_file.Make(Compliance)
+    include Pretty.Make(Compliance)
   end
   type json = Compliance.json
   type t = json
@@ -153,7 +154,7 @@ module Common_writer (Compliance : Compliance.S) = struct
     map json
 
   (* Writers *)
-    
+
   let to_string ?buf:_ ?len:_ ?(std = false) json =
     if std then Internal.to_string (to_standard json) else Internal.to_string json
 
@@ -193,11 +194,17 @@ module Common_writer (Compliance : Compliance.S) = struct
   let write_t buf json = to_outbuf buf json
 
   (* Pretty printers *)
+  let pretty_print ?(std = false) out json =
+    if std then Internal.pretty_print out (to_standard json)
+    else Internal.pretty_print out json
+
   let pretty_to_string ?(std = false) json =
-    if std then Internal.to_string_hum (to_standard json) else Internal.to_string_hum json
+    if std then Internal.pretty_print_to_string (to_standard json)
+    else Internal.pretty_print_to_string json
 
   let pretty_to_channel ?(std = false) oc json =
-    if std then Internal.to_channel_hum oc (to_standard json) else Internal.to_channel_hum oc json
+    if std then Internal.pretty_print_to_channel oc (to_standard json)
+    else Internal.pretty_print_to_channel oc json
 
   (* Utilities *)
   let show json = Utilities.json_to_string_repr json

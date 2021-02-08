@@ -76,6 +76,7 @@ module Basic : sig
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
+  val pretty_print : ?std:bool -> Format.formatter -> t -> unit
   val pretty_to_string : ?std:bool -> t -> string
   val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
   val prettify : ?std:bool -> string -> string
@@ -143,6 +144,7 @@ module Safe : sig
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
+  val pretty_print : ?std:bool -> Format.formatter -> t -> unit
   val pretty_to_string : ?std:bool -> t -> string
   val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
   val prettify : ?std:bool -> string -> string
@@ -211,6 +213,7 @@ module Raw : sig
   val write_t : Buffer.t -> t -> unit
 
   (* Pretty printers *)
+  val pretty_print : ?std:bool -> Format.formatter -> t -> unit
   val pretty_to_string : ?std:bool -> t -> string
   val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
   val prettify : ?std:bool -> string -> string
