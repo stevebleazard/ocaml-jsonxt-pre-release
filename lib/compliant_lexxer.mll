@@ -118,8 +118,25 @@ rule read =
     { read lexbuf }
   | newline
     { Lexxer_utils.update_pos lexbuf; read lexbuf; }
+  | "/*"
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read_comment lexbuf; read lexbuf
+      | Error err ->  COMPLIANCE_ERROR err
+    }
   | _
     { Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
+
+and read_comment =
+  parse
+  | "*/"
+    { () }
+  | newline
+    { Lexxer_utils.update_pos lexbuf; read_comment lexbuf }
+  | eof
+    { Lexxer_utils.lex_error "unexpected EOF in comment" }
+  | _
+    { read_comment lexbuf }
 
 {
   end
