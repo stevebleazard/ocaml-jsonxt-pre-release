@@ -9,10 +9,13 @@ let max_json_int =
 
 let max_json_int_as_float = float_of_int max_json_int
 
-let string_of_float_json f =
+let string_of_float_json ?(with_fraction = false) f =
   let is_int = (float_of_int (int_of_float f)) = f in
-  if is_int && Float.abs f <= max_json_int_as_float then (* IEEE max int in a float when in 64bit int mode*)
-    (let int_value = int_of_float f in format_int "%lld" int_value)
+  if is_int && Float.abs f <= max_json_int_as_float then begin (* IEEE max int in a float when in 64bit int mode*)
+    let int_value = int_of_float f in
+    if with_fraction then (format_int "%lld" int_value) ^ ".0"
+    else format_int "%lld" int_value
+  end
   else
     format_float "%.17g" f
 
@@ -34,6 +37,7 @@ let () =
     [
       "int", Bench.make_command [
           Bench.Test.create ~name:"intopt" (fun () -> string_of_float_json value_int)
+        ; Bench.Test.create ~name:"intoptfrac" (fun () -> string_of_float_json ~with_fraction:true value_int)
         ; Bench.Test.create ~name:"float" (fun () -> string_of_float_json_float value_int)
         ; Bench.Test.create ~name:"printf" (fun () -> string_of_float_printf value_int)
       ];
