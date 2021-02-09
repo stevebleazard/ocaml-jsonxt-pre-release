@@ -153,7 +153,7 @@ let json_to_string json =
   and variant (k, j) =
     add_quote_string k;
     match j with
-    | Some j -> add_string ": "; fmt j
+    | Some j -> add_string ":"; fmt j
     | None -> ()
   in
   fmt json;

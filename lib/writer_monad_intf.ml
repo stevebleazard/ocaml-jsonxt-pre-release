@@ -2,10 +2,11 @@ module type Intf = sig
   module IO : Io.IO
   type json
 
-  (** [json_writer ~writer ~eol ~incr json] converts [json] to a string [s]
-      and writes it out using the [writer string] function.  [incr] and [eol]
+  (** [json_writer ~writer ~eol ~incr ~psep json] converts [json] to a string [s]
+      and writes it out using the [writer string] function.  [incr], [eol] and [psep]
       work together to output human readable output. [incr] defines the increase
-      in indentation and [eol] the end of line sequence.
+      in indentation, [eol] the end of line sequence and [psep] the string to
+      seperate the : from the value in objects
 
       The [writer string] function takes a string and returns a [unit IO.t]
   *)
@@ -13,6 +14,7 @@ module type Intf = sig
        : writer:(string -> unit IO.t)
       -> eol:string
       -> incr:int
+      -> psep:string
       -> json
       -> unit IO.t
 

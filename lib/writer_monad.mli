@@ -7,6 +7,7 @@ module type Writer_monad = sig
        : writer:(string -> unit IO.t)
       -> eol:string
       -> incr:int
+      -> psep:string
       -> 'a Json_internal.constrained
       -> unit IO.t
   val write_json : writer:(string -> unit IO.t) -> 'a Json_internal.constrained -> unit IO.t

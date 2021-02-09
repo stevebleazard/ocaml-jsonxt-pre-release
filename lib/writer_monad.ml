@@ -7,6 +7,7 @@ module type Writer_monad = sig
        : writer:(string -> unit IO.t)
       -> eol:string
       -> incr:int
+      -> psep:string
       -> 'a Json_internal.constrained
       -> unit IO.t
   val write_json : writer:(string -> unit IO.t) -> 'a Json_internal.constrained -> unit IO.t
@@ -44,7 +45,8 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
     done;
     Buffer.contents buf
    
-  let json_writer ~writer ~eol ~incr json = 
+  let json_writer ~writer ~eol ~incr ~psep json = 
+    let psep = ":" ^ psep in
     let string_of_char c = String.make 1 c in
     let write_char c = writer (string_of_char c) in
     let write_string = writer in
@@ -99,18 +101,18 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
         >>= fun () -> write_string (eol ^ ldr ^ ">")
     and json_assoc off o =
       write_list off (fun v -> pair off v) o
-    and pair off (k, v) = write_quote_string k >>= fun () -> write_string ": " >>= fun () -> fmt off v
+    and pair off (k, v) = write_quote_string k >>= fun () -> write_string psep >>= fun () -> fmt off v
     and json_list off l =
       write_list off (fun v -> fmt off v) l
     and variant off (k, j) =
       write_quote_string k
       >>= fun () ->
         match j with
-        | Some j -> write_string ": " >>= fun () -> fmt (off + incr) j
+        | Some j -> write_string psep >>= fun () -> fmt (off + incr) j
         | None -> return ()
     in
     fmt 0 json >>= fun () -> write_string eol
 
-  let write_json ~writer json = json_writer ~writer ~eol:"" ~incr:0 json
-  let write_json_hum ~writer json = json_writer ~writer ~eol:"\n" ~incr:2 json
+  let write_json ~writer json = json_writer ~writer ~eol:"" ~incr:0 ~psep:"" json
+  let write_json_hum ~writer json = json_writer ~writer ~eol:"\n" ~incr:2 ~psep:" " json
 end

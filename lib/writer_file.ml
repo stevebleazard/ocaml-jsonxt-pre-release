@@ -42,12 +42,13 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  let json_to_channel_fmt oc json ~eol ~incr = 
+  let json_to_channel_fmt oc json ~eol ~incr ~psep = 
     let add_char = output_char oc in
     let add_string = output_string oc in
     let add_quote_string s = add_char '"'; escape oc s; add_char '"' in
     let add_int i = add_string (string_of_int i) in
     let add_float f = add_string (Compliance.number_to_string f) in
+    let psep = ":" ^ psep in
     let rec fmt off value =
       match value with
       | `Assoc o ->
@@ -79,7 +80,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       let sep = ref ldr in
       let newsep = "," ^ eol ^ ldr in
       List.iter (fun v -> add_string !sep; sep := newsep; pair off v ) o
-    and pair off (k, v) = add_quote_string k; add_string ": "; fmt off v
+    and pair off (k, v) = add_quote_string k; add_string psep; fmt off v
     and json_list off l =
       let ldr = String.make off ' ' in
       let sep = ref ldr in
@@ -88,14 +89,14 @@ module Make (Compliance : Compliance.S) : Intf = struct
     and variant off (k, j) =
       add_quote_string k;
       match j with
-      | Some j -> add_string ": "; fmt (off + incr) j
+      | Some j -> add_string psep; fmt (off + incr) j
       | None -> ()
     in
     fmt 0 json;
     add_string eol
 
-  let json_to_channel' = json_to_channel_fmt ~eol:"" ~incr:0
-  let json_to_channel_hum' = json_to_channel_fmt ~eol:"\n" ~incr:2
+  let json_to_channel' = json_to_channel_fmt ~eol:"" ~incr:0 ~psep:""
+  let json_to_channel_hum' = json_to_channel_fmt ~eol:"\n" ~incr:2 ~psep:" "
 
   let json_to_channel oc json =
     try Ok (json_to_channel' oc json) with
