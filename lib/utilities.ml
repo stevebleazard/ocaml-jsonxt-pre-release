@@ -68,11 +68,11 @@ let json_to_string_repr json =
     | `Null -> add_string "`Null"
     | `Bool b -> add_string "`Bool "; add_string (string_of_bool b)
     | `Int i -> add_string "`Int "; add_int i
-    | `Intlit s -> add_string "`Intlit "; add_quote_string s
+    | `Intlit s -> add_string "`Intlit "; add_string s
     | `Float f -> add_string "`Float "; add_float f
-    | `Floatlit s -> add_string "`Floatlit "; add_quote_string s
+    | `Floatlit s -> add_string "`Floatlit "; add_string s
     | `String s -> add_string "`String "; add_quote_string s
-    | `Stringlit s -> add_string "`Stringlit "; add_quote_string s
+    | `Stringlit s -> add_string "`Stringlit "; add_string s
     | `Tuple t ->
       add_string "`Tuple (\n"; json_list (ldr ^ "  ") t;
       add_char '\n'; add_string ldr; add_char ')'
@@ -134,11 +134,11 @@ let json_to_string json =
     | `Null -> add_string "null"
     | `Bool b -> add_string (string_of_bool b)
     | `Int i -> add_int i
-    | `Intlit s -> add_quote_string s
+    | `Intlit s -> add_string s
     | `Float f -> add_float f
-    | `Floatlit s -> add_quote_string s
+    | `Floatlit s -> add_string s
     | `String s -> add_quote_string s
-    | `Stringlit s -> add_quote_string s
+    | `Stringlit s -> add_string s
     | `Tuple t -> add_char '('; json_list t; add_char ')'
     | `Variant v -> add_char '<';  variant v; add_char '>'
   and json_assoc o =

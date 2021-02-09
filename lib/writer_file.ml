@@ -61,11 +61,11 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `Null -> add_string "null"
       | `Bool b -> add_string (string_of_bool b)
       | `Int i -> add_int i
-      | `Intlit s -> add_quote_string s
+      | `Intlit s -> add_string s
       | `Float f -> add_float f
-      | `Floatlit s -> add_quote_string s
+      | `Floatlit s -> add_string s
       | `String s -> add_quote_string s
-      | `Stringlit s -> add_quote_string s
+      | `Stringlit s -> add_string s
       | `Tuple t ->
         let ldr = String.make off ' ' in
         add_char '('; add_string eol; json_list (off + incr) t;

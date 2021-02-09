@@ -95,11 +95,11 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `Null -> add_string "null"
       | `Bool b -> add_string (string_of_bool b)
       | `Int i -> add_int i
-      | `Intlit s -> add_quote_string s
+      | `Intlit s -> add_string s
       | `Float f -> add_float f
-      | `Floatlit s -> add_quote_string s
+      | `Floatlit s -> add_string s
       | `String s -> add_quote_string s
-      | `Stringlit s -> add_quote_string s
+      | `Stringlit s -> add_string s
       | `Name s -> add_quote_string s; add_char ':'
       | `Infinity -> add_string "inf"
       | `Neg_infinity -> add_string "-inf"

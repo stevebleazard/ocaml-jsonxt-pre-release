@@ -82,11 +82,11 @@ module Make (Compliance : Compliance.S) (IO : IO) : Writer_monad with module IO 
       | `Null -> write_string "null"
       | `Bool b -> write_string (string_of_bool b)
       | `Int i -> write_int i
-      | `Intlit s -> write_quote_string s
+      | `Intlit s -> write_string s
       | `Float f -> write_float f
-      | `Floatlit s -> write_quote_string s
+      | `Floatlit s -> write_string s
       | `String s -> write_quote_string s
-      | `Stringlit s -> write_quote_string s
+      | `Stringlit s -> write_string s
       | `Tuple t ->
         let ldr = String.make off ' ' in
         write_string ("(" ^ eol)
