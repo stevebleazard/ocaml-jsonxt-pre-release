@@ -124,6 +124,12 @@ rule read =
       | Ok () -> read_comment lexbuf; read lexbuf
       | Error err ->  COMPLIANCE_ERROR err
     }
+  | "//"[^'\n']*
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read lexbuf
+      | Error err ->  COMPLIANCE_ERROR err
+    }
   | _
     { Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
 

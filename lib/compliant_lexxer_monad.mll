@@ -153,6 +153,12 @@ rule read =
       | Ok () -> read_comment lexbuf
       | Error err ->  return (COMPLIANCE_ERROR err)
     }
+  | "//"[^'\n']*
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read lexbuf
+      | Error err ->  return (COMPLIANCE_ERROR err)
+    }
   | _
     { fail ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
 
