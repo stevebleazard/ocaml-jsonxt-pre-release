@@ -38,7 +38,7 @@ module Make(Compliance : Compliance.S) = struct
         if l = [] then Format.pp_print_string out "()"
         else Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," format) l
       | `Variant (s, None) ->
-        Format.fprintf out "<%s>" s
+        Format.fprintf out "<%s>" (to_json_string s)
       | `Variant (s, Some json) ->
         let s = to_json_string s in
         Format.fprintf out "<@[<hv2>%s: %a@]>" s format json
