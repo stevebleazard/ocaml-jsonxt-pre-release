@@ -9,5 +9,5 @@
  (deps))
 
 (alias
- (name examples)
+ (name ppx_yojson_conv_example)
  (deps ppx_yojson_example.exe))
