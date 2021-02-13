@@ -3,8 +3,7 @@
 * Coding
   * Yojson
     * Review functionality
-    * Test including replacing existing use of yojson library (atdgen?)
-    * Test derivers - ppx_deriving_yojson
+    * Test including replacing existing use of yojson library - yojson tests
     * Document
       * differences esp. missing functions
     * run the yojson repo tests against Jsonxt
@@ -15,7 +14,7 @@
   * Test extensions
     * Floatlit etc?
 * Documentation
-  * General - README.md with quick-start and examples
+  * General - README.md with quick-start and examples + performance
   * Function - review
   * Examples - add more
 * Testing
