@@ -76,7 +76,8 @@ include Jsonxt.Yojson
 ]}
 Note that compatibility is mostly a thin layer on top of Jsonxt.
 In particular the error reporting by the utils module uses
-the [Failure] exception rather than Yojson's specialist exceptions
+the [Failure] exception rather than Yojson's specialist exceptions.
+See the [Yojson] module API documentation for more details
 
 {3 Using ppx_yojson_conv}
 
