@@ -17,8 +17,8 @@
         - Comment are supported with /* */ and // at the end of the line
         - Variants and tuples are supported but with syntax changes noted
           later
-        - Object keys must be quoted. So {ab:10} is not valid and must be
-          encoded as {"ab":10}
+        - Object keys must be quoted. So \{ab:10\} is not valid and must be
+          encoded as \{"ab":10\}
         - Variant names must be quoted. eg. <"ab"> and <"ab":10>
 
     {2 Behavioural differences}
