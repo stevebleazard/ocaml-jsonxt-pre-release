@@ -21,13 +21,11 @@ let string_of_float_json f =
 
 let string_of_float_format_float f =
   let s = format_float "%.16g" f in
-  let s = if float_of_string s = f then s else format_float "%.17g" f in
   if not (String.contains s '.') then s ^ ".0"
   else s
 
 let string_of_float_printf f =
   let s = Printf.sprintf "%.16g" f in
-  let s = if float_of_string s = f then s else Printf.sprintf "%.17g" f in
   if not (String.contains s '.') then s ^ ".0"
   else s
 
