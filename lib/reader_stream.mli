@@ -4,7 +4,7 @@ module type Reader_stream = sig
 
   (** The steaming reader provides two interfaces to decode input into a stream of
       [json_stream] elements
-      - The internel create_* and decode_stream mechanism
+      - The internal create_* and decode_stream mechanism
       - A stream_from_* [json_stream Stream.t] based approach
 
       Note that the returned stream has no structure thus [[1,2,3]] will be returned
@@ -27,7 +27,7 @@ module type Reader_stream = sig
       number of bytes read to a maximum of [len] *)
   val json_stream_of_function : (bytes -> int -> int) -> stream
 
-  (** [decode_stream t] deoode the next element of the input, [Ok None] indicates
+  (** [decode_stream t] decode the next element of the input, [Ok None] indicates
       end of the stream *)
   val decode_stream : stream -> (json_stream option, string) result
 

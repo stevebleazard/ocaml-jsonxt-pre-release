@@ -38,11 +38,11 @@ module type Intf = sig
       to channel [oc] *)
   val create_encoder_channel_hum : out_channel -> t
 
-  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_streeam].
+  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_stream].
       Errors cause a Failure exception to be raised. *)
   val encode_stream_exn : t -> 'a Json_internal.constrained_stream -> unit
 
-  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_streeam].
+  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_stream].
       Errors are reported via the [result] value. *)
   val encode_stream : t -> 'a Json_internal.constrained_stream -> (unit, string) result
 end
