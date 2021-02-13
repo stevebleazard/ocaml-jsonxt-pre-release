@@ -9,11 +9,25 @@
     In particular the error reporting by the utils module uses
     the [Failure] exception rather than Yojson's specialist exceptions
 
-    Behavioural differences:
+    {2 JSON compatibility differences}
+
+    The underlying parser used by the Yojson compatibility modules
+    are RFC 8259 compliant except for specific extensions. In
+    particular:
+        - Comment are supported with /* */ and // at the end of the line
+        - Variants and tuples are supported but with syntax changes noted
+          later
+        - Object keys must be quoted. So {ab:10} is not valid and must be
+          encoded as {"ab":10}
+        - Variant names must be quoted. eg. <"ab"> and <"ab":10>
+
+    {2 Behavioural differences}
         - The [lexer_state] data structure is used to report errors but
           not updated during the parsing of the input
         - The optional [buf] parameter is ignored
         - Error messages are likely to be different
+        - The utils module module uses the [Failure] exception rather
+          than Yojson's specialist exceptions
  *)
 
 exception Json_error of string
