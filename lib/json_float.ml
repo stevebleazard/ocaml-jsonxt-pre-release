@@ -14,9 +14,7 @@ let string_of_float_json f =
     let int_value = int_of_float f in (string_of_int int_value) ^ ".0"
   end
   else begin
-    (* %.17g often creates overly long output, attempt to convert at lower precession first *)
     let s = format_float "%.16g" f in
-    let s = if float_of_string s = f then s else format_float "%.17g" f in
     if not (String.contains s '.') then s ^ ".0"
     else s
   end
