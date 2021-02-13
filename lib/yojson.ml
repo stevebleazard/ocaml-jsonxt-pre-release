@@ -1,10 +1,4 @@
 exception Json_error of string
-exception End_of_input
-
-(* These are for compatibility and never raise *)
-exception End_of_array
-exception End_of_object
-exception End_of_tuple
 
 let json_error msg = raise (Json_error msg)
 
@@ -65,7 +59,7 @@ module Common_reader (Compliance : Compliance.S) = struct
     let lnum = Some lexstate.lnum in
     match Internal.json_of_lexbuf_error_info_compat ?stream lexbuf with
     | Ok (Some json) -> json
-    | Ok None -> raise End_of_input
+    | Ok None -> json_error "Blank input data"
     | Error error_info -> json_error (error_to_string error_info fname lnum)
 
   let read_t lexstate lexbuf = from_lexbuf lexstate lexbuf
