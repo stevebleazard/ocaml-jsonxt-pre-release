@@ -88,7 +88,7 @@ let _ =
 ;;
 ```
 
-# Yojson compatibility and using ppx\_yojson\_conv
+## Yojson compatibility and using ppx\_yojson\_conv
 To use Jsonxt's Yojson compatibility module create a `yojson.ml` file in
 the source directory of the project with the following contents:
 
@@ -126,7 +126,7 @@ let () =
 
 See the examples/ppx\_yojson\_conv directory for a working example including the dune configuration
 
-# Async example
+## Async example
 An example of how to use the parser monad and writer with async.  Note
 that async and core libraries need to be installed.
 
