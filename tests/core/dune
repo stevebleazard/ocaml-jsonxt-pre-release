@@ -15,17 +15,17 @@
 
 (rule
  (alias run_test_suite_std)
- (deps jxtester.exe (glob_files path-to-JSONTestSuite/test_parsing/[iny]_*))
+ (deps jxtester.exe (glob_files ../data/jsontestsuite/[iny]_*))
  (action (run ./jxtester.exe suite std %{deps})))
 
 (rule
  (alias run_test_suite_monad)
- (deps jxtester.exe (glob_files path-to-JSONTestSuite/test_parsing/[iny]_*))
+ (deps jxtester.exe (glob_files ../data/jsontestsuite/[iny]_*))
  (action (run ./jxtester.exe suite monad %{deps})))
 
 (rule
  (alias run_test_suite_stream)
- (deps jxtester.exe (glob_files path-to-JSONTestSuite/test_parsing/[iny]_*))
+ (deps jxtester.exe (glob_files ../data/jsontestsuite/[iny]_*))
  (action (run ./jxtester.exe suite stream %{deps})))
 
 (alias
