@@ -3,12 +3,8 @@
 * Coding
   * Yojson
     * Review functionality
-    * Test including replacing existing use of yojson library - yojson tests
     * Document
       * differences esp. missing functions
-    * run the yojson repo tests against Jsonxt
-  * Stream.t json recovery (version 1.1?)
-  * jsonxtool?
 * Review
   * Compliance with RFCs
   * Test extensions
@@ -24,3 +20,5 @@
   * more validation tests esp. floats and unicode
 * Release
   * dune release process
+* Version 1.1
+  * Stream.t json recovery

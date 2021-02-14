@@ -44,7 +44,7 @@ Run the tests with:
 ```
 dune build @run_test_suite
 ```
-
+Which will run the tests for standard, streaming and monad parsers.
 The results are reported as follows:
 - pass: The JSON was handled correctly as defined by the test suite
 - fail: The parser either succeeded when it should have failed or vice versa
