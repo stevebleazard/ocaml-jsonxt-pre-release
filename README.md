@@ -174,3 +174,12 @@ let () =
   never_returns (Scheduler.go ())
 ```
 See the examples/async directory for a working example including the dune configuration
+
+
+# Performance
+Performance in general is similar to Yojson for reading depending to some extent
+on the input.  
+
+Writing wise, jsonxt is similar or slightly faster depending on the type of output,
+for JSON with lots of integers (even if they are actually float values) Jsonxt will
+be faster.

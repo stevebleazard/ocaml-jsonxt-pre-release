@@ -28,3 +28,6 @@ The results show
 
 ## perf\_yojson\_of\_string
 This compares Jsonxt's and Yojson's parsing of strings
+
+## perf\_yojson\_to\_string
+This compares Jsonxt's and Yojson's writing of strings
