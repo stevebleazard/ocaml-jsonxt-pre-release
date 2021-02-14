@@ -71,11 +71,11 @@ let command_dump idx sys_argv_len =
   let dump =
     try begin
       match !compliance with
-      | `Strict -> let json = Jsonxt.Strict.of_string contents in Jsonxt.Tools.dump json
-      | `Basic -> let json = Jsonxt.Basic.of_string contents in Jsonxt.Tools.dump json
-      | `Extended -> let json = Jsonxt.Extended.of_string contents in Jsonxt.Tools.dump json
-      | `Yojson_basic -> let json = Jsonxt.Yojson.Basic.of_string contents in Jsonxt.Tools.dump json
-      | `Yojson_safe -> let json = Jsonxt.Yojson.Safe.of_string contents in Jsonxt.Tools.dump json
+      | `Strict -> let json = Jsonxt.Strict.of_string contents in Jsonxt.Utilities.json_to_string_repr json
+      | `Basic -> let json = Jsonxt.Basic.of_string contents in Jsonxt.Utilities.json_to_string_repr json
+      | `Extended -> let json = Jsonxt.Extended.of_string contents in Jsonxt.Utilities.json_to_string_repr json
+      | `Yojson_basic -> let json = Jsonxt.Yojson.Basic.from_string contents in Jsonxt.Utilities.json_to_string_repr json
+      | `Yojson_safe -> let json = Jsonxt.Yojson.Safe.from_string contents in Jsonxt.Utilities.json_to_string_repr json
     end
     with
     | Failure err -> sprintf "Parse failed with: %s" err

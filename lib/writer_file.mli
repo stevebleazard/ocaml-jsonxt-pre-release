@@ -11,6 +11,8 @@ module type Intf = sig
   val to_file_hum : string -> 'a Json_internal.constrained -> unit
   val to_channel :  out_channel -> 'a Json_internal.constrained -> unit
   val to_channel_hum :  out_channel -> 'a Json_internal.constrained -> unit
+  val stream_to_channel : out_channel -> 'a Json_internal.constrained Stream.t -> unit
+  val stream_to_file : string -> 'a Json_internal.constrained Stream.t -> unit
 end
 
 module Make (Compliance : Compliance.S) : Intf

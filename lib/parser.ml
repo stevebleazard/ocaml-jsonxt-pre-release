@@ -135,10 +135,12 @@ module Make (Compliance : Compliance.S) : Parser
     match reader () with
     | exception (Parse_error `Eof) -> None
     | exception exn_ -> raise exn_
+    | EOF -> None
     | tok -> Some (token_value tok)
 
   let decode ~reader = 
     match json_value ~reader with
+    | exception (Parse_error `Eof) -> Error "Unexpected end-of-input"
     | exception (Parse_error (`Syntax_error err)) -> Error err
     | exception (Lexxer_utils.Lex_error err) -> Error err
     | res -> Ok res

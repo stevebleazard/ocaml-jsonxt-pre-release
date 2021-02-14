@@ -17,12 +17,14 @@ module Make (Compliance : Compliance.S) : Parser
   type t = {
     reader : unit -> Tokens.token
   ; continuation : (unit -> Compliance.json_stream) Stack.t
+  ; state : [`Start | `Process | `End] ref
   }
 
   let create ~reader = 
     { 
       reader
     ; continuation = Stack.create ()
+    ; state = ref `Start
     }
 
   let json_stream t =
@@ -50,7 +52,7 @@ module Make (Compliance : Compliance.S) : Parser
     and array_value () = begin
       let tok = t.reader () in
       match tok with
-      | AE -> Compliance.Stream.array_start ()
+      | AE -> Compliance.Stream.array_end ()
       | tok -> Stack.push array_value_next t.continuation; token_value tok
     end
     and array_value_next () = begin
@@ -65,7 +67,7 @@ module Make (Compliance : Compliance.S) : Parser
     and object_value () = begin
       let tok = t.reader () in
       match tok with
-      | OE -> Compliance.Stream.object_start ()
+      | OE -> Compliance.Stream.object_end ()
       | STRING s -> Stack.push object_colon_value t.continuation; Compliance.Stream.name s
       | tok -> raise (Parse_error (token_error tok))
     end
@@ -135,7 +137,11 @@ module Make (Compliance : Compliance.S) : Parser
       match t.reader () with
       | exception (Parse_error `Eof) -> None
       | exception exn_ -> raise exn_
-      | tok -> Some (token_value tok)
+      | tok -> begin
+          match tok with
+          | EOF -> None
+          | tok -> Some (token_value tok)
+        end
     end
     else Some ((Stack.pop t.continuation) ())
 
@@ -143,6 +149,19 @@ module Make (Compliance : Compliance.S) : Parser
     match json_stream t with
     | exception (Parse_error (`Syntax_error err)) -> Error err
     | exception (Lexxer_utils.Lex_error err) -> Error err
-    | res -> Ok res
+    | None
+    | exception (Parse_error `Eof) ->
+      if Stack.length t.continuation > 0 then Error "unexpected end-of-input"
+      else begin
+        match !(t.state) with
+        | `Start -> Error "empty input"
+        | `Process
+        | `End -> Ok None
+      end
+    | res ->
+      match !(t.state) with
+      | `Start -> t.state := `Process; Ok res
+      | `Process -> if Stack.length t.continuation = 0 then t.state := `End; Ok res
+      | `End -> Error "Junk following JSON value"
 
 end

@@ -1,8 +1,20 @@
+(** [Strict] supports parsing and writing JSON data that conforms to the
+    {!type:Json.Strict.json} json type.  This only supports types
+    supported by the JSON standard and explicity excludes integers *)
+
 type json = Json.Strict.json
 type t = json
 
+(** {1 Reader functions} *)
 include (Reader_string_file.Reader_string_file with type json := json)
+
+(** {1 Writer functions} *)
 include (Writer_intf.Intf with type json := Json.Strict.json)
+
+(** {1 Processing functions} *)
+module Process : sig
+  include (module type of Process.Strict)
+end
 
 module Compliance : Compliance.S with
   type json = Json.Strict.json

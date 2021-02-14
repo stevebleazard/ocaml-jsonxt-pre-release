@@ -4,6 +4,7 @@ module Compliance = struct
 
   open Tokens
 
+  let lex_string s = Lexxer_utils.unescape_string s
   let lex_number token = token
   let lex_integer token = token
 
@@ -14,7 +15,13 @@ module Compliance = struct
   let lex_variant _ = true
   let lex_tuple _ = true
 
-  let number_to_string f = Json_float.string_of_float_fast_int f
+  let comment_check () = Error "comments are not supported in basic mode"
+
+  let number_to_string f =
+    match classify_float f with
+    | FP_normal | FP_subnormal | FP_zero -> Json_float.string_of_float_json f
+    | FP_infinite -> if f < 0. then "-Infinity" else "Infinity"
+    | FP_nan -> "NaN"
 
   let largeint s = `Float (float_of_string s)
   let integer i = `Int i
@@ -31,6 +38,7 @@ module Compliance = struct
   | `Infinity ->    `Float (1.0 /. 0.0)
   | `Neginfinity -> `Float (-1.0 /. 0.0)
   | `Nan ->         `Float (0.0 /. 0.0)
+  | `Floatlit _ ->  raise (Failure "floatlit not supported in basic mode")
 
   module Stream = struct
     let number = number
@@ -59,3 +67,6 @@ type t = json
 
 include Writer_string.Make(Compliance)
 include Writer_file.Make(Compliance)
+include Pretty.Make(Compliance)
+
+module Process = Process.Extended

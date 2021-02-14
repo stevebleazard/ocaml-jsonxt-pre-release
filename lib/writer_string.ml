@@ -5,11 +5,17 @@ module type Intf = sig
   val json_to_string_hum : 'a Json_internal.constrained -> (string, string) result
   val json_to_string_hum_exn : 'a Json_internal.constrained -> string
   val to_string_hum : 'a Json_internal.constrained -> string
+  val json_to_buffer : Buffer.t -> 'a Json_internal.constrained -> (unit, string) result
+  val json_to_buffer_exn : Buffer.t -> 'a Json_internal.constrained -> unit
+  val json_to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> (unit, string) result
+  val json_to_buffer_hum_exn : Buffer.t -> 'a Json_internal.constrained -> unit
+  val to_buffer : Buffer.t -> 'a Json_internal.constrained -> unit
+  val to_buffer_hum : Buffer.t -> 'a Json_internal.constrained -> unit
+  val stream_to_string : 'a Json_internal.constrained Stream.t -> string
+  val stream_to_buffer : Buffer.t -> 'a Json_internal.constrained Stream.t -> unit
 end
 
 module Make (Compliance : Compliance.S) : Intf = struct
-
-  open Printf
 
   let nibble_to_hex i = char_of_int (if i > 9 then 65 + i - 10 else 48 + i)
 
@@ -36,8 +42,7 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | _      -> add_char s.[i]
     done
    
-  let json_to_string' json = 
-    let buf = Buffer.create 100 in
+  let json_to_buffer' buf json =
     let add_char = Buffer.add_char buf in
     let add_string = Buffer.add_string buf in
     let add_quote_string s = add_char '"'; escape buf s; add_char '"' in
@@ -50,11 +55,11 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `Null -> add_string "null"
       | `Bool b -> add_string (string_of_bool b)
       | `Int i -> add_int i
-      | `Intlit s -> add_quote_string s
+      | `Intlit s -> add_string s
       | `Float f -> add_float f
-      | `Floatlit s -> add_quote_string s
+      | `Floatlit s -> add_string s
       | `String s -> add_quote_string s
-      | `Stringlit s -> add_quote_string s
+      | `Stringlit s -> add_string s
       | `Tuple t -> add_char '('; json_list t; add_char ')'
       | `Variant v -> add_char '<';  variant v; add_char '>'
     and json_assoc o =
@@ -68,11 +73,9 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | Some j -> add_char ':'; fmt j
       | None -> ()
     in
-    fmt json;
-    Buffer.contents buf
+    fmt json
 
-  let json_to_string_hum' json = 
-    let buf = Buffer.create 100 in
+  let json_to_buffer_hum' buf json =
     let add_char = Buffer.add_char buf in
     let add_string = Buffer.add_string buf in
     let add_quote_string s = add_char '"'; escape buf s; add_char '"' in
@@ -89,11 +92,11 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | `Null -> add_string "null"
       | `Bool b -> add_string (string_of_bool b)
       | `Int i -> add_int i
-      | `Intlit s -> add_quote_string s
+      | `Intlit s -> add_string s
       | `Float f -> add_float f
-      | `Floatlit s -> add_quote_string s
+      | `Floatlit s -> add_string s
       | `String s -> add_quote_string s
-      | `Stringlit s -> add_quote_string s
+      | `Stringlit s -> add_string s
       | `Tuple t ->
         add_string "(\n"; json_list (ldr ^ "  ") t;
         add_char '\n'; add_string ldr; add_char ')'
@@ -116,19 +119,50 @@ module Make (Compliance : Compliance.S) : Intf = struct
       | None -> ()
     in
     fmt "" json;
+    add_char '\n'
+
+  let json_to_string' json =
+    let buf = Buffer.create 100 in
+    json_to_buffer' buf json;
     Buffer.contents buf
 
   let json_to_string json =
     try Ok (json_to_string' json) with
     | Failure err -> Error err
 
+  let json_to_buffer buf json =
+    try Ok (json_to_buffer' buf json) with
+    | Failure err -> Error err
+
   let json_to_string_exn = json_to_string'
   let to_string = json_to_string'
+  let json_to_buffer_exn = json_to_buffer'
+  let to_buffer = json_to_buffer'
+
+  let json_to_string_hum' json =
+    let buf = Buffer.create 100 in
+    json_to_buffer_hum' buf json;
+    Buffer.contents buf
 
   let json_to_string_hum json =
     try Ok (json_to_string_hum' json) with
     | Failure err -> Error err
 
+  let json_to_buffer_hum buf json =
+    try Ok (json_to_buffer' buf json) with
+    | Failure err -> Error err
+
   let json_to_string_hum_exn = json_to_string_hum'
   let to_string_hum = json_to_string_hum'
+  let json_to_buffer_hum_exn = json_to_buffer_hum'
+  let to_buffer_hum = json_to_buffer_hum'
+
+  let stream_to_string stream =
+    let buf = Buffer.create 100 in
+    let () = Stream.iter (fun json -> to_buffer buf json; Buffer.add_char buf '\n') stream in
+    Buffer.contents buf
+
+  let stream_to_buffer buf stream =
+    Stream.iter (fun json -> to_buffer buf json; Buffer.add_char buf '\n') stream
+
 end

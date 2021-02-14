@@ -19,7 +19,6 @@
       *)
       result
   end
-  open Lexing
   open Tokens
 
   module type IO = Io.IO
@@ -63,8 +62,8 @@ let frac = '.' digits
 let e = ['e' 'E']['+' '-']?
 let exp = e digits
 let fp = '-'? (posint frac | posint exp | posint frac exp)
-let unescaped_char = [ ' '-'!' '#'-'[' ']'-'~' '\128'-'\255' ]
-let escaped_char = '\\' [ '"' '\\' 'b' 'f' 'n' 'r' 't' ]
+let unescaped_char = [ ' '-'!' '#'-'[' ']'-'~' '\127'-'\255' ]
+let escaped_char = '\\' [ '"' '\\' '/' 'b' 'f' 'n' 'r' 't' ]
 let unicode_char = "\\u" hex_digit hex_digit hex_digit hex_digit
 let character = (unescaped_char | escaped_char | unicode_char)
 let characters = character+
@@ -137,15 +136,42 @@ rule read =
   | double_quote double_quote
     { return (STRING "") }
   | double_quote (characters as s) double_quote
-    { return (STRING (Lexxer_utils.unescape_string s)) }
+    {
+      match Lexxer_utils.unescape_string s with
+      | exception (Lexxer_utils.Lex_error err) -> fail err
+      | us -> return (STRING us)
+    }
   | eof
     { return EOF }
   | whitespace
     { read lexbuf }
   | newline
     { Lexxer_utils.update_pos lexbuf; read lexbuf; }
+  | "/*"
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read_comment lexbuf
+      | Error err ->  return (COMPLIANCE_ERROR err)
+    }
+  | "//"[^'\n']*
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read lexbuf
+      | Error err ->  return (COMPLIANCE_ERROR err)
+    }
   | _
     { fail ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
+
+and read_comment =
+  parse
+  | "*/"
+    { read lexbuf }
+  | newline
+    { Lexxer_utils.update_pos lexbuf; read_comment lexbuf }
+  | eof
+    { Lexxer_utils.lex_error "unexpected EOF in comment" }
+  | _
+    { read_comment lexbuf }
 
 {
   end

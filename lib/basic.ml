@@ -4,6 +4,8 @@ module Compliance = struct
 
   open Tokens
 
+  let lex_string s = Lexxer_utils.unescape_string s
+
   let lex_number = function
   | INFINITY -> COMPLIANCE_ERROR "inf not supported"
   | NEGINFINITY -> COMPLIANCE_ERROR "-inf not supported"
@@ -11,7 +13,7 @@ module Compliance = struct
   | FLOAT _ as token -> token
   | token -> token
 
-  let lex_integer token = token (* CR sbleazard: fix bounds *)
+  let lex_integer token = token
 
   let lex_largeint = function
   | LARGEINT s -> FLOAT (float_of_string s)
@@ -20,9 +22,11 @@ module Compliance = struct
   let lex_variant _ = false
   let lex_tuple _ = false
 
+  let comment_check () = Error "comments are not supported in basic mode"
+
   let number_to_string f =
     match classify_float f with
-    | FP_normal | FP_subnormal | FP_zero -> Json_float.string_of_float_fast_int f
+    | FP_normal | FP_subnormal | FP_zero -> Json_float.string_of_float_json f
     | FP_infinite -> raise (Failure "infinity not supported")
     | FP_nan -> raise (Failure "nan not supported")
 
@@ -33,14 +37,15 @@ module Compliance = struct
   let bool b = `Bool b
   let assoc a = `Assoc a
   let list l = `List l
-  let tuple l = raise (Failure "tuples not supported in basic mode")
-  let variant l = raise (Failure "variants not supported in basic mode")
+  let tuple _l = raise (Failure "tuples not supported in basic mode")
+  let variant _l = raise (Failure "variants not supported in basic mode")
 
   let number = function
   | `Float f ->     `Float f
   | `Infinity ->    raise (Failure "inf not supported in basic mode")
   | `Neginfinity -> raise (Failure "-inf not supported in basic mode")
   | `Nan ->         raise (Failure "nan not supported in basic mode")
+  | `Floatlit _ ->  raise (Failure "floatlit not supported in basic mode")
 
   module Stream = struct
     let number = number
@@ -69,3 +74,6 @@ type t = json
 
 include Writer_string.Make(Compliance)
 include Writer_file.Make(Compliance)
+include Pretty.Make(Compliance)
+
+module Process = Process.Basic

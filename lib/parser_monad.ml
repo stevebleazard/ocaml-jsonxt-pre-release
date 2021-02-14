@@ -168,7 +168,7 @@ module Make (Compliance : Compliance.S) (IO : IO) : Parser
     >>= function
     | Ok res -> return res
     | Error (`Syntax_error err) -> fail err
-    | Error `Eof  -> fail "unexpected end-of-file"
+    | Error `Eof  -> fail "unexpected end-of-input"
 
 end
 

@@ -4,11 +4,15 @@ exception Lex_error of string
 
 let lex_error err = raise (Lex_error err)
 
-let error_pos_msg (lexbuf : Lexing.lexbuf) =
+let error_pos lexbuf = 
   let start = lexbuf.lex_start_p in
   let cnum = lexbuf.lex_last_pos - start.pos_bol in
   let enum = lexbuf.lex_curr_pos - start.pos_bol in
-    Printf.sprintf "line %d chars %d-%d" start.pos_lnum cnum enum
+  (start.pos_lnum, cnum, enum)
+
+let error_pos_msg (lexbuf : Lexing.lexbuf) =
+  let (line, cnum, enum) = error_pos lexbuf in
+    Printf.sprintf "line %d chars %d-%d" line cnum enum
 
 let string2num s =
   try (Tokens.INT (int_of_string s)) with
@@ -104,6 +108,7 @@ let unescape_string s =
       match s.[i] with
        | '"'  -> Bytes.unsafe_set s' !j '"';    state := `Char; j := !j + 1
        | '\\' -> Bytes.unsafe_set s' !j '\\';   state := `Char; j := !j + 1
+       | '/'  -> Bytes.unsafe_set s' !j '/';    state := `Char; j := !j + 1
        | 'b'  -> Bytes.unsafe_set s' !j '\b';   state := `Char; j := !j + 1
        | 'f'  -> Bytes.unsafe_set s' !j '\012'; state := `Char; j := !j + 1
        | 'n'  -> Bytes.unsafe_set s' !j '\n';   state := `Char; j := !j + 1

@@ -19,7 +19,6 @@
       *)
       result
   end
-  open Lexing
   open Tokens
 
 
@@ -40,8 +39,8 @@ let frac = '.' digits
 let e = ['e' 'E']['+' '-']?
 let exp = e digits
 let fp = '-'? (posint frac | posint exp | posint frac exp)
-let unescaped_char = [ ' '-'!' '#'-'[' ']'-'~' '\128'-'\255' ]
-let escaped_char = '\\' [ '"' '\\' 'b' 'f' 'n' 'r' 't' ]
+let unescaped_char = [ ' '-'!' '#'-'[' ']'-'~' '\127'-'\255' ]
+let escaped_char = '\\' [ '"' '\\' '/' 'b' 'f' 'n' 'r' 't' ]
 let unicode_char = "\\u" hex_digit hex_digit hex_digit hex_digit
 let character = (unescaped_char | escaped_char | unicode_char)
 let characters = character+
@@ -119,8 +118,31 @@ rule read =
     { read lexbuf }
   | newline
     { Lexxer_utils.update_pos lexbuf; read lexbuf; }
+  | "/*"
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read_comment lexbuf; read lexbuf
+      | Error err ->  COMPLIANCE_ERROR err
+    }
+  | "//"[^'\n']*
+    {
+      match Compliance.comment_check () with
+      | Ok () -> read lexbuf
+      | Error err ->  COMPLIANCE_ERROR err
+    }
   | _
     { Lexxer_utils.lex_error ("unexpected character '" ^ (Lexing.lexeme lexbuf) ^ "'") }
+
+and read_comment =
+  parse
+  | "*/"
+    { () }
+  | newline
+    { Lexxer_utils.update_pos lexbuf; read_comment lexbuf }
+  | eof
+    { Lexxer_utils.lex_error "unexpected EOF in comment" }
+  | _
+    { read_comment lexbuf }
 
 {
   end
