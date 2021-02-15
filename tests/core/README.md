@@ -53,3 +53,10 @@ The results are reported as follows:
 
 There should be no fails, OKpass and OKfail are both fine as the result is implementation
 dependent.
+
+## Building the jxtester executable
+To build the jxtester.exe without running any tests run
+
+```
+dune build @jxtester
+```

@@ -33,5 +33,13 @@
  (deps (alias run_test_suite_std) (alias run_test_suite_monad) (alias run_test_suite_stream)))
 
 (alias
- (name runtests)
- (deps (alias compliance_tests) (alias validation_tests)))
+ (name runtest)
+ (deps (alias compliance_tests) (alias validation_tests) (alias run_test_suite)))
+
+(alias
+ (name default)
+ (deps))
+
+(alias
+  (name jxtester)
+  (deps jxtester.exe))

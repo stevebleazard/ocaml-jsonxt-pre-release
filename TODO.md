@@ -9,13 +9,12 @@
     * Floatlit etc?
   * Clean out the ATTIC
 * Documentation
-  * General - README.md with quick-start and examples + performance
   * Function - review
   * Examples - add more
 * Testing
-  * Yojson compatibility
   * more validation tests esp. floats and unicode
 * Release
+  * jsonxt.opam
   * dune release process
 * Version 1.1
   * Stream.t json recovery
