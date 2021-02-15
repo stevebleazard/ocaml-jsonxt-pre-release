@@ -1,7 +1,7 @@
 # Jsonxt - JSON parsers for files, strings and more
 
 *Jsonxt* provides a number of JSON parsers and writers for
-RFC 8259 compliant JSON as well as non-standard extentions
+RFC 8259 compliant JSON as well as non-standard extensions
 introduced by Yojson.  Features include
 
 * RFC 8259 compliant when in strict and basic mode
@@ -184,3 +184,23 @@ Writing wise, jsonxt is similar or slightly faster depending on the type of outp
 Jsonxt optimises integer values in floats and uses integer conversion which is 4-5
 times faster.  This means there is very little penalty for using [`Float] to store
 an integer
+
+# Examples
+The [examples] directory contains the examples from this README as well as
+additional ones.  See the individual README.md files for more details.
+Build the ones with no external library dependencies with
+
+```
+dune build @examples
+```
+
+# Tests
+The tests directory contains a number of tests including compliance, JSON Test Suite and
+decode-encode-decode validation.  Run with
+
+```
+dune build @runtest
+```
+
+Performance tests can be found in tests/perf, see the README.md in that
+directory for more details.
