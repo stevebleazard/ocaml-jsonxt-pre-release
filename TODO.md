@@ -3,8 +3,6 @@
 * Coding
   * Yojson
     * Review functionality
-    * Document
-      * differences esp. missing functions
 * Review
   * Compliance with RFCs
   * Test extensions
@@ -15,7 +13,6 @@
   * Function - review
   * Examples - add more
 * Testing
-  * performance compared to Yojson
   * Yojson compatibility
   * more validation tests esp. floats and unicode
 * Release

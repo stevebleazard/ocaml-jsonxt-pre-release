@@ -181,5 +181,6 @@ Performance in general is similar to Yojson for reading depending to some extent
 on the input.  
 
 Writing wise, jsonxt is similar or slightly faster depending on the type of output,
-for JSON with lots of integers (even if they are actually float values) Jsonxt will
-be faster.
+Jsonxt optimises integer values in floats and uses integer conversion which is 4-5
+times faster.  This means there is very little penalty for using [`Float] to store
+an integer
