@@ -15,6 +15,11 @@
   * more validation tests esp. floats and unicode
 * Release
   * jsonxt.opam
+    * review config
+    * remove dead dependencies and cleanup
+    * Set min compiler version - 4.05?
+  * Pin and test
+    * each supported compiler version
   * dune release process
 * Version 1.1
   * Stream.t json recovery
