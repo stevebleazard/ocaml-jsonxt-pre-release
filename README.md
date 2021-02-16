@@ -46,7 +46,7 @@ let () =
 ### Using the json\_stream parser
 The json\_stream parser returns a stream of json elements
 rather than a json tree.  The following is example using
-the [Stream.t] interface to process the stream
+the `Stream.t` interface to process the stream
 
 ```
 open Printf
