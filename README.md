@@ -186,7 +186,7 @@ times faster.  This means there is very little penalty for using [`Float] to sto
 an integer
 
 ## Examples
-The [examples] directory contains the examples from this README as well as
+The `examples` directory contains the examples from this README as well as
 additional ones.  See the individual README.md files for more details.
 Build the ones with no external library dependencies with
 
