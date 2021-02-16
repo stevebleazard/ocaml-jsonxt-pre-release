@@ -24,6 +24,10 @@ introduced by Yojson.  Features include
 * Support for streaming JSON via Stream.t
 * Standard interfaces including Yojson compatibility
 
+## API Documentation
+
+See [Jsonxt API](https://stevebleazard.github.io/ocaml-jsonxt) for full API documentation
+
 ## Quick Start
 The following covers various use cases
 
