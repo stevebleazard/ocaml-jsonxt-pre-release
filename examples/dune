@@ -1,4 +1,4 @@
 (alias
  (name default)
- (deps))
+ (deps (alias_rec examples)))
 
