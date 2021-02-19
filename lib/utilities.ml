@@ -162,10 +162,10 @@ let json_to_string json =
 let rec equal json1 json2 =
   match json1, json2 with
   | `Null, `Null -> true
-  | `Bool b1, `Bool b2 -> Bool.equal b1 b2
-  | `Int i1, `Int i2 -> Int.equal i1 i2
+  | `Bool b1, `Bool b2 -> b1 = b2
+  | `Int i1, `Int i2 -> i1 = i2
   | `Intlit s1, `Intlit s2 -> String.equal s1 s2
-  | `Float f1, `Float f2 -> Float.equal f1 f2
+  | `Float f1, `Float f2 -> f1 = f2
   | `Floatlit s1, `Floatlit s2 -> String.equal s1 s2
   | `String s1, `String s2 -> String.equal s1 s2
   | `Stringlit s1, `Stringlit s2 -> String.equal s1 s2

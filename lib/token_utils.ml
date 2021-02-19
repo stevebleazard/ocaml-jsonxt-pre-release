@@ -8,9 +8,9 @@ let token_to_string (tok:Tokens.token) =
   | NAN -> "NAN"
   | LEX_ERROR err -> "input error '" ^ err ^ "'"
   | LARGEINT s -> s
-  | INT i -> Int.to_string i
+  | INT i -> string_of_int i
   | INFINITY -> "Infinity"
-  | FLOAT f -> Float.to_string f
+  | FLOAT f -> string_of_float f
   | EOF -> "end-of-file"
   | COMPLIANCE_ERROR err -> err
   | COMMA -> ","

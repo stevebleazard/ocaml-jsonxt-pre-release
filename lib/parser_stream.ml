@@ -146,11 +146,7 @@ module Make (Compliance : Compliance.S) : Parser
     else Some ((Stack.pop t.continuation) ())
 
   let decode t = 
-    match json_stream t with
-    | exception (Parse_error (`Syntax_error err)) -> Error err
-    | exception (Lexxer_utils.Lex_error err) -> Error err
-    | None
-    | exception (Parse_error `Eof) ->
+    let handle_eof () =
       if Stack.length t.continuation > 0 then Error "unexpected end-of-input"
       else begin
         match !(t.state) with
@@ -158,6 +154,12 @@ module Make (Compliance : Compliance.S) : Parser
         | `Process
         | `End -> Ok None
       end
+    in
+    match json_stream t with
+    | exception (Parse_error (`Syntax_error err)) -> Error err
+    | exception (Lexxer_utils.Lex_error err) -> Error err
+    | exception (Parse_error `Eof) -> handle_eof ()
+    | None -> handle_eof ()
     | res ->
       match !(t.state) with
       | `Start -> t.state := `Process; Ok res
