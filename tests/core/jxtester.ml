@@ -55,13 +55,14 @@ module CmdlineOptions = struct
     Term.(ret (const gen_run $ subcmd $ tfile $ alco_opts)),
     Term.info "validation" ~exits:Term.default_exits ~doc ~man
 
-  let suite_cmd std_f stream_f monad_f =
+  let suite_cmd std_f stream_f monad_f all_f =
     let suite_run subcmd files =
       let files = List.filter (fun n -> not (Filename.check_suffix n ".exe")) files in
       match subcmd with
       | "std" -> std_f files; `Ok ()
       | "stream" -> stream_f files; `Ok ()
       | "monad" -> monad_f files; `Ok ()
+      | "all" -> all_f files; `Ok ()
       | _ -> `Error (true, "expected std, stream or monad")
     in
     let doc = "Process the JsonSuite files available from https://github.com/nst/JSONTestSuite" in
@@ -83,14 +84,13 @@ module CmdlineOptions = struct
 
 end
 
-let tester_suite_std files = Printf.printf "command: suite\nsubcommand: std\nFile: %s\n" (String.concat ", " files)
-let tester_suite_stream files = Printf.printf "command: suite\nsubcommand: stream\nFile: %s\n" (String.concat ", " files)
-let tester_suite_monad files = Printf.printf "command: suite\nsubcommand: monad\nFile: %s\n" (String.concat ", " files)
-
-
 let cmds = [
     CmdlineOptions.compliance_cmd ComplianceTests.run_tests
   ; CmdlineOptions.validation_cmd ValidationTests.gen_config ValidationTests.run_tests
-  ; CmdlineOptions.suite_cmd JsonTestSuite.test_suite_std JsonTestSuite.test_suite_stream JsonTestSuite.test_suite_monad
+  ; CmdlineOptions.suite_cmd
+      JsonTestSuite.test_suite_std
+      JsonTestSuite.test_suite_stream
+      JsonTestSuite.test_suite_monad
+      JsonTestSuite.test_suite_all
   ]
 let () = Cmdliner.Term.(exit @@ eval_choice CmdlineOptions.default_cmd cmds)

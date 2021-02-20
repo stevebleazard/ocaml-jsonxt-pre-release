@@ -28,9 +28,14 @@
  (deps jxtester.exe (glob_files ../data/jsontestsuite/[iny]_*))
  (action (run ./jxtester.exe suite stream %{deps})))
 
+(rule
+ (alias run_test_suite_all)
+ (deps jxtester.exe (glob_files ../data/jsontestsuite/[iny]_*))
+ (action (run ./jxtester.exe suite all %{deps})))
+
 (alias
  (name run_test_suite)
- (deps (alias run_test_suite_std) (alias run_test_suite_monad) (alias run_test_suite_stream)))
+ (deps (alias run_test_suite_all)))
 
 (alias
  (name runtest)

@@ -35,52 +35,55 @@ let result_to_string = function
   | `Fail -> "fail"
   | `Undefined -> "undef"
 
-let result_to_report expected actual =
-  match expected, actual with
-  | `Pass, `Pass
-  | `Fail, `Fail -> "pass"
-  | `Pass, `Fail
-  | `Fail, `Pass -> "fail"
-  | `Undefined, `Pass -> "OKpass"
-  | `Undefined, `Fail -> "OKfail"
+let pass_fail =
+  let pp ppf v = Fmt.pf ppf "%s" (result_to_string v) in
+  let pass_fail_eq expected result =
+    match expected, result with
+    | `Pass, `Pass -> true
+    | `Fail, `Fail -> true
+    | `Undefined, _ -> true
+    | _ -> false
+  in
+  Alcotest.testable pp pass_fail_eq
 
-let charfill text tolen chr =
-  let textlen= String.length text in
-  if textlen >= tolen then text
-  else begin
-    let chars = String.make (tolen - textlen) chr in
-    text ^ chars
-  end
-
-let report filename actual =
+let test_parse_file filename parser_f () =
+  let jsons = Utils.load_file filename in
   let expected = filename_to_success filename in
-  let report = result_to_report expected actual in
-  let report = charfill report 8 ' ' in
-    Printf.printf "  %s  %s\n" report filename
+  let result = parser_f jsons in
+  Alcotest.(check pass_fail) filename expected result 
 
-let test_suite_std_file filename =
-  let jsons = try Utils.load_file filename with Sys_error err -> Utils.die err in
-  let actual = string_parse_std jsons in
-  report filename actual
+let gen_tests parser_name parser_f files =
+  let create_test file =
+    let msg = Filename.basename file in
+    Alcotest.test_case msg `Quick (test_parse_file file parser_f)
+  in
+  let tests = List.map create_test files in
+  [ parser_name, tests ]
 
 let test_suite_std files =
-  Printf.printf "Standard parser\n";
-  List.iter test_suite_std_file files
-
-let test_suite_stream_file filename =
-  let jsons = try Utils.load_file filename with Sys_error err -> Utils.die err in
-  let actual = string_parse_stream jsons in
-  report filename actual
+  let alco_opts = [] in
+  let argv = Array.of_list ("suite"::alco_opts) in
+  let alco_tests = gen_tests "standard" string_parse_std files in
+  Alcotest.run ~argv "Suite" alco_tests
 
 let test_suite_stream files =
-  Printf.printf "Stream parser\n";
-  List.iter test_suite_stream_file files
-
-let test_suite_monad_file filename =
-  let jsons = try Utils.load_file filename with Sys_error err -> Utils.die err in
-  let actual = string_parse_monad jsons in
-  report filename actual
+  let alco_opts = [] in
+  let argv = Array.of_list ("suite"::alco_opts) in
+  let alco_tests = gen_tests "stream" string_parse_stream files in
+  Alcotest.run ~argv "Suite" alco_tests
 
 let test_suite_monad files =
-  Printf.printf "Monad parser\n";
-  List.iter test_suite_monad_file files
+  let alco_opts = [] in
+  let argv = Array.of_list ("suite"::alco_opts) in
+  let alco_tests = gen_tests "monad" string_parse_monad files in
+  Alcotest.run ~argv "Suite" alco_tests
+
+let test_suite_all files =
+  let alco_opts = [] in
+  let argv = Array.of_list ("suite"::alco_opts) in
+  let alco_tests =
+    gen_tests "standard" string_parse_std files @
+    gen_tests "stream" string_parse_monad files @
+    gen_tests "monad" string_parse_monad files
+  in
+  Alcotest.run ~argv "Suite" alco_tests
