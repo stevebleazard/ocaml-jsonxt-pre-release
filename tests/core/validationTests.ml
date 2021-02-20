@@ -18,7 +18,7 @@ end
 
 let read_json_sexp inc =
   let l = input_line inc in
-  let p = String.split_on_char '\t' l in
+  let p = Utils.split_string '\t' l in
   let (bits, jsons, sexps, sexps_json_stream) = match p with
     | bt::jv::sv::ssv::[] -> (bt, jv, sv, ssv)
     | bt::jv::[] -> (bt, jv, "", "")

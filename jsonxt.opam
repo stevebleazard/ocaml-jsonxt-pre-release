@@ -15,12 +15,10 @@ build: [
 ]
 
 depends: [
-  "ocaml"               {>= "4.05.0"}
+  "ocaml"               {>= "4.03.0"}
   "dune"                {build}
   "alcotest"            {with-test}
   "cmdliner"            {with-test}
   "core_kernel"         {with-test}
   "fmt"                 {with-test}
 ]
-  #"core"                {with-test}
-  #"ocaml"               {>= "4.08.1"}

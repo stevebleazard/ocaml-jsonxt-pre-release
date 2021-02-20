@@ -59,3 +59,20 @@ let load_file f =
   really_input ic s 0 n;
   close_in ic;
   Bytes.to_string s
+
+
+(* String.split_on_char was introduced at 4.04 *)
+let split_string c str =
+  let len = String.length str in
+  let rec loop acc last_pos pos =
+    if pos = -1
+    then String.sub str 0 last_pos :: acc
+    else if Char.equal c str.[pos]
+    then (
+      let pos1 = pos + 1 in
+      let sub_str = String.sub str pos1 (last_pos - pos1) in
+      loop (sub_str :: acc) pos (pos - 1))
+    else loop acc last_pos (pos - 1)
+  in
+  loop [] len (len - 1)
+;;
