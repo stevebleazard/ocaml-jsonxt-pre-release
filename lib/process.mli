@@ -14,7 +14,7 @@ module Basic : sig
   include (Process_intf.Basic with type json := Json.Basic.json)
 end
 
-(** [Strict] supports processing JSON data that conforms to the
+(** [Extended] supports processing JSON data that conforms to the
     {!type:Json.Extended.json} json type.  *)
 module Extended : sig
   include (Process_intf.Shared with type json := Json.Extended.json)
