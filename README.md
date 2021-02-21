@@ -26,7 +26,7 @@ introduced by Yojson.  Features include
 
 ## API Documentation
 
-See [Jsonxt API](https://stevebleazard.github.io/ocaml-jsonxt) for full API documentation
+See the [Jsonxt API documentation](https://stevebleazard.github.io/ocaml-jsonxt) for full API documentation
 
 ## Quick Start
 The following covers various use cases
