@@ -1,6 +1,8 @@
 (** [Strict] supports parsing and writing JSON data that conforms to the
     {!type:Json.Strict.json} json type.  This only supports types
-    supported by the JSON standard and explicity excludes integers *)
+    supported by the JSON standard and explicity excludes integers.
+    However, when encoded in floats integers in the range (+/-)2^53
+    have no loss of precision *)
 
 type json = Json.Strict.json
 type t = json

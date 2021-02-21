@@ -2,8 +2,10 @@
     {!type:Json.Basic.json} json type.  This includes support for
     integers which are not part of the JSON standard
     
-    The maximim/minimum size of an integer is architecture specific,
-    typically 31 or 63 bits depending on the platform *)
+    The maximum/minimum size of an integer is architecture specific,
+    typically 31 or 63 bits depending on the platform.  In cases where
+    the integer overflows the value is converted to a `Float.  For
+    integers in the range (+/-)2^53 there is no loss of precision *)
 
 type json = Json.Basic.json
 type t = json
