@@ -3,21 +3,12 @@
 * Coding
   * Yojson
     * Review functionality
-* Review
-  * Compliance with RFCs
-  * Test extensions
-    * Floatlit etc?
-  * Clean out the ATTIC
 * Documentation
   * Function - review
-  * Examples - add more
-* Testing
-  * more validation tests esp. floats and unicode
+* Review
+  * Clean out the ATTIC during copy to ocaml-jsonxt repo
+  * remove TODO.md during copy to ocaml-jsonxt repo
 * Release
-  * jsonxt.opam
-    * review config
-    * remove dead dependencies and cleanup
-    * Set min compiler version - 4.05?
   * Pin and test
     * each supported compiler version
   * dune release process
