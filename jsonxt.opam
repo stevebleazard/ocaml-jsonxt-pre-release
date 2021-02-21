@@ -1,11 +1,11 @@
 opam-version: "1.2"
 maintainer: "Steve Bleazard <stevebleazard@googlemail.com>"
 authors: "Steve Bleazard <stevebleazard@googlemail.com>"
-homepage: "https://www.github.com/stevebleazard/ocaml-jsonxt"
-bug-reports: "https://www.github.com/stevebleazard/ocaml-jsonxt/issues"
+homepage: "https://github.com/stevebleazard/ocaml-jsonxt.pre-release"
+bug-reports: "https://github.com/stevebleazard/ocaml-jsonxt/issues"
 license: "MIT"
-dev-repo: "https://www.github.com/stevebleazard/ocaml-jsonxt.git"
-doc: "https://stevebleazard.github.io/ocaml-jsonxt/"
+dev-repo: "https://github.com/stevebleazard/ocaml-jsonxt.pre-release.git"
+doc: "https://stevebleazard.github.io/ocaml-jsonxt.pre-release/"
 synopsis: "JSON parsers parsers for string, files and more"
 build: [
   ["dune" "subst"] {pinned}
