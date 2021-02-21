@@ -182,7 +182,6 @@ module Internal = struct
   end
 
   module type Internal_basic_intf = sig
-    type json
 
     val to_number : [> `Int of int | `Float of float ] -> float
     val to_number_option : [> `Int of int | `Float of float | `Null ] -> float option
@@ -192,10 +191,7 @@ module Internal = struct
     val filter_number : [> `Int of int | `Float of float ] list -> float list
   end
 
-  module Basic(M : S) : Internal_basic_intf
-    with type json = M.json
-  = struct
-    type json = M.json
+  module Basic(M : S) : Internal_basic_intf = struct
 
     let to_number = function
       | `Int i -> float i
@@ -226,16 +222,11 @@ module Internal = struct
   end
 
   module type Internal_extended_intf = sig
-    type json
-
     val sort : ([> `Assoc of (string * 'a) list | `List of 'a list |
                    `Tuple of 'a list | `Variant of 'b * 'a option ] as 'a) -> 'a
   end
 
-  module Extended(M : S) : Internal_extended_intf
-    with type json = M.json
-  = struct
-    type json = M.json
+  module Extended(M : S) : Internal_extended_intf = struct
 
     let rec sort json =
       match json with

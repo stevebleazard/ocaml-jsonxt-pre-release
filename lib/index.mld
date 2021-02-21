@@ -5,7 +5,8 @@ a focus on performance especially for the core file and
 string functions
 
 {2 API Documentation}
-- {!module:Jsonxt} provides detailed module and function documentation
+- See the {!module:Jsonxt} API documentation for detailed module
+  and function documentation
 
 {2 Quick Start}
 The following covers various use cases
@@ -45,7 +46,7 @@ let () =
     parse_stream_string json_s;;
 ]}
 
-{3 Reading and writing a file using the monad functions}
+{3 Reading and writing a file using the monadic functions}
 {[
 module IO = struct
   type 'a t = 'a
@@ -77,7 +78,7 @@ include Jsonxt.Yojson
 Note that compatibility is mostly a thin layer on top of Jsonxt.
 In particular the error reporting by the utils module uses
 the [Failure] exception rather than Yojson's specialist exceptions.
-See the [Yojson] module API documentation for more details
+See the {!module:Jsonxt.Yojson} module API documentation for more details
 
 {3 Using ppx_yojson_conv}
 
@@ -109,7 +110,7 @@ let () =
 ]}
 
 {3 Async example}
-An example of how to use the parser monad and writer with async.  Note
+An example of how to use the monad based parser and writer with async.  Note
 that async and core libraries need to be installed.
 {[
 open Core

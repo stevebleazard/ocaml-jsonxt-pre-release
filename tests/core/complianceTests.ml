@@ -1,6 +1,6 @@
 let read_test_data inc =
   let l = input_line inc in
-  let p = String.split_on_char ' ' l |> List.filter (fun v -> not (String.equal "" v)) in
+  let p = Utils.split_string ' ' l |> List.filter (fun v -> not (String.equal "" v)) in
   let (level, passfail, filename, bits) = match p with
     | lv::pf::fn::"32"::[] -> (lv, pf, fn, "32")
     | lv::pf::fn::"64"::[] -> (lv, pf, fn, "64")

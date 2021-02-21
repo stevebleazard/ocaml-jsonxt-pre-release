@@ -14,6 +14,7 @@
     The underlying parser used by the Yojson compatibility modules
     are RFC 8259 compliant except for specific extensions. In
     particular:
+        - Control characters must be escaped as defined by RFC 8259
         - Comment are supported with /* */ and // at the end of the line
         - Variants and tuples are supported but with syntax changes noted
           later

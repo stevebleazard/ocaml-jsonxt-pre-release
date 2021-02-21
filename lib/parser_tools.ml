@@ -13,7 +13,7 @@ let token_error tok =
     | INT i -> "unexpected integer '" ^ (string_of_int i) ^ "'"
     | INFINITY -> "unexpected infinity"
     | FLOAT f -> "unexpected float '" ^ (string_of_float f) ^ "'"
-    | EOF -> "unexpected end-of-file"
+    | EOF -> "unexpected end-of-input"
     | COMPLIANCE_ERROR s -> "compliance error '" ^ s ^ "'"
     | COMMA -> "unexpected ','"
     | COLON -> "unexpected ':'"

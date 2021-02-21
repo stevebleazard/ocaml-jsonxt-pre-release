@@ -18,19 +18,19 @@ let init_lexer ?buf:_ ?fname ?(lnum = 1) () =
   }
 
 module Common_reader (Compliance : Compliance.S) = struct
-  module Internal = struct
+  module Internal_reader = struct
     module Lexxer = Compliant_lexxer.Make(Compliance)
     module Parser = Parser.Make(Compliance)
     include Reader_string_file.Make (Lexxer) (Parser)
   end
 
-  type json = Internal.json
+  type json = Internal_reader.json
   type t = json
   type json_line = [ `Json of t | `Exn of exn ]
 
   (* Helper functions *)
   let error_to_string (error_info:Error_info.t) fname lnum =
-    let lnum = Option.value lnum ~default:1 in
+    let lnum = match lnum with Some lnum -> lnum | None -> 1 in
     let info = { error_info with line = lnum + error_info.line - 1 } in
     let fname = match fname with
       | None -> "Line"
@@ -46,18 +46,18 @@ module Common_reader (Compliance : Compliance.S) = struct
 
   (* Readers *)
   let from_string ?buf:_ ?fname ?lnum s =
-    apply_and_handle_errors Internal.json_of_string_error_info s fname lnum
+    apply_and_handle_errors Internal_reader.json_of_string_error_info s fname lnum
 
   let from_channel ?buf:_ ?fname ?lnum in_channel =
-    apply_and_handle_errors Internal.json_of_channel_error_info in_channel fname lnum
+    apply_and_handle_errors Internal_reader.json_of_channel_error_info in_channel fname lnum
 
   let from_file ?buf:_ ?fname ?lnum filename =
-    apply_and_handle_errors Internal.json_of_file_error_info filename fname lnum
+    apply_and_handle_errors Internal_reader.json_of_file_error_info filename fname lnum
 
   let from_lexbuf lexstate ?stream lexbuf =
     let fname = lexstate.fname in
     let lnum = Some lexstate.lnum in
-    match Internal.json_of_lexbuf_error_info_compat ?stream lexbuf with
+    match Internal_reader.json_of_lexbuf_error_info_compat ?stream lexbuf with
     | Ok (Some json) -> json
     | Ok None -> json_error "Blank input data"
     | Error error_info -> json_error (error_to_string error_info fname lnum)
@@ -76,16 +76,16 @@ module Common_reader (Compliance : Compliance.S) = struct
     Stream.from f
 
   let stream_from_string ?buf:_ ?fname ?lnum s =
-    stream_apply_and_handle_errors Internal.stream_from_string_error_info s fname lnum
+    stream_apply_and_handle_errors Internal_reader.stream_from_string_error_info s fname lnum
 
   let stream_from_channel ?buf:_ ?(fin = fun () -> ()) ?fname ?lnum in_channel =
-    stream_apply_and_handle_errors (Internal.stream_from_channel_error_info ~fin) in_channel fname lnum
+    stream_apply_and_handle_errors (Internal_reader.stream_from_channel_error_info ~fin) in_channel fname lnum
 
   let stream_from_file ?buf:_ ?fname ?lnum filename =
-    stream_apply_and_handle_errors Internal.stream_from_file_error_info filename fname lnum
+    stream_apply_and_handle_errors Internal_reader.stream_from_file_error_info filename fname lnum
 
   let stream_from_lexbuf lexstate ?(fin = fun () -> ()) lexbuf =
-    let stream = Internal.stream_from_lexbuf_error_info lexbuf in
+    let stream = Internal_reader.stream_from_lexbuf_error_info lexbuf in
     let f _i =
       match Stream.next stream with
       | v -> Some v
@@ -113,13 +113,11 @@ module Common_reader (Compliance : Compliance.S) = struct
 end
 
 module Common_writer (Compliance : Compliance.S) = struct
-  module Internal = struct
+  module Internal_writer = struct
     include Writer_string.Make(Compliance)
     include Writer_file.Make(Compliance)
     include Pretty.Make(Compliance)
   end
-  type json = Compliance.json
-  type t = json
 
   let to_standard json =
     let rec map node =
@@ -150,18 +148,18 @@ module Common_writer (Compliance : Compliance.S) = struct
   (* Writers *)
 
   let to_string ?buf:_ ?len:_ ?(std = false) json =
-    if std then Internal.to_string (to_standard json) else Internal.to_string json
+    if std then Internal_writer.to_string (to_standard json) else Internal_writer.to_string json
 
   let to_channel ?buf:_ ?len:_ ?(std = false) out_channel json =
-    if std then Internal.to_channel out_channel (to_standard json)
-    else Internal.to_channel out_channel json
+    if std then Internal_writer.to_channel out_channel (to_standard json)
+    else Internal_writer.to_channel out_channel json
 
   let to_file ?len:_ ?(std = false) filename json =
-    if std then Internal.to_file filename (to_standard json)
-    else Internal.to_file filename json
+    if std then Internal_writer.to_file filename (to_standard json)
+    else Internal_writer.to_file filename json
 
   let to_outbuf ?(std = false) buf json =
-    if std then Internal.to_buffer buf (to_standard json) else Internal.to_buffer buf json
+    if std then Internal_writer.to_buffer buf (to_standard json) else Internal_writer.to_buffer buf json
 
   let to_output ?buf:_ ?len:_ ?std out json =
     let str = to_string ?std json in
@@ -189,16 +187,16 @@ module Common_writer (Compliance : Compliance.S) = struct
 
   (* Pretty printers *)
   let pretty_print ?(std = false) out json =
-    if std then Internal.pretty_print out (to_standard json)
-    else Internal.pretty_print out json
+    if std then Internal_writer.pretty_print out (to_standard json)
+    else Internal_writer.pretty_print out json
 
   let pretty_to_string ?(std = false) json =
-    if std then Internal.pretty_print_to_string (to_standard json)
-    else Internal.pretty_print_to_string json
+    if std then Internal_writer.pretty_print_to_string (to_standard json)
+    else Internal_writer.pretty_print_to_string json
 
   let pretty_to_channel ?(std = false) oc json =
-    if std then Internal.pretty_print_to_channel oc (to_standard json)
-    else Internal.pretty_print_to_channel oc json
+    if std then Internal_writer.pretty_print_to_channel oc (to_standard json)
+    else Internal_writer.pretty_print_to_channel oc json
 
   (* Utilities *)
   let show json = Utilities.json_to_string_repr json

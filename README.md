@@ -1,7 +1,7 @@
 # Jsonxt - JSON parsers for files, strings and more
 
 *Jsonxt* provides a number of JSON parsers and writers for
-RFC 8259 compliant JSON as well as non-standard extentions
+RFC 8259 compliant JSON as well as non-standard extensions
 introduced by Yojson.  Features include
 
 * RFC 8259 compliant when in strict and basic mode
@@ -24,10 +24,14 @@ introduced by Yojson.  Features include
 * Support for streaming JSON via Stream.t
 * Standard interfaces including Yojson compatibility
 
-# Quick Start
+## API Documentation
+
+See the [Jsonxt API documentation](https://stevebleazard.github.io/ocaml-jsonxt) for full API documentation
+
+## Quick Start
 The following covers various use cases
 
-## Convert a string and print the internal representation
+### Convert a string and print the internal representation
 
 ```
 let () =
@@ -35,7 +39,7 @@ let () =
   print_endline (Jsonxt.Utilities.json_to_string_repr json);;
 ```
 
-## Reading a file and printing to stdout
+### Reading a file and printing to stdout
 
 ```
 let () = 
@@ -43,10 +47,10 @@ let () =
   Jsonxt.Basic.to_channel_hum stdout json;;
 ```
 
-## Using the json\_stream parser
+### Using the json\_stream parser
 The json\_stream parser returns a stream of json elements
 rather than a json tree.  The following is example using
-the [Stream.t] interface to process the stream
+the `Stream.t` interface to process the stream
 
 ```
 open Printf
@@ -65,7 +69,7 @@ let () =
     parse_stream_string json_s;;
 ```
 
-## Reading and writing a file using the monad functions
+### Reading and writing a file using the monad functions
 
 ```
 module IO = struct
@@ -88,7 +92,7 @@ let _ =
 ;;
 ```
 
-## Yojson compatibility and using ppx\_yojson\_conv
+### Yojson compatibility and using ppx\_yojson\_conv
 To use Jsonxt's Yojson compatibility module create a `yojson.ml` file in
 the source directory of the project with the following contents:
 
@@ -126,7 +130,7 @@ let () =
 
 See the examples/ppx\_yojson\_conv directory for a working example including the dune configuration
 
-## Async example
+### Async example
 An example of how to use the parser monad and writer with async.  Note
 that async and core libraries need to be installed.
 
@@ -176,10 +180,31 @@ let () =
 See the examples/async directory for a working example including the dune configuration
 
 
-# Performance
+## Performance
 Performance in general is similar to Yojson for reading depending to some extent
 on the input.  
 
 Writing wise, jsonxt is similar or slightly faster depending on the type of output,
-for JSON with lots of integers (even if they are actually float values) Jsonxt will
-be faster.
+Jsonxt optimises integer values in floats and uses integer conversion which is 4-5
+times faster.  This means there is very little penalty for using [`Float] to store
+an integer
+
+## Examples
+The `examples` directory contains the examples from this README as well as
+additional ones.  See the individual README.md files for more details.
+Build the ones with no external library dependencies with
+
+```
+dune build @examples
+```
+
+## Tests
+The tests directory contains a number of tests including compliance, JSON Test Suite and
+decode-encode-decode validation.  Run with
+
+```
+dune build @runtest
+```
+
+Performance tests can be found in tests/perf, see the README.md in that
+directory for more details.

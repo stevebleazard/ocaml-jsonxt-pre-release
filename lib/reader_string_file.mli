@@ -75,7 +75,8 @@ module type Reader_string_file = sig
 
       The following functions are identical to the functions without
       the _error_info extension except they return an [(json, Error_info.t) result]
-      instead of a [(json, string) result]
+      instead of a [(json, string) result].  See {!module:Jsonxt.Error_info} for details
+      of of [Error_info.t]
    *)
 
   val json_of_string_error_info : string -> (json, Error_info.t) result
@@ -127,12 +128,12 @@ module type Reader_string_file = sig
       and stream_from_function should be used in preference *)
   val stream_from_lexbuf : Lexing.lexbuf -> json Stream.t
 
-  (** {2 Json_error_info Error_info.t raising Stream.t functions}
+  (** {2 Error_info.Json_error_info raising Stream.t functions}
 
       The following functions are identical to the functions without
       the _error_info extension except they raise an [Error_info.Json_error_info Error_info.t]
-      instead of a [Failure string]
-   *)
+      exception instead of a [Failure string].  See {!module:Jsonxt.Error_info} for details
+      of the exception *)
 
   val stream_from_string_error_info : string -> json Stream.t
   val stream_from_channel_error_info : ?fin:(unit -> unit) -> in_channel -> json Stream.t

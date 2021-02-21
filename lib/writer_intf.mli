@@ -111,20 +111,20 @@ module type Intf = sig
       The output is more compact than the _hum versions but still readable *)
   val pretty_print_to_channel : out_channel -> json -> unit
 
-  (* [stream_to_string stream] converts a [Stream.t] of [json] values to a string, separating the enties
-     with newlines *)
+  (** [stream_to_string stream] converts a [Stream.t] of [json] values to a string, separating the enties
+      with newlines *)
   val stream_to_string : json Stream.t -> string
 
-  (* [stream_to_channel out_channel] converts a [Stream.t] of [json] values to a newline separated list
-     of compact json strings and outputs them to [out_channel] *)
+  (** [stream_to_channel out_channel] converts a [Stream.t] of [json] values to a newline separated list
+      of compact json strings and outputs them to [out_channel] *)
   val stream_to_channel : out_channel -> json Stream.t -> unit
 
-  (* [stream_to_file stream file] converts a [Stream.t] of [json] values to a newline separated list of compact json strings and
-     outputs them to [file]  *)
+  (** [stream_to_file stream file] converts a [Stream.t] of [json] values to a newline separated list of compact json strings and
+      outputs them to [file]  *)
   val stream_to_file : string -> json Stream.t -> unit
 
-  (* [stream_to_buffer buf stream] converts a [Stream.t] of [json] values to compact strings and outputs them,
-     separating by newlines, to [buf] *)
+  (** [stream_to_buffer buf stream] converts a [Stream.t] of [json] values to compact strings and outputs them,
+      separating by newlines, to [buf] *)
   val stream_to_buffer : Buffer.t -> json Stream.t -> unit
 end
 
