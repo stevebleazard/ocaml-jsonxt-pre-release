@@ -12,15 +12,20 @@ type json = Json.Extended.json
 type t = json
 
 (** {1 Reader functions} *)
+
 include (Reader_string_file.Reader_string_file with type json := json)
 
 (** {1 Writer functions} *)
+
 include (Writer_intf.Intf with type json := Json.Extended.json)
 
 (** {1 Processing functions} *)
+
 module Process : sig
   include (module type of Process.Extended)
 end
+
+(** {1 Internal modules} *)
 
 module Compliance : Compliance.S with
   type json = Json.Extended.json

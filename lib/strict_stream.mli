@@ -6,7 +6,9 @@
 type json_stream = Json_stream.Strict.json
 
 (** {1 Reader functions} *)
+
 include (Reader_stream.Reader_stream with type json_stream := json_stream)
 
 (** {1 Writer functions} *)
+
 include (Writer_stream_intf.Intf with type json_stream := json_stream)
