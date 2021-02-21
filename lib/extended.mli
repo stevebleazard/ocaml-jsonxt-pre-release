@@ -4,7 +4,7 @@
     by [Yojson].
 
     The maximim/minimum size of an integer is architecture specific,
-    typically 31 or 63 bits depending on the platform. In cases where
+    typically 30 or 62 bits depending on the platform. In cases where
     the integer overflows the value is converted to a `Float.  For
     integers in the range (+/-)2^53 there is no loss of precision *)
 
