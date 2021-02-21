@@ -3,8 +3,6 @@
 * Coding
   * Yojson
     * Review functionality
-* Documentation
-  * Function - review
 * Review
   * Clean out the ATTIC during copy to ocaml-jsonxt repo
   * remove TODO.md during copy to ocaml-jsonxt repo
