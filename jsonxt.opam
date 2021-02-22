@@ -21,4 +21,5 @@ depends: [
   "cmdliner"            {with-test}
   "core_kernel"         {with-test}
   "fmt"                 {with-test}
+  "ppx_sexp_conv"       {with-test}
 ]
