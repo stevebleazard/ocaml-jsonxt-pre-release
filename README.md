@@ -184,10 +184,10 @@ See the examples/async directory for a working example including the dune config
 Performance in general is similar to Yojson for reading depending to some extent
 on the input.  
 
-Writing wise, jsonxt is similar or slightly faster depending on the type of output,
+Writing wise, jsonxt is similar or slightly faster depending on the type of output.
 Jsonxt optimises integer values in floats and uses integer conversion which is 4-5
 times faster.  This means there is very little penalty for using [`Float] to store
-an integer
+an integer.  The tests/perf directory contains a comparison for basic JSON input.
 
 ## Examples
 The `examples` directory contains the examples from this README as well as
