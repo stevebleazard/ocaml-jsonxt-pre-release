@@ -26,7 +26,7 @@ module type Intf = sig
 
   (** [create_encoder_hum ~add_char ~add_string] creates a human readable encoder.
       [add_char] and [add_string] add a [char] and [string] to the output respectively.
-      The increment is set to 2 and end of line LF (\n).  A type [t] is returned *)
+      The increment is set to 2 and end of line to LF (\n).  A type [t] is returned *)
   val create_encoder_hum
     :  add_char:(char -> unit)
     -> add_string:(string -> unit)
@@ -40,11 +40,11 @@ module type Intf = sig
       to channel [oc] *)
   val create_encoder_channel_hum : out_channel -> t
 
-  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_streeam].
+  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_stream].
       Errors cause a Failure exception to be raised. *)
   val encode_stream_exn : t -> json_stream -> unit
 
-  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_streeam].
+  (** [encode_stream_exn t json_stream] encodes and outputs the element [json_stream].
       Errors are reported via the [result] value. *)
   val encode_stream : t -> json_stream -> (unit, string) result
 end
